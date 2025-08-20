@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xcafe Widget - Teste Simples</title>
+    <link href="../styles/globals.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 40px;
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="text-primary mb-4">§ª xcafe Widget - Teste</h1>
+        <p class="text-light mb-4">Teste rá¡pido do widget standalone</p>
+        
+        <!-- Widget Container -->
+        <div id="xcafe-widget-test"></div>
+        
+        <div class="mt-4 text-muted">
+            <small>Widget carregado via JavaScript standalone</small>
+        </div>
+    </div>
+
+    <!-- Scripts necessá¡rios -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="xcafe-widget.js"></script>
+    
+    <script>
+        // Inicializar widget com API correta
+        createxcafeWidget({
+            containerId: 'xcafe-widget-test',
+            contract: '0x7Ab950357Bb80172718a70FD04783e6949193006',
+            network: 97,
+            title: 'xcafe Token - Teste',
+            theme: 'dark'
+        });
+    </script>
+</body>
+</html>
+
+
+
+

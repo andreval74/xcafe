@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xcafe Widget - Teste Completo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../styles/globals.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light py-4">
+
+  <div class="container">
+    <h2 class="text-center mb-4">🧪 Teste Completo - Widget xcafe</h2>
+    
+    <div class="row">
+      <div class="col-md-6">
+        <h4>Widget com Preá§o Automá¡tico</h4>
+        <div id="widget-auto"></div>
+      </div>
+      <div class="col-md-6">
+        <h4>Widget com Preá§o Fixo 0.002</h4>
+        <div id="widget-fixed"></div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <div class="alert alert-info">
+        <h5>… Funcionalidades Testadas</h5>
+        <ul class="text-start">
+          <li>… <strong>Hash uma linha sá³:</strong> … 0x1234...abcd (verde=sucesso, vermelho=erro)</li>
+          <li>… <strong>Botá£o preview:</strong> Atualiza configuraá§áµes em tempo real</li>
+          <li>… <strong>Valor má­nimo automá¡tico:</strong> Baseado no contrato ou 0.001 BNB</li>
+          <li>… <strong>Validaá§á£o de má¡ximo:</strong> Aviso inline se exceder limite</li>
+          <li>… <strong>Layout compacto:</strong> Todas as mensagens em linha áºnica</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="../js/xcafe-widget-core.js"></script>
+  <script>
+    // Widget com detecá§á£o automá¡tica
+    xcafe.createWidget("widget-auto", {
+      contract: "0x7Ab950357Bb80172718a70FD04783e6949193006",
+      network: 97,
+      title: "Auto-Detect",
+      logo: "../imgs/moeda-cafe-tec-semfundo.png"
+    });
+
+    // Widget com preá§o fixo
+    xcafe.createWidget("widget-fixed", {
+      contract: "0x7Ab950357Bb80172718a70FD04783e6949193006", 
+      network: 97,
+      title: "Preá§o Fixo",
+      logo: "",
+      price: "0.002"
+    });
+  </script>
+
+</body>
+</html>
+
+
+
+
