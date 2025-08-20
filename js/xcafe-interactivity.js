@@ -10,7 +10,6 @@ class XcafeInteractivity {
 
     init() {
         this.setupScrollAnimations();
-        this.setupParallaxEffects();
         this.setupCounterAnimations();
         this.setupHoverEffects();
         this.setupLoadingStates();
@@ -20,6 +19,7 @@ class XcafeInteractivity {
         this.setupTypewriterEffect();
         this.setupProgressBars();
         this.setupLazyLoading();
+        // Removido: this.setupParallaxEffects(); - efeito estava atrapalhando a visualização
     }
 
     // Animações no Scroll
@@ -59,7 +59,8 @@ class XcafeInteractivity {
         });
     }
 
-    // Efeitos Parallax
+    // Efeitos Parallax - DESABILITADO (estava atrapalhando a visualização)
+    /*
     setupParallaxEffects() {
         let ticking = false;
 
@@ -90,6 +91,7 @@ class XcafeInteractivity {
 
         window.addEventListener('scroll', requestTick);
     }
+    */
 
     // Animações de Contadores
     setupCounterAnimations() {
