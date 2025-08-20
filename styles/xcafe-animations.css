@@ -1,0 +1,311 @@
+/*
+==========================================================================
+XCAFE - SISTEMA DE ANIMAÇÕES E EFEITOS ESPECIAIS
+==========================================================================
+*/
+
+/* Animações de Entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animações Contínuas */
+@keyframes float {
+    0%, 100% { 
+        transform: translateY(0px); 
+    }
+    50% { 
+        transform: translateY(-20px); 
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(248, 93, 35, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(248, 93, 35, 0);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(248, 93, 35, 0);
+        transform: scale(1);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(248, 93, 35, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(248, 93, 35, 0.8), 0 0 30px rgba(248, 93, 35, 0.4);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Hover Animations */
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Gradientes Animados */
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Classes Utilitárias */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.floating {
+    animation: float 6s ease-in-out infinite;
+}
+
+.pulsing {
+    animation: pulse 2s infinite;
+}
+
+.glowing {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.rotating {
+    animation: rotate 20s linear infinite;
+}
+
+.gradient-animated {
+    background: linear-gradient(-45deg, #f85d23, #fbbf24, #f85d23, #d97706);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+/* Efeitos de Hover Específicos */
+.card-hover-effect {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+}
+
+.card-hover-effect:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(248, 93, 35, 0.2);
+}
+
+.button-hover-effect {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.button-hover-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.button-hover-effect:hover::before {
+    left: 100%;
+}
+
+.button-hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(248, 93, 35, 0.4);
+}
+
+/* Text Animations */
+.typing-animation {
+    overflow: hidden;
+    border-right: 2px solid #f85d23;
+    white-space: nowrap;
+    margin: 0 auto;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #f85d23; }
+}
+
+/* Loading Animations */
+.spinner {
+    animation: rotate 1s linear infinite;
+}
+
+.dots-loading::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% {
+        content: '';
+    }
+    40% {
+        content: '.';
+    }
+    60% {
+        content: '..';
+    }
+    80%, 100% {
+        content: '...';
+    }
+}
+
+/* Parallax Effects */
+.parallax-element {
+    transition: transform 0.1s ease-out;
+}
+
+/* Stagger Animation Classes */
+.stagger-animation > * {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Mobile Optimizations */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Dark Theme Glow Effects */
+.dark-glow {
+    box-shadow: 
+        0 0 10px rgba(248, 93, 35, 0.3),
+        inset 0 0 10px rgba(248, 93, 35, 0.1);
+}
+
+.dark-glow:hover {
+    box-shadow: 
+        0 0 20px rgba(248, 93, 35, 0.5),
+        inset 0 0 20px rgba(248, 93, 35, 0.2);
+}
+
+/* Performance Optimizations */
+.gpu-acceleration {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Smooth Scrolling Enhancement */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus States for Accessibility */
+.focus-visible:focus {
+    outline: 2px solid #f85d23;
+    outline-offset: 2px;
+}
