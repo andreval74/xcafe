@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xcafe Widget - Configurador</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="../styles/globals.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold text-white">
+        <i class="bi bi-gear-fill text-warning me-3"></i>
+        xcafe Widget Configurador
+      </h1>
+      <p class="lead text-light">Configure e gere seu widget de compra de tokens personalizado</p>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-primary">
+            <h5 class="text-white mb-0">⚙️ Configurações</h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="config-contract" class="form-label text-light">Endereço do Contrato</label>
+                <input type="text" class="form-control bg-dark text-light border-secondary" 
+                       id="config-contract" 
+                       value="0x7Ab950357Bb80172718a70FD04783e6949193006"
+                       placeholder="0x...">
+              </div>
+              <div class="col-md-6">
+                <label for="config-network" class="form-label text-light">Rede</label>
+                <select class="form-select bg-dark text-light border-secondary" id="config-network">
+                  <option value="97" selected>BSC Testnet (97)</option>
+                  <option value="56">BSC Mainnet (56)</option>
+                  <option value="1">Ethereum (1)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-light">Tema (Fixo)</label>
+                <input type="text" class="form-control bg-dark text-light border-secondary" value="Escuro" readonly>
+              </div>
+              <div class="col-12">
+                <label for="config-title" class="form-label text-light">Título</label>
+                <input type="text" class="form-control bg-dark text-light border-secondary" 
+                       id="config-title" 
+                       value="Comprar Token xcafe">
+              </div>
+              <div class="col-md-8">
+                <label for="config-logo" class="form-label text-light">URL do Logo (opcional)</label>
+                <input type="text" class="form-control bg-dark text-light border-secondary" 
+                       id="config-logo" 
+                       placeholder="https://exemplo.com/logo.png">
+              </div>
+              <div class="col-md-4">
+                <label for="config-price" class="form-label text-light">Preço Fixo</label>
+                <input type="number" class="form-control bg-dark text-light border-secondary" 
+                       id="config-price" 
+                       step="0.000001"
+                       min="0"
+                       placeholder="0.001 (vazio = automático)">
+              </div>
+            </div>
+            <div class="mt-4">
+              <button class="btn btn-primary me-2" onclick="updateWidget()">
+                <i class="bi bi-arrow-clockwise me-1"></i>
+                Atualizar Preview
+              </button>
+              <button class="btn btn-success" onclick="generateSimpleCode()">
+                <i class="bi bi-code-slash me-1"></i>
+                Gerar Código Widget
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREVIEW DO WIDGET -->
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-info">
+            <h5 class="text-white mb-0">👁️ Preview</h5>
+          </div>
+          <div class="card-body">
+            <div id="widget-preview" class="d-flex justify-content-center">
+              <!-- Widget será inserido aqui -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CÓDIGO GERADO -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-success d-flex justify-content-between align-items-center">
+            <h5 class="text-white mb-0">📋 Código Para Embed</h5>
+            <button class="btn btn-outline-light btn-sm" onclick="copyEmbedCode()">
+              <i class="bi bi-clipboard me-1"></i>
+              Copiar
+            </button>
+          </div>
+          <div class="card-body">
+            <textarea id="embed-code" class="form-control bg-dark text-light border-secondary" 
+                      style="height: 200px; font-family: monospace; font-size: 0.9em;" 
+                      readonly>Clique em "Gerar Código Widget" para ver o código embed</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTRUÇÕES -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-warning">
+            <h5 class="text-dark mb-0">📝 Como Usar</h5>
+          </div>
+          <div class="card-body">
+            <ol class="text-light">
+              <li>Configure o contrato, rede e personalização acima</li>
+              <li>Clique em "Atualizar Preview" para ver como ficará</li>
+              <li>Clique em "Gerar Código Widget" para obter o código HTML</li>
+              <li>Cole o código HTML na sua página/site</li>
+              <li>O widget funcionará automaticamente</li>
+            </ol>
+            <div class="alert alert-info mt-3">
+              <strong>💡 Dica:</strong> O widget se adapta automaticamente ao tema escuro e tem tamanho responsivo!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/xcafe-widget-core.js"></script>
+  <script>
+    // Configuração inicial
+    var currentConfig = {
+      contractAddress: "0x7Ab950357Bb80172718a70FD04783e6949193006",
+      networkId: 97,
+      title: "Comprar Token xcafe",
+      logoUrl: "",
+      fixedPrice: null,
+      theme: "dark"
+    };
+
+    // Atualizar widget preview
+    function updateWidget() {
+      // Coletar dados do formulário
+      currentConfig.contractAddress = document.getElementById('config-contract').value;
+      currentConfig.networkId = parseInt(document.getElementById('config-network').value);
+      currentConfig.title = document.getElementById('config-title').value;
+      currentConfig.logoUrl = document.getElementById('config-logo').value;
+      
+      var priceInput = document.getElementById('config-price').value;
+      currentConfig.fixedPrice = priceInput ? parseFloat(priceInput) : null;
+
+      // Limpar preview anterior
+      var previewContainer = document.getElementById('widget-preview');
+      previewContainer.innerHTML = '';
+
+      // Criar elemento div para o widget
+      var widgetDiv = document.createElement('div');
+      widgetDiv.id = 'xcafe-widget-preview';
+      previewContainer.appendChild(widgetDiv);
+
+      // Inicializar widget com configurações
+      if (typeof window.initXCafeWidget === 'function') {
+        window.initXCafeWidget(widgetDiv, currentConfig);
+      } else {
+        // Fallback se o script do widget não estiver carregado
+        var logoHtml = currentConfig.logoUrl ? 
+          '<img src="' + currentConfig.logoUrl + '" alt="Logo" style="height: 40px;" class="mb-2">' : '';
+        var priceHtml = currentConfig.fixedPrice ? 
+          '<p class="small">Preço: ' + currentConfig.fixedPrice + ' BNB</p>' : '';
+          
+        var html = '<div class="card bg-dark text-white" style="max-width: 400px;">';
+        html += '<div class="card-header text-center">';
+        html += logoHtml;
+        html += '<h5>' + currentConfig.title + '</h5>';
+        html += '</div>';
+        html += '<div class="card-body">';
+        html += '<p class="text-muted">Preview do Widget xcafe</p>';
+        html += '<p class="small">Contrato: ' + currentConfig.contractAddress + '</p>';
+        html += '<p class="small">Rede: ' + currentConfig.networkId + '</p>';
+        html += priceHtml;
+        html += '<button class="btn btn-warning w-100" disabled>Conectar Carteira</button>';
+        html += '</div>';
+        html += '</div>';
+        
+        widgetDiv.innerHTML = html;
+      }
+    }
+
+    // Gerar código embed
+    function generateSimpleCode() {
+      var logoLine = currentConfig.logoUrl ? 
+        'logoUrl: "' + currentConfig.logoUrl + '",' : '';
+      var priceLine = currentConfig.fixedPrice ? 
+        'fixedPrice: ' + currentConfig.fixedPrice + ',' : '';
+        
+      var embedCode = '<!-- xcafe Widget Embed -->' + '\n';
+      embedCode += '<div id="xcafe-widget-container"></div>' + '\n';
+      embedCode += '<scr' + 'ipt src="https://cdn.jsdelivr.net/gh/xcafe-io/widget@latest/xcafe-widget.min.js"></scr' + 'ipt>' + '\n';
+      embedCode += '<scr' + 'ipt>' + '\n';
+      embedCode += '  // Configuração do Widget' + '\n';
+      embedCode += '  var xcafeConfig = {' + '\n';
+      embedCode += '    contractAddress: "' + currentConfig.contractAddress + '",' + '\n';
+      embedCode += '    networkId: ' + currentConfig.networkId + ',' + '\n';
+      embedCode += '    title: "' + currentConfig.title + '",' + '\n';
+      embedCode += '    ' + logoLine + '\n';
+      embedCode += '    ' + priceLine + '\n';
+      embedCode += '    theme: "dark"' + '\n';
+      embedCode += '  };' + '\n' + '\n';
+      embedCode += '  // Inicializar Widget' + '\n';
+      embedCode += '  document.addEventListener("DOMContentLoaded", function() {' + '\n';
+      embedCode += '    var container = document.getElementById("xcafe-widget-container");' + '\n';
+      embedCode += '    if (container && typeof initXCafeWidget === "function") {' + '\n';
+      embedCode += '      initXCafeWidget(container, xcafeConfig);' + '\n';
+      embedCode += '    }' + '\n';
+      embedCode += '  });' + '\n';
+      embedCode += '</scr' + 'ipt>';
+
+      document.getElementById('embed-code').value = embedCode;
+    }
+
+    // Copiar código embed
+    function copyEmbedCode() {
+      var textarea = document.getElementById('embed-code');
+      textarea.select();
+      textarea.setSelectionRange(0, 99999); // Para mobile
+      
+      try {
+        document.execCommand('copy');
+        // Feedback visual
+        var button = event.target.closest('button');
+        var originalText = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check-lg me-1"></i> Copiado!';
+        button.classList.remove('btn-outline-light');
+        button.classList.add('btn-success');
+        
+        setTimeout(function() {
+          button.innerHTML = originalText;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-light');
+        }, 2000);
+      } catch (err) {
+        console.error('Erro ao copiar:', err);
+        alert('Erro ao copiar. Selecione o texto manualmente.');
+      }
+    }
+
+    // Inicializar widget na carga da página
+    document.addEventListener('DOMContentLoaded', function() {
+      updateWidget();
+    });
+
+    // Auto-atualizar quando campos mudarem
+    document.addEventListener('input', function(e) {
+      if (e.target.id.indexOf('config-') === 0) {
+        // Debounce para não atualizar muito frequentemente
+        clearTimeout(window.updateTimeout);
+        window.updateTimeout = setTimeout(updateWidget, 1000);
+      }
+    });
+  </script>
+</body>
+</html>
