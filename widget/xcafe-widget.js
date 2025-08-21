@@ -102,7 +102,7 @@ function injectxcafeStyles() {
     
     .xcafe-button:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(248, 93, 35, 0.3);
+      box-shadow: 0 4px 16px rgba(248, 93, 35, 0.3); 
     }
     
     .xcafe-button:disabled {
