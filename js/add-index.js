@@ -1,6 +1,6 @@
 ﻿/**
  * xcafe Token Creator - Main Script
- * Sistema de criaá§á£o de tokens com steps
+ * Sistema de criação de tokens com steps
  */
 
 // Estado global
@@ -9,9 +9,9 @@ let walletConnected = false;
 let walletAddress = '';
 let networkData = {};
 
-// Inicializaá§á£o
+// Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('š€ xcafe Token Creator iniciado');
+    console.log('🔧 xcafe Token Creator iniciado');
     
     initializeSteps();
     setupEventListeners();
@@ -36,7 +36,7 @@ function setupEventListeners() {
         connectBtn.addEventListener('click', connectWallet);
     }
     
-    // Prá³ximo step 1
+    // Próximo step 1
     const nextStep1 = document.getElementById('next-step-1');
     if (nextStep1) {
         nextStep1.addEventListener('click', () => {
@@ -46,7 +46,7 @@ function setupEventListeners() {
         });
     }
     
-    // Prá³ximo step 2
+    // Próximo step 2
     const nextStep2 = document.getElementById('next-step-2');
     if (nextStep2) {
         nextStep2.addEventListener('click', () => {

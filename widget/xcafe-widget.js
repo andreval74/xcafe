@@ -1,10 +1,10 @@
 ﻿/**
  * xcafe Embeddable Widget
  * Sistema de widgets embarcáveis para compra de tokens
- * Usando padráo CSS xcafe
+ * Usando padrão CSS xcafe
  */
 
-// CSS PADRáO xcafe INJETADO
+// CSS PADRÃO xcafe INJETADO
 function injectxcafeStyles() {
   if (document.getElementById('xcafe-widget-styles')) return;
   
@@ -50,6 +50,16 @@ function injectxcafeStyles() {
       padding: 24px;
     }
     
+    .xcafe-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .xcafe-col {
+      flex: 1;
+    }
+    
     .xcafe-info-card {
       background: rgba(107, 114, 128, 0.1);
       border: 1px solid #374151;
@@ -62,6 +72,18 @@ function injectxcafeStyles() {
     .xcafe-widget.theme-light .xcafe-info-card {
       background: rgba(249, 250, 251, 0.8);
       border-color: #e5e7eb;
+    }
+    
+    .xcafe-text-muted {
+      color: #9ca3af;
+      font-size: 12px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .xcafe-widget.theme-light .xcafe-text-muted {
+      color: #6b7280;
     }
     
     .xcafe-input {
@@ -87,93 +109,10 @@ function injectxcafeStyles() {
       box-shadow: 0 0 0 3px rgba(248, 93, 35, 0.1);
     }
     
-    .xcafe-button {
-      background: linear-gradient(135deg, var(--xcafe-primary) 0%, var(--xcafe-warning) 100%);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      padding: 12px 24px;
-      font-weight: 600;
-      width: 100%;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.3s ease;
-    }
-    
-    .xcafe-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(248, 93, 35, 0.3); 
-    }
-    
-    .xcafe-button:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .xcafe-alert {
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 16px;
-      font-size: 14px;
-    }
-    
-    .xcafe-alert.success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid var(--xcafe-success);
-      color: #10b981;
-    }
-    
-    .xcafe-alert.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid var(--xcafe-danger);
-      color: #ef4444;
-    }
-    
-    .xcafe-alert.info {
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid #3b82f6;
-      color: #60a5fa;
-    }
-    
-    .xcafe-spinner {
-      border: 2px solid transparent;
-      border-top: 2px solid currentColor;
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      animation: xcafe-spin 1s linear infinite;
-      display: inline-block;
-      margin-right: 8px;
-    }
-    
-    @keyframes xcafe-spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .xcafe-text-muted {
-      color: #9ca3af;
-      font-size: 12px;
-    }
-    
-    .xcafe-widget.theme-light .xcafe-text-muted {
-      color: #6b7280;
-    }
-    
-    .xcafe-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    
-    .xcafe-col {
-      flex: 1;
-    }
-    
     .xcafe-input-group {
-      position: relative;
       display: flex;
+      align-items: center;
+      margin-bottom: 16px;
     }
     
     .xcafe-input-group .xcafe-input {
@@ -189,41 +128,137 @@ function injectxcafeStyles() {
       border-top-right-radius: 8px;
       border-bottom-right-radius: 8px;
       padding: 12px 16px;
-      color: #9ca3af;
+      color: #ffffff;
       font-size: 14px;
-      display: flex;
-      align-items: center;
+      font-weight: 600;
     }
     
     .xcafe-widget.theme-light .xcafe-input-suffix {
       background: #f3f4f6;
       border-color: #d1d5db;
+      color: #1f2937;
+    }
+    
+    .xcafe-button {
+      background: linear-gradient(135deg, var(--xcafe-primary) 0%, var(--xcafe-warning) 100%);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 12px 24px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .xcafe-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(248, 93, 35, 0.3);
+    }
+    
+    .xcafe-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .xcafe-alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+    
+    .xcafe-alert.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--xcafe-success);
+      color: #6ee7b7;
+    }
+    
+    .xcafe-alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--xcafe-danger);
+      color: #fca5a5;
+    }
+    
+    .xcafe-alert.info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid #3b82f6;
+      color: #93c5fd;
+    }
+    
+    .xcafe-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-left-color: #ffffff;
+      border-radius: 50%;
+      animation: xcafe-spin 1s linear infinite;
+    }
+    
+    @keyframes xcafe-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .xcafe-powered-by {
+      text-align: center;
+      padding: 12px;
+      border-top: 1px solid #374151;
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    
+    .xcafe-widget.theme-light .xcafe-powered-by {
+      border-color: #e5e7eb;
+      background: rgba(249, 250, 251, 0.8);
       color: #6b7280;
+    }
+    
+    .xcafe-powered-by a {
+      color: var(--xcafe-primary);
+      text-decoration: none;
+    }
+    
+    .xcafe-powered-by a:hover {
+      text-decoration: underline;
     }
   `;
   
   document.head.appendChild(style);
 }
 
-// FUNá‡áƒO PRINCIPAL PARA CRIAR WIDGET
+// FUNÇÃO PRINCIPAL PARA CRIAR WIDGET
 function createxcafeWidget(config) {
   // Injeta estilos CSS
   injectxcafeStyles();
   
   const container = document.getElementById(config.containerId);
   if (!container) {
-    console.error(`Container "${config.containerId}" ná£o encontrado!`);
+    console.error(`Container "${config.containerId}" não encontrado!`);
     return;
   }
   
-  // Configuraá§á£o padrá£o
+  // Configuração padrão
   const widgetConfig = {
-    contract: config.contract || '0x7Ab950357Bb80172718a70FD04783e6949193006',
-    network: config.network || 97,
-    title: config.title || 'Comprar Tokens',
-    logo: config.logo || 'https://via.placeholder.com/32x32/f85d23/FFFFFF?text=SC',
-    price: config.price || null,
+    contractAddress: config.contractAddress || config.contract,
+    tokenPrice: config.tokenPrice || config.price || '0.001',
+    receiverWallet: config.receiverWallet || config.receiver,
+    tokenSymbol: config.tokenSymbol || config.symbol || 'TOKEN',
+    tokenName: config.tokenName || config.title || 'Token',
+    preferredNetwork: config.preferredNetwork || config.network || 97,
     theme: config.theme || 'dark',
+    showLogo: config.showLogo !== false,
+    showPoweredBy: config.showPoweredBy !== false,
     ...config
   };
   
@@ -234,8 +269,7 @@ function createxcafeWidget(config) {
   container.innerHTML = `
     <div class="xcafe-widget ${themeClass}" id="${widgetId}">
       <div class="xcafe-header">
-        <img src="${widgetConfig.logo}" alt="Logo" height="32" style="vertical-align: middle;">
-        <span style="margin-left: 8px;">${widgetConfig.title}</span>
+        ${widgetConfig.tokenName || 'Comprar Token'}
       </div>
       <div class="xcafe-body">
         
@@ -243,81 +277,91 @@ function createxcafeWidget(config) {
         <div class="xcafe-row">
           <div class="xcafe-col">
             <div class="xcafe-info-card">
-              <div class="xcafe-text-muted">Preá§o por Token</div>
+              <div class="xcafe-text-muted">Preço por Token</div>
               <strong id="price-${widgetId}">Carregando...</strong>
             </div>
           </div>
           <div class="xcafe-col">
             <div class="xcafe-info-card">
-              <div class="xcafe-text-muted">Disponá­vel</div>
+              <div class="xcafe-text-muted">Disponível</div>
               <strong id="available-${widgetId}">Carregando...</strong>
             </div>
           </div>
         </div>
-
-        <!-- CALCULADORA -->
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Quantidade de Tokens</label>
+        
+        <!-- QUANTIDADE DE TOKENS -->
+        <div>
+          <label class="xcafe-text-muted">Quantidade de Tokens</label>
           <input type="number" class="xcafe-input" 
                  id="amount-${widgetId}" 
-                 value="100" 
                  min="1" 
+                 step="1" 
                  placeholder="Digite a quantidade">
         </div>
-
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Total a Pagar</label>
+        
+        <!-- TOTAL EM BNB -->
+        <div>
+          <label class="xcafe-text-muted">Total a Pagar</label>
           <div class="xcafe-input-group">
             <input type="text" class="xcafe-input" id="total-${widgetId}" readonly>
             <div class="xcafe-input-suffix">BNB</div>
           </div>
         </div>
 
-        <!-- BOTáƒO DE COMPRA -->
+        <!-- BOTÃO DE COMPRA -->
         <button class="xcafe-button" id="buy-btn-${widgetId}">
-          <span id="buy-icon-${widgetId}">âš¡</span>
+          <span id="buy-icon-${widgetId}">⚡</span>
           <span id="buy-text-${widgetId}">Conectar e Comprar</span>
         </button>
-
+        
         <!-- STATUS -->
         <div id="status-${widgetId}"></div>
       </div>
+      
+      ${widgetConfig.showPoweredBy ? `
+        <div class="xcafe-powered-by">
+          Powered by <a href="https://xcafe.com.br" target="_blank">xcafe</a>
+        </div>
+      ` : ''}
     </div>
   `;
-
-  // Event Listeners
+  
+  // Adiciona event listeners
   document.getElementById(`amount-${widgetId}`).addEventListener('input', () => calculateTotal(widgetId, widgetConfig));
   document.getElementById(`buy-btn-${widgetId}`).addEventListener('click', () => buyTokens(widgetId, widgetConfig));
-
+  
   // Carrega dados do contrato
   loadContractData(widgetId, widgetConfig);
 }
 
-// CARREGA DADOS DO CONTRATO
+// FUNÇÃO PARA CARREGAR DADOS DO CONTRATO
 async function loadContractData(widgetId, config) {
+  const priceEl = document.getElementById(`price-${widgetId}`);
+  const availableEl = document.getElementById(`available-${widgetId}`);
+  const amountInput = document.getElementById(`amount-${widgetId}`);
+  
   try {
-    const rpcUrl = config.network === 97 ? 
-      'https://data-seed-prebsc-1-s1.binance.org:8545/' : 
-      config.network === 56 ?
-      'https://bsc-dataseed1.binance.org/' :
-      'https://eth-mainnet.public.blastapi.io';
+    if (!window.ethereum) {
+      priceEl.textContent = config.tokenPrice ? `${config.tokenPrice} BNB` : 'N/A';
+      availableEl.textContent = 'N/A';
+      return;
+    }
     
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-    const contract = new ethers.Contract(config.contract, [
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(config.contractAddress, [
       'function price() view returns (uint256)',
-      'function getPrice() view returns (uint256)', 
+      'function getPrice() view returns (uint256)',
       'function tokenPrice() view returns (uint256)',
       'function tokensAvailable() view returns (uint256)',
       'function balanceOf(address) view returns (uint256)',
-      'function totalSupply() view returns (uint256)',
       'function minimumPurchase() view returns (uint256)',
       'function minPurchase() view returns (uint256)'
     ], provider);
 
-    const contractInfo = { price: config.price };
+    const contractInfo = { price: config.tokenPrice };
 
-    // Detecta preá§o
-    if (!config.price) {
+    // Detecta preço
+    if (!config.tokenPrice) {
       try {
         const priceWei = await contract.price();
         contractInfo.price = ethers.utils.formatEther(priceWei);
@@ -336,20 +380,20 @@ async function loadContractData(widgetId, config) {
       }
     }
 
-    // Detecta tokens disponá­veis
+    // Detecta tokens disponíveis
     try {
       const availableWei = await contract.tokensAvailable();
       contractInfo.available = ethers.utils.formatEther(availableWei);
     } catch {
       try {
-        const balance = await contract.balanceOf(config.contract);
+        const balance = await contract.balanceOf(config.contractAddress);
         contractInfo.available = ethers.utils.formatEther(balance);
       } catch {
-        contractInfo.available = '1000000'; // Fallback
+        contractInfo.available = null;
       }
     }
 
-    // Detecta compra má­nima
+    // Detecta compra mínima
     try {
       const minWei = await contract.minimumPurchase();
       contractInfo.minPurchase = ethers.utils.formatEther(minWei);
@@ -358,28 +402,29 @@ async function loadContractData(widgetId, config) {
         const minWei = await contract.minPurchase();
         contractInfo.minPurchase = ethers.utils.formatEther(minWei);
       } catch {
-        contractInfo.minPurchase = '1'; // Fallback
+        contractInfo.minPurchase = 1;
       }
     }
 
-    updateWidgetDisplay(widgetId, contractInfo);
-    
+    // Atualiza interface
+    updateContractInfo(widgetId, contractInfo, config);
+
   } catch (error) {
-    console.error('Erro ao carregar contrato:', error);
-    document.getElementById(`price-${widgetId}`).textContent = 'Erro';
-    document.getElementById(`available-${widgetId}`).textContent = 'Erro';
+    console.error('Erro ao carregar dados do contrato:', error);
+    priceEl.textContent = config.tokenPrice ? `${config.tokenPrice} BNB` : 'N/A';
+    availableEl.textContent = 'N/A';
   }
 }
 
-// ATUALIZA DISPLAY DO WIDGET
-function updateWidgetDisplay(widgetId, contractInfo) {
+// FUNÇÃO PARA ATUALIZAR INFO DO CONTRATO
+function updateContractInfo(widgetId, contractInfo, config) {
   const priceEl = document.getElementById(`price-${widgetId}`);
   const availableEl = document.getElementById(`available-${widgetId}`);
   const amountInput = document.getElementById(`amount-${widgetId}`);
 
   if (contractInfo.price) {
     priceEl.textContent = `${contractInfo.price} BNB`;
-    // Armazena preá§o para cá¡lculos
+    // Armazena preço para cálculos
     priceEl.dataset.price = contractInfo.price;
   } else {
     priceEl.textContent = 'N/A';
@@ -392,30 +437,34 @@ function updateWidgetDisplay(widgetId, contractInfo) {
     availableEl.textContent = 'N/A';
   }
 
-  // Define valor má­nimo
+  // Define valor mínimo
   if (contractInfo.minPurchase && contractInfo.minPurchase > 0) {
     const minValue = Math.ceil(parseFloat(contractInfo.minPurchase));
     amountInput.value = minValue;
     amountInput.min = minValue;
+  } else {
+    amountInput.value = '1';
+    amountInput.min = '1';
   }
 
-  calculateTotal(widgetId, { price: contractInfo.price });
+  // Calcula total inicial
+  calculateTotal(widgetId, config);
 }
 
-// CALCULA TOTAL
+// FUNÇÃO PARA CALCULAR TOTAL
 function calculateTotal(widgetId, config) {
   const amountInput = document.getElementById(`amount-${widgetId}`);
   const totalInput = document.getElementById(`total-${widgetId}`);
   const priceEl = document.getElementById(`price-${widgetId}`);
-  
+
   const amount = parseFloat(amountInput.value) || 0;
-  const price = parseFloat(priceEl.dataset.price) || parseFloat(config.price) || 0;
-  
+  const price = parseFloat(priceEl.dataset.price || config.tokenPrice || '0.001');
   const total = amount * price;
+
   totalInput.value = total.toFixed(6);
 }
 
-// FUNá‡áƒO DE COMPRA
+// FUNÇÃO DE COMPRA
 async function buyTokens(widgetId, config) {
   const amountInput = document.getElementById(`amount-${widgetId}`);
   const totalInput = document.getElementById(`total-${widgetId}`);
@@ -426,10 +475,10 @@ async function buyTokens(widgetId, config) {
   
   try {
     if (!window.ethereum) {
-      throw new Error('MetaMask ná£o encontrado! Instale o MetaMask para continuar.');
+      throw new Error('MetaMask não encontrado! Instale o MetaMask para continuar.');
     }
 
-    // Desabilita botá£o
+    // Desabilita botão
     buyBtn.disabled = true;
     buyIcon.innerHTML = '<span class="xcafe-spinner"></span>';
     buyText.textContent = 'Conectando...';
@@ -448,42 +497,33 @@ async function buyTokens(widgetId, config) {
 
     // Verifica rede
     const network = await provider.getNetwork();
-    const targetChainId = config.network;
+    const expectedNetwork = config.preferredNetwork || 97;
     
-    if (network.chainId !== targetChainId) {
-      statusDiv.innerHTML = `
-        <div class="xcafe-alert info">
-          <span class="xcafe-spinner"></span>
-          Mudando para rede correta...
-        </div>
-      `;
-      
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${targetChainId.toString(16)}` }]
-      });
+    if (network.chainId !== expectedNetwork) {
+      const networkName = expectedNetwork === 97 ? 'BSC Testnet' : 'BSC Mainnet';
+      throw new Error(`Conecte à rede ${networkName} (Chain ID: ${expectedNetwork})`);
     }
 
-    // Prepara contrato
-    const contract = new ethers.Contract(config.contract, [
+    // Contrato
+    const contract = new ethers.Contract(config.contractAddress, [
       'function buy() payable',
       'function buyTokens() payable',
-      'function buyWithBNB() payable',
       'function purchase() payable'
     ], signer);
 
-    const totalCost = totalInput.value;
-    const value = ethers.utils.parseEther(totalCost);
+    const amount = parseFloat(amountInput.value);
+    const total = parseFloat(totalInput.value);
+    const value = ethers.utils.parseEther(total.toString());
 
     buyText.textContent = 'Executando...';
     statusDiv.innerHTML = `
       <div class="xcafe-alert info">
         <span class="xcafe-spinner"></span>
-        Executando transaá§á£o...
+        Executando transação...
       </div>
     `;
 
-    // Tenta diferentes funá§áµes de compra
+    // Tenta diferentes funções de compra
     let tx;
     try {
       tx = await contract.buy({ value, gasLimit: 200000 });
@@ -491,35 +531,29 @@ async function buyTokens(widgetId, config) {
       try {
         tx = await contract.buyTokens({ value, gasLimit: 200000 });
       } catch {
-        try {
-          tx = await contract.buyWithBNB({ value, gasLimit: 200000 });
-        } catch {
-          tx = await contract.purchase({ value, gasLimit: 200000 });
-        }
+        tx = await contract.purchase({ value, gasLimit: 200000 });
       }
     }
 
-    buyText.textContent = 'Aguardando...';
+    buyText.textContent = 'Confirmando...';
     statusDiv.innerHTML = `
       <div class="xcafe-alert info">
         <span class="xcafe-spinner"></span>
-        Aguardando confirmaá§á£o na blockchain...
+        Aguardando confirmação na blockchain...
       </div>
     `;
 
-    // Aguarda confirmaá§á£o
+    // Aguarda confirmação
     await tx.wait();
 
     // URL do explorer
-    const explorerUrl = config.network === 97 ? 
+    const explorerUrl = config.preferredNetwork === 97 ? 
       `https://testnet.bscscan.com/tx/${tx.hash}` : 
-      config.network === 56 ?
-      `https://bscscan.com/tx/${tx.hash}` :
-      `https://etherscan.io/tx/${tx.hash}`;
+      `https://bscscan.com/tx/${tx.hash}`;
 
     statusDiv.innerHTML = `
       <div class="xcafe-alert success">
-        … Compra realizada com sucesso!
+        ✅ Compra realizada com sucesso!
         <br><a href="${explorerUrl}" target="_blank" style="color: inherit; text-decoration: underline;">Ver no Explorer</a>
       </div>
     `;
@@ -531,21 +565,19 @@ async function buyTokens(widgetId, config) {
   } catch (error) {
     statusDiv.innerHTML = `
       <div class="xcafe-alert error">
-        âŒ ${error.message}
+        ❌ ${error.message}
       </div>
     `;
   } finally {
-    // Restaura botá£o
+    // Restaura botão
     buyBtn.disabled = false;
-    buyIcon.innerHTML = 'âš¡';
+    buyIcon.innerHTML = '⚡';
     buyText.textContent = 'Conectar e Comprar';
   }
 }
 
-// Exporta funá§á£o global
-if (typeof window !== 'undefined') {
-  window.createxcafeWidget = createxcafeWidget;
-}
+// Expor função globalmente
+window.createxcafeWidget = createxcafeWidget;
 
 
 

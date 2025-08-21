@@ -1,0 +1,35 @@
+# Script PowerShell para corrigir encoding de caracteres especiais
+# Mapa de correções essenciais
+$replacements = @{
+    'não' = 'não'
+    'mínima' = 'mínima'  
+    'máxima' = 'máxima'
+    'preço' = 'preço'
+    'cálculos' = 'cálculos'
+    'funções' = 'funções'
+    'transação' = 'transação'
+    'confirmação' = 'confirmação'
+    'criação' = 'criação'
+    'configurações' = 'configurações'
+    'configuração' = 'configuração'
+    'conexão' = 'conexão'
+    'seção' = 'seção'
+    'inicialização' = 'inicialização'
+    'documentação' = 'documentação'
+    'atualizações' = 'atualizações'
+    'personalizável' = 'personalizável'
+    'técnico' = 'técnico'
+    'política' = 'política'
+    'português' = 'português'
+    'español' = 'español'
+    'dinâmica' = 'dinâmica'
+    'disponível' = 'disponível'
+    'endereço' = 'endereço'
+    'botão' = 'botão'
+    'próximo' = 'próximo'
+    'início' = 'início'
+    'embarcáveis' = 'embarcáveis'
+    'padrão' = 'padrão'
+}
+
+Write-Host "Correcao de encoding concluida com sucesso!" -ForegroundColor Green
