@@ -3,42 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>xcafe Widget - Teste Simples</title>
+    <title>xcafe Widget - Exemplo de Uso</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../styles/globals.css" rel="stylesheet">
-    <link href="../styles/exemplo-uso.css" rel="stylesheet">
+    <link href="../styles/xcafe-paginas.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="test-container">
-        <h1 class="text-primary mb-4">🚀 xcafe Widget - Teste</h1>
-        <p class="text-light mb-4">Teste rápido do widget standalone</p>
-        
-        <!-- Widget Container -->
-        <div id="xcafe-widget-test"></div>
-        
-        <!-- Status do Widget -->
-        <div id="widget-status" class="widget-info mt-4">
-            <span class="status-indicator status-loading"></span>
-            <span class="status-text">Inicializando widget...</span>
-        </div>
-        
-        <!-- Botões de Controle -->
-        <div class="mt-4">
-            <button class="btn btn-primary me-2" onclick="xcafeWidgetDebug.reload()">
-                <i class="bi bi-arrow-clockwise"></i>
-                Recarregar Widget
-            </button>
-            <button class="btn btn-secondary" onclick="console.log(xcafeWidgetDebug.status)">
-                <i class="bi bi-bug"></i>
-                Debug Status
-            </button>
-        </div>
-        
-        <div class="mt-4 text-muted">
-            <small>Widget carregado via JavaScript standalone</small>
+    <!-- Background Animation -->
+    <div class="background-animation">
+        <div class="floating-particle particle-1"></div>
+        <div class="floating-particle particle-2"></div>
+        <div class="floating-particle particle-3"></div>
+        <div class="floating-particle particle-4"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Header -->
+                    <div class="text-center mb-5">
+                        <div class="logo-wrapper mb-4">
+                            <div class="logo-glow"></div>
+                            <img src="../imgs/xcafe.png" alt="xcafe Logo" class="logo">
+                        </div>
+                        <h1 class="display-4 fw-bold text-white mb-4">
+                            Widget <span class="gradient-text">xcafe</span> - Exemplo de Uso
+                        </h1>
+                        <p class="lead text-secondary">
+                            Demonstração do widget de compra de tokens em funcionamento
+                        </p>
+                    </div>
+
+                    <!-- Widget Demo Card -->
+                    <div class="card bg-gradient border-primary mb-4" style="background: linear-gradient(135deg, rgba(248, 93, 35, 0.1), rgba(237, 125, 49, 0.1));">
+                        <div class="card-header bg-primary">
+                            <h5 class="text-white mb-0">
+                                <i class="bi bi-widget text-white me-2"></i>
+                                Demonstração do Widget
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Widget Container -->
+                            <div id="xcafe-widget-test" class="d-flex justify-content-center mb-4">
+                                <!-- Widget será inserido aqui -->
+                            </div>
+                            
+                            <!-- Status do Widget -->
+                            <div id="widget-status" class="alert alert-info d-flex align-items-center">
+                                <div class="status-indicator me-2"></div>
+                                <span class="status-text">Inicializando widget...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controles -->
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-header bg-secondary">
+                            <h5 class="text-white mb-0">
+                                <i class="bi bi-gear-fill text-warning me-2"></i>
+                                Controles de Teste
+                            </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <button class="btn btn-primary me-3" onclick="xcafeWidgetDebug.reload()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>
+                                Recarregar Widget
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="console.log(xcafeWidgetDebug.status)">
+                                <i class="bi bi-bug-fill me-2"></i>
+                                Debug Console
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Informações Técnicas -->
+                    <div class="card bg-dark border-secondary mt-4">
+                        <div class="card-header bg-info">
+                            <h5 class="text-white mb-0">
+                                <i class="bi bi-info-circle-fill text-white me-2"></i>
+                                Informações Técnicas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <small class="text-secondary d-block">Contrato:</small>
+                                    <code class="text-warning">0x7Ab950357Bb80172718a70FD04783e6949193006</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-secondary d-block">Rede:</small>
+                                    <code class="text-success">BSC Testnet (97)</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-secondary d-block">Tema:</small>
+                                    <code class="text-info">Escuro (Padrão xcafe)</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-secondary d-block">Biblioteca:</small>
+                                    <code class="text-primary">Ethers.js v5.7.2</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instruções -->
+                    <div class="alert alert-warning mt-4">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-lightbulb-fill me-2"></i>
+                            Como Usar
+                        </h6>
+                        <p class="mb-0">
+                            1. O widget carrega automaticamente ao abrir a página<br>
+                            2. Use "Recarregar Widget" se houver problemas<br>
+                            3. Abra o Console (F12) e clique "Debug Console" para ver detalhes técnicos
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Scripts necessários -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="xcafe-widget.js"></script>
     <script src="../js/exemplo-uso.js"></script>

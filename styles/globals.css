@@ -1317,4 +1317,291 @@ Sistema de animações reutilizáveis para todas as páginas
 .hero-content > *:nth-child(5) { animation-delay: 0.5s; }
 .hero-content > *:nth-child(6) { animation-delay: 0.6s; }
 
+/*
+==========================================================================
+EXEMPLO USO WIDGET - STYLES ESPECÍFICOS
+==========================================================================
+*/
+
+/* Logo Header */
+.widget-demo-logo {
+  width: 160px;
+  height: auto;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 4px 8px rgba(248, 93, 35, 0.3));
+  transition: all 0.3s ease;
+}
+
+.widget-demo-logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 6px 12px rgba(248, 93, 35, 0.4));
+}
+
+/* Widget Container */
+.widget-container {
+  background: linear-gradient(135deg, 
+    rgba(248, 93, 35, 0.05) 0%, 
+    rgba(26, 26, 26, 0.95) 50%,
+    rgba(248, 93, 35, 0.05) 100%);
+  border: 2px solid rgba(248, 93, 35, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.widget-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(248, 93, 35, 0.1) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+/* Status Indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.status-indicator.loading {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+}
+
+.status-indicator.success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.status-indicator.error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.status-indicator.warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.status-indicator.loading .status-dot {
+  background: #3b82f6;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-indicator.success .status-dot {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+}
+
+.status-indicator.error .status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+.status-indicator.warning .status-dot {
+  background: #f59e0b;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+/* Loading Animation */
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-left-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Technical Info Cards */
+.tech-info-card {
+  background: linear-gradient(135deg, rgba(45, 45, 45, 0.8), rgba(26, 26, 26, 0.9));
+  border: 1px solid rgba(248, 93, 35, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-info-card:hover {
+  border-color: rgba(248, 93, 35, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(248, 93, 35, 0.15);
+}
+
+.tech-info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--bs-primary), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tech-info-card:hover::before {
+  opacity: 1;
+}
+
+.tech-info-title {
+  color: var(--bs-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tech-info-value {
+  color: var(--bs-body-color);
+  font-family: var(--mono-font);
+  font-size: 0.875rem;
+  word-break: break-all;
+  background: rgba(248, 93, 35, 0.05);
+  padding: 0.5rem;
+  border-radius: 6px;
+  border-left: 3px solid var(--bs-primary);
+}
+
+/* Debug Panel */
+.debug-panel {
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: var(--mono-font);
+  font-size: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 1rem;
+}
+
+.debug-log {
+  margin: 0;
+  padding: 0;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.debug-log .timestamp {
+  color: #6b7280;
+}
+
+.debug-log .level-info {
+  color: #3b82f6;
+}
+
+.debug-log .level-success {
+  color: #10b981;
+}
+
+.debug-log .level-warning {
+  color: #f59e0b;
+}
+
+.debug-log .level-error {
+  color: #ef4444;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .widget-demo-logo {
+    width: 120px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .widget-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .tech-info-card {
+    padding: 1rem;
+  }
+  
+  .tech-info-value {
+    font-size: 0.75rem;
+  }
+  
+  .debug-panel {
+    font-size: 0.7rem;
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .widget-container {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  .status-indicator {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .tech-info-title {
+    font-size: 0.75rem;
+  }
+}
+
 
