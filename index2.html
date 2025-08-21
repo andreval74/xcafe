@@ -42,7 +42,15 @@
     <meta name="twitter:image" content="imgs/xcafe-512x512.png">
 </head>
 <body>
-    <!-- Header <header data-component="header"></header> -->
+    <!-- Logo Header -->
+    <section class="py-3 text-center">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-center">
+                <img src="imgs/xcafe.png" alt="Xcafe" class="me-3" style="width: 48px; height: 48px;">
+                <h2 class="fw-bold text-white mb-0" style="font-size: 2rem;">Xcafe</h2>
+            </div>
+        </div>
+    </section>
 
     <!-- Hero Section -->
     <section class="hero-gradient py-5">
@@ -177,43 +185,113 @@
     </section>
 
     <!-- Blockchain Support Section -->
-    <section class="py-4 bg-dark border-top border-bottom border-secondary">
+    <section class="py-5 bg-dark border-top border-bottom border-secondary">
         <div class="container">
             <div class="text-center mb-4">
-                <h6 class="text-muted text-uppercase mb-3">Suportado por Múltiplas Blockchains</h6>
+                <h4 class="text-white mb-3">Suportado por Múltiplas Blockchains</h4>
+                <p class="text-muted">Escolha a rede ideal para o seu projeto</p>
             </div>
-            <div class="row align-items-center justify-content-center">
-                <div class="col-auto">
-                    <div class="d-flex align-items-center gap-4 flex-wrap justify-content-center">
-                        <div class="blockchain-logo text-center">
-                            <i class="bi bi-ethereum text-info fs-1"></i>
-                            <small class="d-block text-muted">Ethereum</small>
-                        </div>
-                        <div class="blockchain-logo text-center">
-                            <i class="bi bi-triangle text-warning fs-1"></i>
-                            <small class="d-block text-muted">Polygon</small>
-                        </div>
-                        <div class="blockchain-logo text-center">
-                            <i class="bi bi-currency-bitcoin text-warning fs-1"></i>
-                            <small class="d-block text-muted">BSC</small>
-                        </div>
-                        <div class="blockchain-logo text-center">
-                            <i class="bi bi-snow text-info fs-1"></i>
-                            <small class="d-block text-muted">Avalanche</small>
-                        </div>
-                        <div class="blockchain-logo text-center">
-                            <i class="bi bi-gem text-primary fs-1"></i>
-                            <small class="d-block text-muted">Base</small>
-                        </div>
-                        <div class="blockchain-logo text-center">
-                            <i class="bi bi-lightning text-success fs-1"></i>
-                            <small class="d-block text-muted">Solana</small>
-                        </div>
+            <div class="blockchain-slider">
+                <div class="blockchain-track">
+                    <!-- Primeira linha de logos -->
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum" class="blockchain-logo">
+                        <span class="blockchain-name">Ethereum</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/polygon-matic-logo.png" alt="Polygon" class="blockchain-logo">
+                        <span class="blockchain-name">Polygon</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png" alt="BSC" class="blockchain-logo">
+                        <span class="blockchain-name">BSC</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/avalanche-avax-logo.png" alt="Avalanche" class="blockchain-logo">
+                        <span class="blockchain-name">Avalanche</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/solana-sol-logo.png" alt="Solana" class="blockchain-logo">
+                        <span class="blockchain-name">Solana</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/arbitrum-arb-logo.png" alt="Arbitrum" class="blockchain-logo">
+                        <span class="blockchain-name">Arbitrum</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/optimism-ethereum-op-logo.png" alt="Optimism" class="blockchain-logo">
+                        <span class="blockchain-name">Optimism</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/fantom-ftm-logo.png" alt="Fantom" class="blockchain-logo">
+                        <span class="blockchain-name">Fantom</span>
+                    </div>
+                    <!-- Repetir os logos para animação contínua -->
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum" class="blockchain-logo">
+                        <span class="blockchain-name">Ethereum</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/polygon-matic-logo.png" alt="Polygon" class="blockchain-logo">
+                        <span class="blockchain-name">Polygon</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png" alt="BSC" class="blockchain-logo">
+                        <span class="blockchain-name">BSC</span>
+                    </div>
+                    <div class="blockchain-item">
+                        <img src="https://cryptologos.cc/logos/avalanche-avax-logo.png" alt="Avalanche" class="blockchain-logo">
+                        <span class="blockchain-name">Avalanche</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <style>
+        .blockchain-slider {
+            overflow: hidden;
+            padding: 20px 0;
+        }
+        
+        .blockchain-track {
+            display: flex;
+            animation: scroll 20s linear infinite;
+            gap: 2rem;
+        }
+        
+        .blockchain-item {
+            flex: 0 0 auto;
+            text-align: center;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .blockchain-item:hover {
+            opacity: 1;
+        }
+        
+        .blockchain-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .blockchain-name {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
 
     <!-- Value Proposition Section -->
     <section class="py-5">
@@ -304,13 +382,13 @@
     </section>
 
     <!-- Competitive Advantages Section -->
-    <section class="py-5 bg-dark">
+    <section class="py-5">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center mb-5">
-                    <h2 class="display-4 fw-bold mb-3">Por que a Xcafe é <span class="gradient-text">Superior</span>?</h2>
+                    <h2 class="display-4 fw-bold mb-3">Nossos <span class="gradient-text">Diferenciais</span></h2>
                     <p class="lead text-secondary">
-                        Enquanto outros focam apenas na criação técnica, nós democratizamos todo o ecossistema Web3
+                        O que nos torna únicos no mercado de tokenização
                     </p>
                 </div>
             </div>
@@ -318,125 +396,37 @@
             <!-- Comparison Cards -->
             <div class="row g-4 mb-5">
                 <div class="col-lg-4">
-                    <div class="card bg-gradient border-success h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
+                    <div class="card bg-dark border-0 h-100 p-4">
                         <div class="text-center">
-                            <i class="bi bi-people-fill text-success fs-1 mb-3"></i>
-                            <h4 class="text-success mb-3">👥 Para TODOS, não só Técnicos</h4>
+                            <i class="bi bi-people-fill text-primary fs-1 mb-3"></i>
+                            <h5 class="mb-3">Para Todos</h5>
                             <p class="text-secondary">
-                                <strong>Concorrentes:</strong> Focam em "freelancers crypto" e técnicos<br>
-                                <strong>Xcafe:</strong> Democratizamos para pessoas comuns, pequenos negócios, influencers
+                                Enquanto concorrentes focam no público técnico, democratizamos para pessoas comuns, pequenos negócios e influencers.
                             </p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="col-lg-4">
-                    <div class="card bg-gradient border-warning h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
+                    <div class="card bg-dark border-0 h-100 p-4">
                         <div class="text-center">
-                            <i class="bi bi-globe text-warning fs-1 mb-3"></i>
-                            <h4 class="text-warning mb-3">🌐 Ecossistema Completo</h4>
+                            <i class="bi bi-globe text-primary fs-1 mb-3"></i>
+                            <h5 class="mb-3">Ecossistema Completo</h5>
                             <p class="text-secondary">
-                                <strong>Concorrentes:</strong> Só criam tokens (ferramenta única)<br>
-                                <strong>Xcafe:</strong> Marketplace + Rede Social + IA + Landing Pages automáticas
+                                Não somos apenas uma ferramenta de criação. Oferecemos marketplace, rede social, IA e acompanhamento completo.
                             </p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="col-lg-4">
-                    <div class="card bg-gradient border-info h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
+                    <div class="card bg-dark border-0 h-100 p-4">
                         <div class="text-center">
-                            <i class="bi bi-robot text-info fs-1 mb-3"></i>
-                            <h4 class="text-info mb-3">🤖 IA Assistente Real</h4>
+                            <i class="bi bi-robot text-primary fs-1 mb-3"></i>
+                            <h5 class="mb-3">IA Orientativa</h5>
                             <p class="text-secondary">
-                                <strong>Concorrentes:</strong> Interface técnica sem orientação<br>
-                                <strong>Xcafe:</strong> IA treinada te guia do zero ao sucesso
+                                Nossa inteligência artificial te guia em cada etapa, desde a criação até o sucesso do seu projeto.
                             </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- More Advantages -->
-            <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="card bg-gradient border-primary h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
-                        <h5 class="text-primary mb-3">💰 Modelo de Negócio Inteligente</h5>
-                        <div class="row">
-                            <div class="col-6">
-                                <p class="text-muted small mb-2"><strong>Outros (limitado):</strong></p>
-                                <ul class="text-secondary small">
-                                    <li>Só taxa por token criado</li>
-                                    <li>Sem receita recorrente</li>
-                                    <li>Sem ecossistema</li>
-                                </ul>
-                            </div>
-                            <div class="col-6">
-                                <p class="text-success small mb-2"><strong>Xcafe (escalável):</strong></p>
-                                <ul class="text-success small">
-                                    <li>Assinaturas recorrentes</li>
-                                    <li>Comissões de negociação</li>
-                                    <li>Marketplace integrado</li>
-                                    <li>Receita de IA Premium</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6">
-                    <div class="card bg-gradient border-primary h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
-                        <h5 class="text-primary mb-3">🌟 Experiência do Usuário</h5>
-                        <div class="row">
-                            <div class="col-6">
-                                <p class="text-muted small mb-2"><strong>Outros:</strong></p>
-                                <ul class="text-secondary small">
-                                    <li>Interface técnica</li>
-                                    <li>Só Telegram para suporte</li>
-                                    <li>Token criado = fim</li>
-                                </ul>
-                            </div>
-                            <div class="col-6">
-                                <p class="text-success small mb-2"><strong>Xcafe:</strong></p>
-                                <ul class="text-success small">
-                                    <li>Interface intuitiva</li>
-                                    <li>IA 24/7 + comunidade</li>
-                                    <li>Acompanhamento pós-lançamento</li>
-                                    <li>Rede social integrada</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Our Unique Value -->
-            <div class="row mt-5">
-                <div class="col-lg-12">
-                    <div class="card bg-gradient border-0 p-5" style="background: linear-gradient(135deg, #0d47a1, #1565c0);">
-                        <div class="text-center">
-                            <h3 class="text-white mb-3">🚀 Nossa Vantagem Definitiva</h3>
-                            <p class="text-white fs-5 mb-4">
-                                Enquanto eles fazem <strong>tokens</strong>, nós fazemos <strong>NEGÓCIOS</strong>
-                            </p>
-                            <div class="row">
-                                <div class="col-md-3 text-center mb-3">
-                                    <h4 class="text-warning">$100M+</h4>
-                                    <p class="text-white small">Meta de receita em 4 anos</p>
-                                </div>
-                                <div class="col-md-3 text-center mb-3">
-                                    <h4 class="text-warning">100K+</h4>
-                                    <p class="text-white small">Tokens projetados (vs 5K deles)</p>
-                                </div>
-                                <div class="col-md-3 text-center mb-3">
-                                    <h4 class="text-warning">🇧🇷</h4>
-                                    <p class="text-white small">Foco no mercado brasileiro</p>
-                                </div>
-                                <div class="col-md-3 text-center mb-3">
-                                    <h4 class="text-warning">🤝</h4>
-                                    <p class="text-white small">Impacto social real</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -544,66 +534,6 @@
                         </div>
                         <h5 class="mb-3">Vanity Wallets</h5>
                         <p class="text-secondary">Geração em massa de carteiras personalizadas (vanity wallets) para projetos.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Technical Superiority -->
-            <div class="row mt-5">
-                <div class="col-lg-12">
-                    <div class="card bg-gradient border-0 p-5" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
-                        <h3 class="text-center text-primary mb-4">⚡ Superioridade Técnica vs Concorrentes</h3>
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <h5 class="text-warning mb-3">🔧 Recursos Técnicos</h5>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="text-muted small mb-2"><strong>20lab (limitado):</strong></p>
-                                        <ul class="text-secondary small">
-                                            <li>17 recursos básicos</li>
-                                            <li>30 blockchains</li>
-                                            <li>Só ERC-20, SPL, Sui</li>
-                                            <li>5K tokens criados</li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-6">
-                                        <p class="text-success small mb-2"><strong>Xcafe (avançado):</strong></p>
-                                        <ul class="text-success small">
-                                            <li>50+ funcionalidades</li>
-                                            <li>15+ blockchains (foco qualidade)</li>
-                                            <li>Tokens + NFTs + DAOs + DeFi</li>
-                                            <li>Meta: 100K+ tokens</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <h5 class="text-info mb-3">🎯 Foco e Mercado</h5>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="text-muted small mb-2"><strong>20lab:</strong></p>
-                                        <ul class="text-secondary small">
-                                            <li>Público técnico</li>
-                                            <li>Só criação de tokens</li>
-                                            <li>Sem pós-venda</li>
-                                            <li>Interface técnica</li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-6">
-                                        <p class="text-success small mb-2"><strong>Xcafe:</strong></p>
-                                        <ul class="text-success small">
-                                            <li>Público geral + técnico</li>
-                                            <li>Ecossistema completo</li>
-                                            <li>Acompanhamento vitalício</li>
-                                            <li>Interface intuitiva + IA</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-4">
-                            <h4 class="text-primary">🏆 Nossa Vantagem: Não somos apenas uma ferramenta, somos um ECOSSISTEMA</h4>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -907,9 +837,11 @@
             
             <div class="row g-4">
                 <div class="col-lg-3 col-md-6">
-                    <div class="step-card text-center">
+                    <div class="step-card text-center p-4">
                         <div class="step-number mb-4">
-                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-3">1</span>
+                            <div class="step-circle">
+                                <span class="step-num">01</span>
+                            </div>
                         </div>
                         <h5 class="mb-3">Conecte sua Carteira</h5>
                         <p class="text-secondary">
@@ -919,9 +851,11 @@
                 </div>
                 
                 <div class="col-lg-3 col-md-6">
-                    <div class="step-card text-center">
+                    <div class="step-card text-center p-4">
                         <div class="step-number mb-4">
-                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-3">2</span>
+                            <div class="step-circle">
+                                <span class="step-num">02</span>
+                            </div>
                         </div>
                         <h5 class="mb-3">Configure com IA</h5>
                         <p class="text-secondary">
@@ -931,9 +865,11 @@
                 </div>
                 
                 <div class="col-lg-3 col-md-6">
-                    <div class="step-card text-center">
+                    <div class="step-card text-center p-4">
                         <div class="step-number mb-4">
-                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-3">3</span>
+                            <div class="step-circle">
+                                <span class="step-num">03</span>
+                            </div>
                         </div>
                         <h5 class="mb-3">Teste & Valide</h5>
                         <p class="text-secondary">
@@ -943,9 +879,11 @@
                 </div>
                 
                 <div class="col-lg-3 col-md-6">
-                    <div class="step-card text-center">
+                    <div class="step-card text-center p-4">
                         <div class="step-number mb-4">
-                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-3">4</span>
+                            <div class="step-circle">
+                                <span class="step-num">04</span>
+                            </div>
                         </div>
                         <h5 class="mb-3">Lance & Gerencie</h5>
                         <p class="text-secondary">
@@ -956,6 +894,32 @@
             </div>
         </div>
     </section>
+
+    <style>
+        .step-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .step-num {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .step-card:hover .step-circle {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
+        }
+    </style>
 
     <!-- Roadmap Section -->
     <section class="py-5">
@@ -1249,22 +1213,22 @@
             <!-- Brazilian Advantages -->
             <div class="row g-4 mb-5">
                 <div class="col-lg-4">
-                    <div class="card bg-gradient border-success h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
+                    <div class="card bg-dark border-0 h-100 p-4">
                         <div class="text-center">
-                            <i class="bi bi-translate text-success fs-1 mb-3"></i>
-                            <h5 class="text-success mb-3">🗣️ Linguagem Acessível</h5>
+                            <i class="bi bi-translate text-primary fs-1 mb-3"></i>
+                            <h5 class="mb-3">Linguagem Acessível</h5>
                             <p class="text-secondary">
-                                Enquanto outros usam termos técnicos em inglês, nós explicamos em português claro que qualquer brasileiro entende.
+                                Explicamos em português claro que qualquer brasileiro entende, sem termos técnicos complexos.
                             </p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="col-lg-4">
-                    <div class="card bg-gradient border-warning h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
+                    <div class="card bg-dark border-0 h-100 p-4">
                         <div class="text-center">
-                            <i class="bi bi-currency-dollar text-warning fs-1 mb-3"></i>
-                            <h5 class="text-warning mb-3">💳 PIX Integrado</h5>
+                            <i class="bi bi-currency-dollar text-primary fs-1 mb-3"></i>
+                            <h5 class="mb-3">PIX Integrado</h5>
                             <p class="text-secondary">
                                 Gateway PIX para compra direta de tokens com Real brasileiro. Sem complicação de exchange internacional.
                             </p>
@@ -1273,12 +1237,12 @@
                 </div>
                 
                 <div class="col-lg-4">
-                    <div class="card bg-gradient border-info h-100 p-4" style="background: linear-gradient(135deg, #1a1a1a, #2d2d2d);">
+                    <div class="card bg-dark border-0 h-100 p-4">
                         <div class="text-center">
-                            <i class="bi bi-clock text-info fs-1 mb-3"></i>
-                            <h5 class="text-info mb-3">🕒 Suporte Brasileiro</h5>
+                            <i class="bi bi-clock text-primary fs-1 mb-3"></i>
+                            <h5 class="mb-3">Suporte Brasileiro</h5>
                             <p class="text-secondary">
-                                Atendimento no horário brasileiro, com time que entende nossa cultura e necessidades únicas.
+                                Atendimento no horário brasileiro, com time que entende nossa cultura e necessidades.
                             </p>
                         </div>
                     </div>
