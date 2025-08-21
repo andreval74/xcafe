@@ -5,45 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xcafe Widget - Teste Simples</title>
     <link href="../styles/globals.css" rel="stylesheet">
-    <style>
-        body {
-            padding: 40px;
-            min-height: 100vh;
-        }
-        .test-container {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: center;
-        }
-    </style>
+    <link href="../styles/exemplo-uso.css" rel="stylesheet">
 </head>
 <body>
     <div class="test-container">
-        <h1 class="text-primary mb-4">§ª xcafe Widget - Teste</h1>
-        <p class="text-light mb-4">Teste rá¡pido do widget standalone</p>
+        <h1 class="text-primary mb-4">🚀 xcafe Widget - Teste</h1>
+        <p class="text-light mb-4">Teste rápido do widget standalone</p>
         
         <!-- Widget Container -->
         <div id="xcafe-widget-test"></div>
+        
+        <!-- Status do Widget -->
+        <div id="widget-status" class="widget-info mt-4">
+            <span class="status-indicator status-loading"></span>
+            <span class="status-text">Inicializando widget...</span>
+        </div>
+        
+        <!-- Botões de Controle -->
+        <div class="mt-4">
+            <button class="btn btn-primary me-2" onclick="xcafeWidgetDebug.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+                Recarregar Widget
+            </button>
+            <button class="btn btn-secondary" onclick="console.log(xcafeWidgetDebug.status)">
+                <i class="bi bi-bug"></i>
+                Debug Status
+            </button>
+        </div>
         
         <div class="mt-4 text-muted">
             <small>Widget carregado via JavaScript standalone</small>
         </div>
     </div>
 
-    <!-- Scripts necessá¡rios -->
+    <!-- Scripts necessários -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="xcafe-widget.js"></script>
-    
-    <script>
-        // Inicializar widget com API correta
-        createxcafeWidget({
-            containerId: 'xcafe-widget-test',
-            contract: '0x7Ab950357Bb80172718a70FD04783e6949193006',
-            network: 97,
-            title: 'xcafe Token - Teste',
-            theme: 'dark'
-        });
-    </script>
+    <script src="../js/exemplo-uso.js"></script>
 </body>
 </html>
 

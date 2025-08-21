@@ -1,0 +1,49 @@
+/* xcafe Widget - Exemplo de Uso CSS */
+body {
+    padding: 40px;
+    min-height: 100vh;
+}
+
+.test-container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.widget-info {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(248, 93, 35, 0.1);
+    border: 1px solid rgba(248, 93, 35, 0.3);
+    border-radius: 8px;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-success {
+    background-color: #10b981;
+}
+
+.status-error {
+    background-color: #ef4444;
+}
+
+.status-loading {
+    background-color: #f59e0b;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
