@@ -27,6 +27,22 @@
           </div>
           <div class="card-body">
             <div class="row g-3">
+              <!-- PRIMEIRO: Escolher a Rede -->
+              <div class="col-12">
+                <label for="config-network" class="form-label text-light">Rede Blockchain</label>
+                <select class="form-select bg-dark text-light border-secondary" 
+                        id="config-network" 
+                        onchange="onNetworkChange()">
+                  <option value="97" selected>BSC Testnet</option>
+                  <option value="56">BSC Mainnet</option>
+                  <option value="1">Ethereum Mainnet</option>
+                  <option value="11155111">Ethereum Sepolia</option>
+                  <option value="137">Polygon Mainnet</option>
+                  <option value="80001">Polygon Mumbai</option>
+                </select>
+              </div>
+              
+              <!-- SEGUNDO: Endereço do Contrato com Botão Buscar -->
               <div class="col-12">
                 <label for="config-contract" class="form-label text-light">Endereço do Contrato</label>
                 <div class="input-group">
@@ -40,6 +56,7 @@
                     <i class="bi bi-search me-1"></i>Buscar
                   </button>
                 </div>
+                <small class="form-text text-muted">Cole o endereço e clique em Buscar para carregar as informações</small>
               </div>
               
               <!-- Informações do Contrato (preenchidas automaticamente) -->
@@ -74,28 +91,10 @@
                   </div>
                 </div>
               </div>
-              <div class="col-6">
-                <label for="config-network" class="form-label text-light">Rede</label>
-                <select class="form-select bg-dark text-light border-secondary" 
-                        id="config-network" 
-                        onchange="onNetworkChange()">
-                  <option value="97" selected>BSC Testnet</option>
-                  <option value="56">BSC Mainnet</option>
-                  <option value="1">Ethereum Mainnet</option>
-                  <option value="11155111">Ethereum Sepolia</option>
-                  <option value="137">Polygon Mainnet</option>
-                  <option value="80001">Polygon Mumbai</option>
-                </select>
-              </div>
-              <div class="col-6">
-                <label for="config-theme" class="form-label text-light">Tema</label>
-                <select class="form-select bg-dark text-light border-secondary" id="config-theme">
-                  <option value="dark" selected>Escuro</option>
-                  <option value="light">Claro</option>
-                </select>
-              </div>
+              
+              <!-- TERCEIRO: Personalização do Widget -->
               <div class="col-12">
-                <label for="config-title" class="form-label text-light">Título</label>
+                <label for="config-title" class="form-label text-light">Título do Widget</label>
                 <input type="text" 
                        class="form-control bg-dark text-light border-secondary" 
                        id="config-title"
@@ -110,7 +109,7 @@
                        placeholder="https://exemplo.com/logo.png">
               </div>
               <div class="col-6">
-                <label for="config-price" class="form-label text-light">Preço Fixo</label>
+                <label for="config-price" class="form-label text-light">Preço Fixo (opcional)</label>
                 <input type="number" 
                        step="0.000001"
                        class="form-control bg-dark text-light border-secondary" 
@@ -462,7 +461,22 @@
         console.error('Erro ao buscar informações do contrato:', error);
         
         // Esconder seção de informações em caso de erro
-        document.getElementById('contract-info-section').style.display = 'none';
+        const contractInfoSection = document.getElementById('contract-info-section');
+        contractInfoSection.innerHTML = `
+          <div class="card bg-danger">
+            <div class="card-body py-2">
+              <h6 class="card-title text-white mb-1">
+                <i class="bi bi-exclamation-triangle me-1"></i>Erro ao buscar contrato
+              </h6>
+              <small class="text-light">Verifique o endereço e se o contrato existe nesta rede.</small>
+            </div>
+          </div>
+        `;
+        
+        // Esconder após 5 segundos
+        setTimeout(() => {
+          contractInfoSection.style.display = 'none';
+        }, 5000);
         
         // Feedback de erro
         btn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Erro!';
@@ -499,16 +513,32 @@
     
     // Função chamada quando a rede é alterada
     async function onNetworkChange() {
-      console.log('Rede alterada, verificando se há contrato para rebuscar...');
+      const networkSelect = document.getElementById('config-network');
+      const networkName = networkSelect.options[networkSelect.selectedIndex].text;
+      
+      console.log('Rede alterada para:', networkName);
       
       const contractAddress = document.getElementById('config-contract').value.trim();
       const contractInfoSection = document.getElementById('contract-info-section');
       
       // Se já tem informações do contrato carregadas, rebuscar para nova rede
       if (contractAddress && contractAddress.startsWith('0x') && contractInfoSection.style.display === 'block') {
+        console.log('Rebuscando contrato na nova rede...');
+        
+        // Feedback visual - mostrar que está mudando a rede
+        contractInfoSection.innerHTML = `
+          <div class="card bg-secondary">
+            <div class="card-body py-2 text-center">
+              <div class="spinner-border spinner-border-sm text-info me-2"></div>
+              <span class="text-light">Conectando com ${networkName}...</span>
+            </div>
+          </div>
+        `;
+        
+        // Rebuscar contrato na nova rede
         await fetchAndFillContractInfo();
       } else {
-        // Apenas atualizar preview
+        // Apenas atualizar preview se não há contrato carregado
         await updateWidget();
       }
     }
@@ -521,7 +551,7 @@
         widgetConfig.title = document.getElementById('config-title').value;
         widgetConfig.logo = document.getElementById('config-logo').value;
         widgetConfig.price = document.getElementById('config-price').value || null;
-        widgetConfig.theme = 'dark'; // Fixo em escuro
+        widgetConfig.theme = 'dark'; // Sempre tema escuro
 
         console.log('Atualizando widget com config:', widgetConfig);
         
