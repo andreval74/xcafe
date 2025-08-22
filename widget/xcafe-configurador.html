@@ -89,6 +89,9 @@
                 <i class="bi bi-code-square me-2"></i>
                 Gerar Código Widget
               </button>
+              <button class="btn btn-info btn-sm ms-2" onclick="testButton()">
+                🔧 Teste JS
+              </button>
             </div>
           </div>
         </div>
@@ -147,7 +150,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="../js/xcafe-widget-core.js"></script>
+  <!-- Removido xcafe-widget-core.js para preview independente -->
   <script>
     // CONFIGURAÇÃO INICIAL
     let widgetConfig = {
@@ -162,16 +165,21 @@
     // Função especial para preview (simula o widget real)
     function createPreviewWidget(config, containerId) {
       const container = document.getElementById(containerId);
-      if (!container) return;
+      if (!container) {
+        console.error('Container não encontrado:', containerId);
+        return;
+      }
       
       const logoHtml = config.logo ? `<img src="${config.logo}" height="32" class="me-2" onerror="this.style.display='none'">` : '';
       const priceDisplay = config.price ? `${config.price} BNB` : '0.000009 BNB';
+      const networkName = getNetworkName(config.network);
       
       container.innerHTML = `
         <div class="card bg-dark text-light border-secondary" style="max-width:400px;">
           <div class="card-header text-center text-white" style="background:linear-gradient(135deg,#f85d23,#f59e0b)">
             ${logoHtml}
             <span class="fw-bold">${config.title}</span>
+            <div><small class="opacity-75">${networkName}</small></div>
           </div>
           <div class="card-body">
             <div class="row g-2 mb-3">
@@ -207,6 +215,21 @@
           </div>
         </div>
       `;
+      
+      console.log('Preview widget criado com sucesso!');
+    }
+    
+    // Função auxiliar para nome da rede
+    function getNetworkName(networkId) {
+      const networks = {
+        97: 'BSC Testnet',
+        56: 'BSC Mainnet', 
+        1: 'Ethereum Mainnet',
+        11155111: 'Ethereum Sepolia',
+        137: 'Polygon Mainnet',
+        80001: 'Polygon Mumbai'
+      };
+      return networks[networkId] || `Network ${networkId}`;
     }
 
     // FUNÇÕES DE CONFIGURAÇÃO
@@ -221,10 +244,32 @@
 
         console.log('Atualizando widget com config:', widgetConfig);
         
-        // Usar função específica para preview
-        createPreviewWidget(widgetConfig, 'widget-preview');
+        // Feedback visual ao usuário
+        const previewContainer = document.getElementById('widget-preview');
+        previewContainer.innerHTML = '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Carregando...</span></div>';
+        
+        // Pequeno delay para mostrar o loading
+        setTimeout(() => {
+          // Usar função específica para preview
+          createPreviewWidget(widgetConfig, 'widget-preview');
+          
+          // Feedback de sucesso
+          const btn = document.querySelector('button[onclick="updateWidget()"]');
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<i class="bi bi-check me-1"></i>Preview Atualizado!';
+          btn.classList.remove('btn-warning');
+          btn.classList.add('btn-success');
+          
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-warning');
+          }, 2000);
+        }, 300);
+        
       } catch (error) {
         console.error('Erro ao atualizar widget:', error);
+        alert('Erro ao atualizar preview: ' + error.message);
       }
     }
 
@@ -269,8 +314,15 @@
 
     // INICIALIZAÇÃO
     window.addEventListener('load', function() {
+      console.log('Página carregada - inicializando widget...');
       updateWidget();
     });
+    
+    // FUNÇÃO DE DEBUG/TESTE
+    function testButton() {
+      alert('JavaScript está funcionando!');
+      console.log('Botão de teste clicado');
+    }
   </script>
 </body>
 </html>
