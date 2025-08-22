@@ -86,12 +86,53 @@
                         <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
                                id="token-decimals" readonly>
                       </div>
+                      <div class="col-6">
+                        <label class="form-label small text-light">Compra Mínima</label>
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="token-min-purchase" readonly>
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label small text-light">Compra Máxima</label>
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="token-max-purchase" readonly>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <!-- TERCEIRO: Personalização do Widget -->
+              <!-- TERCEIRO: Configuração de Compra -->
+              <div class="col-12">
+                <div class="card bg-secondary border-secondary">
+                  <div class="card-body py-2">
+                    <h6 class="card-title text-light mb-2">
+                      <i class="bi bi-cart me-1"></i>Configuração de Compra
+                    </h6>
+                    <div class="row g-2">
+                      <div class="col-4">
+                        <label class="form-label small text-light">Qtd. Inicial (widget)</label>
+                        <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="config-initial-quantity" 
+                               placeholder="Vazio = sem valor">
+                      </div>
+                      <div class="col-4">
+                        <label class="form-label small text-light">Qtd. Mín. (widget)</label>
+                        <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="config-min-quantity" 
+                               placeholder="Do contrato">
+                      </div>
+                      <div class="col-4">
+                        <label class="form-label small text-light">Qtd. Máx. (widget)</label>
+                        <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="config-max-quantity" 
+                               placeholder="Do contrato">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- QUARTO: Personalização do Widget -->
               <div class="col-12">
                 <label for="config-title" class="form-label text-light">Título do Widget</label>
                 <input type="text" 
@@ -246,6 +287,17 @@
         const finalPrice = config.price || contractData.price;
         const priceDisplay = `${finalPrice} BNB`;
         
+        // Valores de quantidade do configurador
+        const initialQuantity = config.initialQuantity || '';
+        const minQuantity = config.minQuantity || contractData.minPurchase || 1;
+        const maxQuantity = config.maxQuantity || contractData.maxPurchase || null;
+        
+        // Função para calcular total
+        const calculateTotal = (quantity, price) => {
+          if (!quantity || isNaN(quantity)) return '0.000000';
+          return (quantity * parseFloat(price)).toFixed(6);
+        };
+        
         container.innerHTML = `
           <div class="card bg-dark text-light border-secondary" style="max-width:400px;">
             <div class="card-header text-center text-white" style="background:linear-gradient(135deg,#f85d23,#f59e0b)">
@@ -271,11 +323,25 @@
               <div class="row g-2 mb-3">
                 <div class="col-6">
                   <label class="form-label small">Quantidade</label>
-                  <input type="number" class="form-control bg-dark text-light border-secondary" value="1100" min="1">
+                  <input type="number" 
+                         id="widget-quantity" 
+                         class="form-control bg-dark text-light border-secondary" 
+                         value="${initialQuantity}" 
+                         min="${minQuantity}"
+                         ${maxQuantity ? `max="${maxQuantity}"` : ''}
+                         placeholder="Digite aqui"
+                         oninput="updateTotal(this, ${finalPrice})">
+                  <div class="form-text text-light small">
+                    ${minQuantity ? `Mín: ${minQuantity}` : ''} ${maxQuantity ? `| Máx: ${maxQuantity}` : ''}
+                  </div>
                 </div>
                 <div class="col-6">
                   <label class="form-label small">Total BNB</label>
-                  <input type="text" class="form-control bg-dark text-light border-secondary" value="${(1100 * parseFloat(finalPrice)).toFixed(6)}" readonly>
+                  <input type="text" 
+                         id="widget-total" 
+                         class="form-control bg-dark text-light border-secondary" 
+                         value="${calculateTotal(initialQuantity, finalPrice)}" 
+                         readonly>
                 </div>
               </div>
               <button class="btn btn-primary w-100">⚡ Comprar ${contractData.symbol}</button>
@@ -288,12 +354,37 @@
           </div>
         `;
         
+        // Adicionar script para calculadora
+        if (!window.updateTotal) {
+          window.updateTotal = function(quantityInput, price) {
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const total = (quantity * price).toFixed(6);
+            const totalInput = document.getElementById('widget-total');
+            if (totalInput) {
+              totalInput.value = total;
+            }
+            
+            // Validar limites
+            const min = parseFloat(quantityInput.min);
+            const max = parseFloat(quantityInput.max);
+            
+            if (min && quantity < min) {
+              quantityInput.setCustomValidity('Quantidade mínima: ' + min);
+            } else if (max && quantity > max) {
+              quantityInput.setCustomValidity('Quantidade máxima: ' + max);
+            } else {
+              quantityInput.setCustomValidity('');
+            }
+          };
+        }
+        
         console.log('Preview widget criado com dados reais:', contractData);
       } catch (error) {
         console.error('Erro ao buscar dados do contrato:', error);
         
         // Mostrar preview com dados padrão em caso de erro
         const priceDisplay = config.price ? `${config.price} BNB` : '0.000009 BNB';
+        const initialQuantity = config.initialQuantity || '';
         
         container.innerHTML = `
           <div class="card bg-dark text-light border-secondary" style="max-width:400px;">
@@ -323,11 +414,19 @@
               <div class="row g-2 mb-3">
                 <div class="col-6">
                   <label class="form-label small">Quantidade</label>
-                  <input type="number" class="form-control bg-dark text-light border-secondary" value="1100" min="1">
+                  <input type="number" 
+                         id="widget-quantity" 
+                         class="form-control bg-dark text-light border-secondary" 
+                         value="${initialQuantity}" 
+                         placeholder="Digite aqui"
+                         oninput="updateTotal(this, ${parseFloat(config.price || '0.000009')})">
                 </div>
                 <div class="col-6">
                   <label class="form-label small">Total BNB</label>
-                  <input type="text" class="form-control bg-dark text-light border-secondary" value="0.009900" readonly>
+                  <input type="text" 
+                         id="widget-total" 
+                         class="form-control bg-dark text-light border-secondary" 
+                         value="0.000000" readonly>
                 </div>
               </div>
               <button class="btn btn-secondary w-100" disabled>⚠️ Contrato não encontrado</button>
@@ -384,13 +483,19 @@
           throw new Error('Endereço não é um contrato inteligente');
         }
         
-        // ABI básica de token ERC20
+        // ABI básica de token ERC20 + funções de compra
         const tokenABI = [
           'function name() view returns (string)',
           'function symbol() view returns (string)',
           'function totalSupply() view returns (uint256)',
           'function decimals() view returns (uint8)',
-          'function balanceOf(address) view returns (uint256)'
+          'function balanceOf(address) view returns (uint256)',
+          // Funções comuns de contratos de venda
+          'function minPurchase() view returns (uint256)',
+          'function maxPurchase() view returns (uint256)',
+          'function tokenPrice() view returns (uint256)',
+          'function rate() view returns (uint256)',
+          'function weiRaised() view returns (uint256)'
         ];
         
         const contract = new ethers.Contract(contractAddress, tokenABI, provider);
@@ -414,19 +519,60 @@
           throw new Error('Contrato não retorna nome ou símbolo válidos');
         }
         
+        // Tentar buscar dados de compra (pode falhar se não for contrato de venda)
+        let minPurchase = null;
+        let maxPurchase = null;
+        let contractPrice = null;
+        
+        try {
+          // Tentar diferentes nomes de função para preço
+          try {
+            contractPrice = await contract.tokenPrice();
+            contractPrice = ethers.utils.formatEther(contractPrice);
+          } catch {
+            try {
+              const rate = await contract.rate();
+              contractPrice = ethers.utils.formatEther(rate);
+            } catch {
+              // Usar preço padrão se não encontrar
+              contractPrice = '0.000009';
+            }
+          }
+          
+          // Tentar buscar limites de compra
+          try {
+            minPurchase = await contract.minPurchase();
+            minPurchase = ethers.utils.formatUnits(minPurchase, decimals);
+          } catch {
+            minPurchase = '1'; // Padrão: 1 token mínimo
+          }
+          
+          try {
+            maxPurchase = await contract.maxPurchase();
+            maxPurchase = ethers.utils.formatUnits(maxPurchase, decimals);
+          } catch {
+            maxPurchase = null; // Sem limite máximo
+          }
+          
+        } catch (error) {
+          console.log('Dados de compra não encontrados, usando padrões');
+          contractPrice = '0.000009';
+          minPurchase = '1';
+          maxPurchase = null;
+        }
+        
         // Formatear totalSupply
         const formattedSupply = ethers.utils.formatUnits(totalSupply, decimals);
         const displaySupply = parseFloat(formattedSupply).toLocaleString('pt-BR', {maximumFractionDigits: 0});
-        
-        // Preço padrão ou buscar de uma fonte externa (implementar depois)
-        const defaultPrice = '0.000009';
         
         return {
           name: name.trim(),
           symbol: symbol.trim(),
           totalSupply: displaySupply,
           decimals: decimals,
-          price: defaultPrice,
+          price: contractPrice,
+          minPurchase: minPurchase,
+          maxPurchase: maxPurchase,
           contractAddress: contractAddress
         };
         
@@ -473,6 +619,8 @@
         const tokenSymbolEl = document.getElementById('token-symbol');
         const tokenSupplyEl = document.getElementById('token-supply');
         const tokenDecimalsEl = document.getElementById('token-decimals');
+        const tokenMinPurchaseEl = document.getElementById('token-min-purchase');
+        const tokenMaxPurchaseEl = document.getElementById('token-max-purchase');
         const contractInfoSection = document.getElementById('contract-info-section');
         
         if (!tokenNameEl || !tokenSymbolEl || !tokenSupplyEl || !tokenDecimalsEl || !contractInfoSection) {
@@ -485,6 +633,27 @@
         tokenSymbolEl.value = contractData.symbol;
         tokenSupplyEl.value = contractData.totalSupply;
         tokenDecimalsEl.value = contractData.decimals;
+        
+        // Preencher dados de compra
+        if (tokenMinPurchaseEl) {
+          tokenMinPurchaseEl.value = `${contractData.minPurchase} ${contractData.symbol}`;
+        }
+        if (tokenMaxPurchaseEl) {
+          tokenMaxPurchaseEl.value = contractData.maxPurchase ? `${contractData.maxPurchase} ${contractData.symbol}` : 'Sem limite';
+        }
+        
+        // Preencher campos de configuração com valores do contrato
+        const configMinEl = document.getElementById('config-min-quantity');
+        const configMaxEl = document.getElementById('config-max-quantity');
+        
+        if (configMinEl) {
+          configMinEl.value = contractData.minPurchase;
+          configMinEl.setAttribute('data-contract-min', contractData.minPurchase);
+        }
+        if (configMaxEl && contractData.maxPurchase) {
+          configMaxEl.value = contractData.maxPurchase;
+          configMaxEl.setAttribute('data-contract-max', contractData.maxPurchase);
+        }
         
         // Preencher preço fixo com valor da pesquisa
         const priceField = document.getElementById('config-price');
@@ -653,6 +822,11 @@
         const priceField = document.getElementById('config-price');
         const priceValue = priceField ? priceField.value.trim() : '';
         widgetConfig.price = priceValue || null;
+        
+        // Capturar configurações de quantidade
+        widgetConfig.initialQuantity = document.getElementById('config-initial-quantity').value || '';
+        widgetConfig.minQuantity = document.getElementById('config-min-quantity').value || null;
+        widgetConfig.maxQuantity = document.getElementById('config-max-quantity').value || null;
         
         widgetConfig.theme = 'dark'; // Sempre tema escuro
 
