@@ -115,7 +115,7 @@ function initializeWidget() {
             }, 800);
         } else {
             hideWidgetLoading();
-            throw new Error('Função createxcafeWidget não encontrada. Verifique se xcafe-widget.js foi carregado.');
+            throw new Error('Função createxcafeWidget não encontrada. Verifique se wg-widget.js foi carregado.');
         }
     } catch (error) {
         hideWidgetLoading();
