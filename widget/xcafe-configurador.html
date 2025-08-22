@@ -49,9 +49,8 @@
                   <input type="text" 
                          class="form-control bg-dark text-light border-secondary" 
                          id="config-contract"
-                         value="0x7Ab950357Bb80172718a70FD04783e6949193006"
-                         placeholder="0x..."
-                         onpaste="setTimeout(onContractAddressPaste, 100)">
+                         value=""
+                         placeholder="0x... (Cole o endereço do contrato aqui)">
                   <button class="btn btn-outline-info" type="button" onclick="fetchAndFillContractInfo()">
                     <i class="bi bi-search me-1"></i>Buscar
                   </button>
@@ -98,8 +97,8 @@
                 <input type="text" 
                        class="form-control bg-dark text-light border-secondary" 
                        id="config-title"
-                       value="Comprar Token xcafe"
-                       placeholder="Título do widget">
+                       value=""
+                       placeholder="Ex: Comprar Token XYZ">
               </div>
               <div class="col-12">
                 <label for="config-logo" class="form-label text-light">Logo URL (opcional)</label>
@@ -141,7 +140,13 @@
           </div>
           <div class="card-body text-center">
             <div id="widget-preview" class="d-flex justify-content-center">
-              <!-- Widget será inserido aqui -->
+              <div class="alert alert-info text-center m-3">
+                <i class="bi bi-info-circle me-2"></i>
+                <div>
+                  <strong>Preview do Widget</strong><br>
+                  <small>Configure um contrato acima para ver o preview aqui</small>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -438,8 +443,8 @@
       const networkId = parseInt(document.getElementById('config-network').value);
       const btn = document.querySelector('button[onclick="fetchAndFillContractInfo()"]');
       
-      if (!contractAddress || !contractAddress.startsWith('0x')) {
-        alert('Por favor, insira um endereço de contrato válido');
+      if (!contractAddress || !contractAddress.startsWith('0x') || contractAddress.length !== 42) {
+        alert('Por favor, insira um endereço de contrato válido (deve começar com 0x e ter 42 caracteres)');
         return;
       }
       
@@ -459,8 +464,9 @@
         const tokenSymbolEl = document.getElementById('token-symbol');
         const tokenSupplyEl = document.getElementById('token-supply');
         const tokenDecimalsEl = document.getElementById('token-decimals');
+        const contractInfoSection = document.getElementById('contract-info-section');
         
-        if (!tokenNameEl || !tokenSymbolEl || !tokenSupplyEl || !tokenDecimalsEl) {
+        if (!tokenNameEl || !tokenSymbolEl || !tokenSupplyEl || !tokenDecimalsEl || !contractInfoSection) {
           console.error('Elementos do formulário não encontrados');
           throw new Error('Erro interno: elementos do formulário não encontrados');
         }
@@ -472,11 +478,11 @@
         tokenDecimalsEl.value = contractData.decimals;
         
         // Mostrar seção de informações
-        document.getElementById('contract-info-section').style.display = 'block';
+        contractInfoSection.style.display = 'block';
         
-        // Atualizar título automaticamente se estiver vazio ou for o padrão
+        // Atualizar título automaticamente se estiver vazio
         const titleField = document.getElementById('config-title');
-        if (!titleField.value || titleField.value === 'Comprar Token xcafe') {
+        if (!titleField.value.trim()) {
           titleField.value = `Comprar ${contractData.name} (${contractData.symbol})`;
         }
         
@@ -552,23 +558,6 @@
       }
     }
     
-    // Função chamada quando um endereço é colado
-    async function onContractAddressPaste() {
-      const contractAddress = document.getElementById('config-contract').value.trim();
-      
-      console.log('Endereço colado:', contractAddress);
-      
-      // Verificar se é um endereço válido
-      if (contractAddress && contractAddress.startsWith('0x') && contractAddress.length === 42) {
-        console.log('Endereço válido detectado, buscando automaticamente...');
-        
-        // Pequeno delay para feedback visual
-        setTimeout(async () => {
-          await fetchAndFillContractInfo();
-        }, 500);
-      }
-    }
-    
     // Função chamada quando a rede é alterada
     async function onNetworkChange() {
       const networkSelect = document.getElementById('config-network');
@@ -576,37 +565,44 @@
       
       console.log('Rede alterada para:', networkName);
       
-      const contractAddress = document.getElementById('config-contract').value.trim();
+      // Limpar informações do contrato quando trocar de rede
       const contractInfoSection = document.getElementById('contract-info-section');
+      contractInfoSection.style.display = 'none';
       
-      // Se já tem informações do contrato carregadas, rebuscar para nova rede
-      if (contractAddress && contractAddress.startsWith('0x') && contractInfoSection.style.display === 'block') {
-        console.log('Rebuscando contrato na nova rede...');
-        
-        // Feedback visual - mostrar que está mudando a rede
-        contractInfoSection.innerHTML = `
-          <div class="card bg-secondary">
-            <div class="card-body py-2 text-center">
-              <div class="spinner-border spinner-border-sm text-info me-2"></div>
-              <span class="text-light">Conectando com ${networkName}...</span>
-            </div>
-          </div>
-        `;
-        
-        // Rebuscar contrato na nova rede
-        await fetchAndFillContractInfo();
-      } else {
-        // Apenas atualizar preview se não há contrato carregado
-        await updateWidget();
-      }
+      // Mostrar mensagem informativa
+      const previewContainer = document.getElementById('widget-preview');
+      previewContainer.innerHTML = `
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Rede alterada para <strong>${networkName}</strong><br>
+          <small>Digite um endereço de contrato e clique em "Buscar" para continuar</small>
+        </div>
+      `;
     }
     
     // FUNÇÕES DE CONFIGURAÇÃO
     async function updateWidget() {
       try {
-        widgetConfig.contract = document.getElementById('config-contract').value;
+        const contractAddress = document.getElementById('config-contract').value.trim();
+        
+        // Se não tem contrato, mostrar mensagem
+        if (!contractAddress) {
+          const previewContainer = document.getElementById('widget-preview');
+          previewContainer.innerHTML = `
+            <div class="alert alert-warning text-center">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              <div>
+                <strong>Nenhum contrato configurado</strong><br>
+                <small>Digite um endereço de contrato e clique em "Buscar"</small>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
+        widgetConfig.contract = contractAddress;
         widgetConfig.network = parseInt(document.getElementById('config-network').value);
-        widgetConfig.title = document.getElementById('config-title').value;
+        widgetConfig.title = document.getElementById('config-title').value || 'Widget de Token';
         widgetConfig.logo = document.getElementById('config-logo').value;
         widgetConfig.price = document.getElementById('config-price').value || null;
         widgetConfig.theme = 'dark'; // Sempre tema escuro
@@ -637,7 +633,16 @@
         
       } catch (error) {
         console.error('Erro ao atualizar widget:', error);
-        alert('Erro ao atualizar preview: ' + error.message);
+        const previewContainer = document.getElementById('widget-preview');
+        previewContainer.innerHTML = `
+          <div class="alert alert-danger text-center">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <div>
+              <strong>Erro ao carregar preview</strong><br>
+              <small>${error.message}</small>
+            </div>
+          </div>
+        `;
       }
     }
 
@@ -681,11 +686,22 @@
     }
 
     // INICIALIZAÇÃO
-    window.addEventListener('load', async function() {
-      console.log('Página carregada - inicializando widget...');
+    window.addEventListener('load', function() {
+      console.log('Página carregada - aguardando configuração manual...');
       
-      // Buscar informações do contrato padrão
-      await fetchAndFillContractInfo();
+      // Mostrar mensagem inicial no preview
+      const previewContainer = document.getElementById('widget-preview');
+      previewContainer.innerHTML = `
+        <div class="alert alert-secondary text-center">
+          <i class="bi bi-arrow-left me-2"></i>
+          <div>
+            <strong>Configure o widget</strong><br>
+            <small>1. Escolha a rede blockchain<br>
+            2. Digite o endereço do contrato<br>
+            3. Clique em "Buscar"</small>
+          </div>
+        </div>
+      `;
     });
   </script>
 </body>
