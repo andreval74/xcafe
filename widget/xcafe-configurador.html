@@ -89,9 +89,6 @@
                 <i class="bi bi-code-square me-2"></i>
                 Gerar Código Widget
               </button>
-              <button class="btn btn-info btn-sm ms-2" onclick="testButton()">
-                🔧 Teste JS
-              </button>
             </div>
           </div>
         </div>
@@ -162,8 +159,8 @@
       theme: 'dark'
     };
 
-    // Função especial para preview (simula o widget real)
-    function createPreviewWidget(config, containerId) {
+    // Função especial para preview (busca dados reais do contrato)
+    async function createPreviewWidget(config, containerId) {
       const container = document.getElementById(containerId);
       if (!container) {
         console.error('Container não encontrado:', containerId);
@@ -171,9 +168,9 @@
       }
       
       const logoHtml = config.logo ? `<img src="${config.logo}" height="32" class="me-2" onerror="this.style.display='none'">` : '';
-      const priceDisplay = config.price ? `${config.price} BNB` : '0.000009 BNB';
       const networkName = getNetworkName(config.network);
       
+      // Mostrar loading inicial
       container.innerHTML = `
         <div class="card bg-dark text-light border-secondary" style="max-width:400px;">
           <div class="card-header text-center text-white" style="background:linear-gradient(135deg,#f85d23,#f59e0b)">
@@ -181,42 +178,114 @@
             <span class="fw-bold">${config.title}</span>
             <div><small class="opacity-75">${networkName}</small></div>
           </div>
-          <div class="card-body">
-            <div class="row g-2 mb-3">
-              <div class="col-6">
-                <div class="text-center p-2 rounded bg-secondary">
-                  <small class="text-muted">Preço/Token</small>
-                  <div class="fw-bold">${priceDisplay}</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="text-center p-2 rounded bg-secondary">
-                  <small class="text-muted">Disponível</small>
-                  <div class="fw-bold">999.755</div>
-                </div>
-              </div>
+          <div class="card-body text-center">
+            <div class="spinner-border text-warning" role="status">
+              <span class="visually-hidden">Buscando dados do contrato...</span>
             </div>
-            <div class="row g-2 mb-3">
-              <div class="col-6">
-                <label class="form-label small">Quantidade</label>
-                <input type="number" class="form-control bg-dark text-light border-secondary" value="1100" min="1">
-              </div>
-              <div class="col-6">
-                <label class="form-label small">Total BNB</label>
-                <input type="text" class="form-control bg-dark text-light border-secondary" value="0.009900" readonly>
-              </div>
-            </div>
-            <button class="btn btn-primary w-100">⚡ Comprar Tokens</button>
-            <div class="text-center mt-3">
-              <small class="text-success">
-                ✅ <a href="#" class="text-success text-decoration-none" style="font-size:0.8em">0x5bb877ab...c11aeb64</a>
-              </small>
-            </div>
+            <div class="mt-2"><small class="text-muted">Conectando com ${networkName}...</small></div>
           </div>
         </div>
       `;
       
-      console.log('Preview widget criado com sucesso!');
+      // Buscar dados reais do contrato
+      try {
+        const contractData = await fetchContractData(config.contract, config.network);
+        const priceDisplay = config.price ? `${config.price} BNB` : `${contractData.price} BNB`;
+        
+        container.innerHTML = `
+          <div class="card bg-dark text-light border-secondary" style="max-width:400px;">
+            <div class="card-header text-center text-white" style="background:linear-gradient(135deg,#f85d23,#f59e0b)">
+              ${logoHtml}
+              <span class="fw-bold">${config.title}</span>
+              <div><small class="opacity-75">${networkName}</small></div>
+            </div>
+            <div class="card-body">
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <div class="text-center p-2 rounded bg-secondary">
+                    <small class="text-muted">Preço/Token</small>
+                    <div class="fw-bold">${priceDisplay}</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-center p-2 rounded bg-secondary">
+                    <small class="text-muted">Disponível</small>
+                    <div class="fw-bold">${contractData.totalSupply}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small">Quantidade</label>
+                  <input type="number" class="form-control bg-dark text-light border-secondary" value="1100" min="1">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small">Total BNB</label>
+                  <input type="text" class="form-control bg-dark text-light border-secondary" value="${(1100 * parseFloat(contractData.price)).toFixed(6)}" readonly>
+                </div>
+              </div>
+              <button class="btn btn-primary w-100">⚡ Comprar Tokens</button>
+              <div class="text-center mt-3">
+                <small class="text-success">
+                  ✅ <a href="#" class="text-success text-decoration-none" style="font-size:0.8em">${config.contract.substring(0,10)}...${config.contract.substring(config.contract.length-8)}</a>
+                </small>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        console.log('Preview widget criado com dados reais:', contractData);
+      } catch (error) {
+        console.error('Erro ao buscar dados do contrato:', error);
+        
+        // Mostrar preview com dados padrão em caso de erro
+        const priceDisplay = config.price ? `${config.price} BNB` : '0.000009 BNB';
+        
+        container.innerHTML = `
+          <div class="card bg-dark text-light border-secondary" style="max-width:400px;">
+            <div class="card-header text-center text-white" style="background:linear-gradient(135deg,#f85d23,#f59e0b)">
+              ${logoHtml}
+              <span class="fw-bold">${config.title}</span>
+              <div><small class="opacity-75">${networkName}</small></div>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-warning p-2 mb-3">
+                <small>⚠️ Não foi possível conectar ao contrato. Usando dados de exemplo.</small>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <div class="text-center p-2 rounded bg-secondary">
+                    <small class="text-muted">Preço/Token</small>
+                    <div class="fw-bold">${priceDisplay}</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-center p-2 rounded bg-secondary">
+                    <small class="text-muted">Disponível</small>
+                    <div class="fw-bold">---</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <label class="form-label small">Quantidade</label>
+                  <input type="number" class="form-control bg-dark text-light border-secondary" value="1100" min="1">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small">Total BNB</label>
+                  <input type="text" class="form-control bg-dark text-light border-secondary" value="0.009900" readonly>
+                </div>
+              </div>
+              <button class="btn btn-secondary w-100" disabled>⚠️ Contrato não encontrado</button>
+              <div class="text-center mt-3">
+                <small class="text-warning">
+                  ⚠️ <span style="font-size:0.8em">Verifique o endereço e rede</span>
+                </small>
+              </div>
+            </div>
+          </div>
+        `;
+      }
     }
     
     // Função auxiliar para nome da rede
@@ -231,9 +300,73 @@
       };
       return networks[networkId] || `Network ${networkId}`;
     }
+    
+    // Função para buscar dados reais do contrato
+    async function fetchContractData(contractAddress, networkId) {
+      try {
+        console.log('Buscando dados do contrato:', contractAddress, 'na rede:', networkId);
+        
+        // URLs dos RPCs para cada rede
+        const rpcUrls = {
+          97: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+          56: 'https://bsc-dataseed.binance.org/',
+          1: 'https://eth.llamarpc.com',
+          11155111: 'https://ethereum-sepolia.publicnode.com',
+          137: 'https://polygon-rpc.com/',
+          80001: 'https://rpc-mumbai.maticvigil.com/'
+        };
+        
+        const rpcUrl = rpcUrls[networkId];
+        if (!rpcUrl) {
+          throw new Error(`RPC URL não configurado para a rede ${networkId}`);
+        }
+        
+        // Conectar ao provider
+        const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+        
+        // ABI básica de token ERC20
+        const tokenABI = [
+          'function name() view returns (string)',
+          'function symbol() view returns (string)',
+          'function totalSupply() view returns (uint256)',
+          'function decimals() view returns (uint8)',
+          'function balanceOf(address) view returns (uint256)'
+        ];
+        
+        const contract = new ethers.Contract(contractAddress, tokenABI, provider);
+        
+        // Buscar dados básicos do token
+        const [name, symbol, totalSupply, decimals] = await Promise.all([
+          contract.name(),
+          contract.symbol(),
+          contract.totalSupply(),
+          contract.decimals()
+        ]);
+        
+        // Formatear totalSupply
+        const formattedSupply = ethers.utils.formatUnits(totalSupply, decimals);
+        const displaySupply = parseFloat(formattedSupply).toLocaleString('pt-BR', {maximumFractionDigits: 0});
+        
+        // Preço padrão ou buscar de uma fonte externa (implementar depois)
+        const defaultPrice = '0.000009';
+        
+        return {
+          name: name,
+          symbol: symbol,
+          totalSupply: displaySupply,
+          decimals: decimals,
+          price: defaultPrice,
+          contractAddress: contractAddress
+        };
+        
+      } catch (error) {
+        console.error('Erro ao buscar dados do contrato:', error);
+        throw error;
+      }
+    }
 
     // FUNÇÕES DE CONFIGURAÇÃO
-    function updateWidget() {
+    async function updateWidget() {
       try {
         widgetConfig.contract = document.getElementById('config-contract').value;
         widgetConfig.network = parseInt(document.getElementById('config-network').value);
@@ -248,13 +381,12 @@
         const previewContainer = document.getElementById('widget-preview');
         previewContainer.innerHTML = '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Carregando...</span></div>';
         
-        // Pequeno delay para mostrar o loading
-        setTimeout(() => {
-          // Usar função específica para preview
-          createPreviewWidget(widgetConfig, 'widget-preview');
-          
-          // Feedback de sucesso
-          const btn = document.querySelector('button[onclick="updateWidget()"]');
+        // Buscar dados reais do contrato
+        await createPreviewWidget(widgetConfig, 'widget-preview');
+        
+        // Feedback de sucesso
+        const btn = document.querySelector('button[onclick="updateWidget()"]');
+        if (btn) {
           const originalText = btn.innerHTML;
           btn.innerHTML = '<i class="bi bi-check me-1"></i>Preview Atualizado!';
           btn.classList.remove('btn-warning');
@@ -265,7 +397,7 @@
             btn.classList.remove('btn-success');
             btn.classList.add('btn-warning');
           }, 2000);
-        }, 300);
+        }
         
       } catch (error) {
         console.error('Erro ao atualizar widget:', error);
@@ -313,16 +445,10 @@
     }
 
     // INICIALIZAÇÃO
-    window.addEventListener('load', function() {
+    window.addEventListener('load', async function() {
       console.log('Página carregada - inicializando widget...');
-      updateWidget();
+      await updateWidget();
     });
-    
-    // FUNÇÃO DE DEBUG/TESTE
-    function testButton() {
-      alert('JavaScript está funcionando!');
-      console.log('Botão de teste clicado');
-    }
   </script>
 </body>
 </html>
