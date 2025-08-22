@@ -364,6 +364,12 @@
         // Conectar ao provider
         const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
         
+        // Verificar se é um contrato primeiro
+        const code = await provider.getCode(contractAddress);
+        if (code === '0x') {
+          throw new Error('Endereço não é um contrato inteligente');
+        }
+        
         // ABI básica de token ERC20
         const tokenABI = [
           'function name() view returns (string)',
@@ -375,13 +381,24 @@
         
         const contract = new ethers.Contract(contractAddress, tokenABI, provider);
         
-        // Buscar dados básicos do token
-        const [name, symbol, totalSupply, decimals] = await Promise.all([
+        // Buscar dados básicos do token com timeout
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout: Operação demorou mais de 10 segundos')), 10000)
+        );
+        
+        const dataPromise = Promise.all([
           contract.name(),
           contract.symbol(),
           contract.totalSupply(),
           contract.decimals()
         ]);
+        
+        const [name, symbol, totalSupply, decimals] = await Promise.race([dataPromise, timeoutPromise]);
+        
+        // Validar dados básicos
+        if (!name || !symbol) {
+          throw new Error('Contrato não retorna nome ou símbolo válidos');
+        }
         
         // Formatear totalSupply
         const formattedSupply = ethers.utils.formatUnits(totalSupply, decimals);
@@ -391,8 +408,8 @@
         const defaultPrice = '0.000009';
         
         return {
-          name: name,
-          symbol: symbol,
+          name: name.trim(),
+          symbol: symbol.trim(),
           totalSupply: displaySupply,
           decimals: decimals,
           price: defaultPrice,
@@ -401,6 +418,16 @@
         
       } catch (error) {
         console.error('Erro ao buscar dados do contrato:', error);
+        
+        // Personalizar mensagens de erro
+        if (error.code === 'CALL_EXCEPTION') {
+          throw new Error('Contrato não implementa padrão ERC20 ou não existe nesta rede');
+        } else if (error.message.includes('Timeout')) {
+          throw new Error('Timeout: A rede está muito lenta. Tente novamente.');
+        } else if (error.message.includes('network')) {
+          throw new Error('Erro de conexão com a rede blockchain');
+        }
+        
         throw error;
       }
     }
@@ -427,11 +454,22 @@
         // Buscar dados do contrato
         const contractData = await fetchContractData(contractAddress, networkId);
         
+        // Verificar se os elementos existem antes de preencher
+        const tokenNameEl = document.getElementById('token-name');
+        const tokenSymbolEl = document.getElementById('token-symbol');
+        const tokenSupplyEl = document.getElementById('token-supply');
+        const tokenDecimalsEl = document.getElementById('token-decimals');
+        
+        if (!tokenNameEl || !tokenSymbolEl || !tokenSupplyEl || !tokenDecimalsEl) {
+          console.error('Elementos do formulário não encontrados');
+          throw new Error('Erro interno: elementos do formulário não encontrados');
+        }
+        
         // Preencher campos de informações
-        document.getElementById('token-name').value = contractData.name;
-        document.getElementById('token-symbol').value = contractData.symbol;
-        document.getElementById('token-supply').value = contractData.totalSupply;
-        document.getElementById('token-decimals').value = contractData.decimals;
+        tokenNameEl.value = contractData.name;
+        tokenSymbolEl.value = contractData.symbol;
+        tokenSupplyEl.value = contractData.totalSupply;
+        tokenDecimalsEl.value = contractData.decimals;
         
         // Mostrar seção de informações
         document.getElementById('contract-info-section').style.display = 'block';
@@ -460,26 +498,48 @@
       } catch (error) {
         console.error('Erro ao buscar informações do contrato:', error);
         
-        // Esconder seção de informações em caso de erro
+        // Mostrar seção de erro ao invés de esconder
         const contractInfoSection = document.getElementById('contract-info-section');
+        const networkName = getNetworkName(networkId);
+        
+        let errorMessage = 'Erro desconhecido';
+        if (error.message.includes('call revert exception')) {
+          errorMessage = `O contrato não existe na rede ${networkName} ou não é um token ERC20 válido`;
+        } else if (error.message.includes('network')) {
+          errorMessage = `Erro de conexão com a rede ${networkName}`;
+        } else if (error.message.includes('elementos do formulário')) {
+          errorMessage = 'Erro interno da página. Recarregue a página.';
+        } else {
+          errorMessage = error.message;
+        }
+        
         contractInfoSection.innerHTML = `
           <div class="card bg-danger">
             <div class="card-body py-2">
               <h6 class="card-title text-white mb-1">
                 <i class="bi bi-exclamation-triangle me-1"></i>Erro ao buscar contrato
               </h6>
-              <small class="text-light">Verifique o endereço e se o contrato existe nesta rede.</small>
+              <small class="text-light">${errorMessage}</small>
+              <div class="mt-2">
+                <small class="text-light opacity-75">
+                  Verifique se:
+                  • O endereço está correto<br>
+                  • O contrato existe na rede ${networkName}<br>
+                  • O contrato implementa o padrão ERC20
+                </small>
+              </div>
             </div>
           </div>
         `;
+        contractInfoSection.style.display = 'block';
         
-        // Esconder após 5 segundos
+        // Esconder após 8 segundos
         setTimeout(() => {
           contractInfoSection.style.display = 'none';
-        }, 5000);
+        }, 8000);
         
-        // Feedback de erro
-        btn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Erro!';
+        // Feedback de erro no botão
+        btn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Não encontrado';
         btn.classList.remove('btn-outline-info');
         btn.classList.add('btn-danger');
         
@@ -488,9 +548,7 @@
           btn.classList.remove('btn-danger');
           btn.classList.add('btn-outline-info');
           btn.disabled = false;
-        }, 2000);
-        
-        alert(`Erro ao buscar contrato: ${error.message}`);
+        }, 3000);
       }
     }
     
