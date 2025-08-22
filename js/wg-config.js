@@ -106,7 +106,7 @@ async function createPreviewWidget(config, containerId) {
                      readonly>
             </div>
           </div>
-          <button class="btn btn-primary w-100">⚡ Comprar ${contractData.symbol}</button>
+          <button class="btn btn-primary w-100" onclick="handlePurchase('${contractData.symbol}', '${contractData.contractAddress}')">⚡ Comprar ${contractData.symbol}</button>
         </div>
       </div>
     `;
@@ -670,4 +670,16 @@ function copyEmbedCode() {
     btn.classList.remove('btn-success');
     btn.classList.add('btn-outline-light');
   }, 2000);
+}
+
+// Função para lidar com a compra no preview
+function handlePurchase(symbol, contractAddress) {
+  const quantity = document.getElementById('widget-quantity')?.value || '0';
+  const total = document.getElementById('widget-total')?.value || '0';
+  
+  alert(`🎯 PREVIEW - Comprar ${symbol}\n\n` +
+        `Quantidade: ${quantity} tokens\n` +
+        `Total: ${total} BNB\n` +
+        `Contrato: ${contractAddress}\n\n` +
+        `💡 Este é apenas o preview. No widget real, esta ação conectaria com MetaMask para realizar a compra.`);
 }

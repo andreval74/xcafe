@@ -2,6 +2,7 @@ body {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
   color: #ffffff;
   min-height: 100vh;
+  padding-top: 76px; /* Space for fixed navbar */
 }
 
 .card {
@@ -37,4 +38,50 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Header/Footer specific styles */
+.navbar-brand .text-primary {
+  color: #f85d23 !important;
+}
+
+.nav-link.active {
+  color: #f85d23 !important;
+}
+
+.btn-outline-primary {
+  border-color: #f85d23;
+  color: #f85d23;
+}
+
+.btn-outline-primary:hover {
+  background-color: #f85d23;
+  border-color: #f85d23;
+}
+
+/* Footer adjustments */
+footer .text-primary {
+  color: #f85d23 !important;
+}
+
+footer .btn-outline-primary {
+  border-color: #f85d23;
+  color: #f85d23;
+}
+
+footer .btn-outline-primary:hover {
+  background-color: #f85d23;
+  border-color: #f85d23;
+}
+
+/* Responsive fixes */
+main {
+  margin-top: 0 !important; /* Override inline style */
+  padding-top: 20px;
+}
+
+@media (max-width: 991.98px) {
+  body {
+    padding-top: 56px; /* Smaller navbar on mobile */
+  }
 }
