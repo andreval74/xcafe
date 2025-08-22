@@ -563,44 +563,22 @@
 
             // Buscar dados do contrato
             const contractData = await fetchContractData(contractAddress, networkId);
-
-            // Verificar se os elementos existem antes de preencher
-            const tokenNameEl = document.getElementById('token-name');
-            const tokenSymbolEl = document.getElementById('token-symbol');
-            const tokenSupplyEl = document.getElementById('token-supply');
-            const tokenDecimalsEl = document.getElementById('token-decimals');
-            const tokenMinPurchaseEl = document.getElementById('token-min-purchase');
-            const tokenMaxPurchaseEl = document.getElementById('token-max-purchase');
-            const contractInfoSection = document.getElementById('contract-info-section');
-
-            if (!tokenNameEl || !tokenSymbolEl || !tokenSupplyEl || !tokenDecimalsEl || !contractInfoSection) {
-              console.error('Elementos do formulário não encontrados');
-              throw new Error('Erro interno: elementos do formulário não encontrados');
-            }
-
-            // Preencher campos de informações
-            tokenNameEl.value = contractData.name;
-            tokenSymbolEl.value = contractData.symbol;
-            tokenSupplyEl.value = contractData.totalSupply;
-            tokenDecimalsEl.value = contractData.decimals;
-
-            // Preencher dados de compra
-            if (tokenMinPurchaseEl) {
-              tokenMinPurchaseEl.value = `${contractData.minPurchase} ${contractData.symbol}`;
-            }
-            if (tokenMaxPurchaseEl) {
-              tokenMaxPurchaseEl.value = contractData.maxPurchase ? `${contractData.maxPurchase} ${contractData.symbol}` : 'Sem limite';
+            
+            // Atualizar título automaticamente se estiver vazio
+            const titleField = document.getElementById('config-title');
+            if (titleField && !titleField.value.trim()) {
+              titleField.value = `Comprar ${contractData.name} (${contractData.symbol})`;
             }
 
             // Preencher campos de configuração com valores do contrato
             const configMinEl = document.getElementById('config-min-quantity');
             const configMaxEl = document.getElementById('config-max-quantity');
 
-            if (configMinEl) {
+            if (configMinEl && !configMinEl.value) {
               configMinEl.value = contractData.minPurchase;
               configMinEl.setAttribute('data-contract-min', contractData.minPurchase);
             }
-            if (configMaxEl && contractData.maxPurchase) {
+            if (configMaxEl && contractData.maxPurchase && !configMaxEl.value) {
               configMaxEl.value = contractData.maxPurchase;
               configMaxEl.setAttribute('data-contract-max', contractData.maxPurchase);
             }
@@ -640,15 +618,6 @@
               };
             }
 
-            // Mostrar seção de informações
-            contractInfoSection.style.display = 'block';
-
-            // Atualizar título automaticamente se estiver vazio
-            const titleField = document.getElementById('config-title');
-            if (!titleField.value.trim()) {
-              titleField.value = `Comprar ${contractData.name} (${contractData.symbol})`;
-            }
-
             // Feedback de sucesso
             btn.innerHTML = '<i class="bi bi-check me-1"></i>Encontrado!';
             btn.classList.remove('btn-outline-info');
@@ -682,30 +651,27 @@
               errorMessage = error.message;
             }
 
-            contractInfoSection.innerHTML = `
-          <div class="card bg-danger">
-            <div class="card-body py-2">
-              <h6 class="card-title text-white mb-1">
-                <i class="bi bi-exclamation-triangle me-1"></i>Erro ao buscar contrato
-              </h6>
-              <small class="text-light">${errorMessage}</small>
-              <div class="mt-2">
-                <small class="text-light opacity-75">
-                  Verifique se:
-                  • O endereço está correto<br>
-                  • O contrato existe na rede ${networkName}<br>
-                  • O contrato implementa o padrão ERC20
-                </small>
-              </div>
-            </div>
-          </div>
-        `;
-            contractInfoSection.style.display = 'block';
-
-            // Esconder após 8 segundos
-            setTimeout(() => {
-              contractInfoSection.style.display = 'none';
-            }, 8000);
+            // Mostrar erro no preview ao invés de seção inexistente
+            const previewContainer = document.getElementById('widget-preview');
+            if (previewContainer) {
+              previewContainer.innerHTML = `
+                <div class="alert alert-danger text-center m-3">
+                  <i class="bi bi-exclamation-triangle me-2"></i>
+                  <div>
+                    <strong>Erro ao buscar contrato</strong><br>
+                    <small>${errorMessage}</small>
+                    <div class="mt-2">
+                      <small class="opacity-75">
+                        Verifique se:
+                        • O endereço está correto<br>
+                        • O contrato existe na rede ${networkName}<br>
+                        • O contrato implementa o padrão ERC20
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }
 
             // Feedback de erro no botão
             btn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Não encontrado';
