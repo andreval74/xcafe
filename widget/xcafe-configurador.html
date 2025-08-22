@@ -114,6 +114,12 @@
                        class="form-control bg-dark text-light border-secondary" 
                        id="config-price"
                        placeholder="0.001 (vazio = automático)">
+                <div class="invalid-feedback">
+                  <!-- Mensagem de erro aparecerá aqui -->
+                </div>
+                <div class="form-text text-light small">
+                  <span id="price-hint">Será preenchido automaticamente após buscar o contrato</span>
+                </div>
               </div>
               <div class="col-6 d-flex align-items-end">
                 <button class="btn btn-warning w-100" onclick="updateWidget()">
@@ -235,7 +241,10 @@
       // Buscar dados reais do contrato
       try {
         const contractData = await fetchContractData(config.contract, config.network);
-        const priceDisplay = config.price ? `${config.price} BNB` : `${contractData.price} BNB`;
+        
+        // Usar preço do configurador se definido, senão usar o do contrato
+        const finalPrice = config.price || contractData.price;
+        const priceDisplay = `${finalPrice} BNB`;
         
         container.innerHTML = `
           <div class="card bg-dark text-light border-secondary" style="max-width:400px;">
@@ -255,7 +264,7 @@
                 <div class="col-6">
                   <div class="text-center p-2 rounded bg-secondary">
                     <small class="text-muted">Disponível</small>
-                    <div class="fw-bold">${contractData.totalSupply}</div>
+                    <div class="fw-bold">${contractData.totalSupply} ${contractData.symbol}</div>
                   </div>
                 </div>
               </div>
@@ -266,10 +275,10 @@
                 </div>
                 <div class="col-6">
                   <label class="form-label small">Total BNB</label>
-                  <input type="text" class="form-control bg-dark text-light border-secondary" value="${(1100 * parseFloat(contractData.price)).toFixed(6)}" readonly>
+                  <input type="text" class="form-control bg-dark text-light border-secondary" value="${(1100 * parseFloat(finalPrice)).toFixed(6)}" readonly>
                 </div>
               </div>
-              <button class="btn btn-primary w-100">⚡ Comprar Tokens</button>
+              <button class="btn btn-primary w-100">⚡ Comprar ${contractData.symbol}</button>
               <div class="text-center mt-3">
                 <small class="text-success">
                   ✅ <a href="#" class="text-success text-decoration-none" style="font-size:0.8em">${config.contract.substring(0,10)}...${config.contract.substring(config.contract.length-8)}</a>
@@ -477,6 +486,41 @@
         tokenSupplyEl.value = contractData.totalSupply;
         tokenDecimalsEl.value = contractData.decimals;
         
+        // Preencher preço fixo com valor da pesquisa
+        const priceField = document.getElementById('config-price');
+        const priceHint = document.getElementById('price-hint');
+        
+        if (priceField && contractData.price) {
+          priceField.value = contractData.price;
+          priceField.setAttribute('data-min-price', contractData.price);
+          
+          // Atualizar hint
+          if (priceHint) {
+            priceHint.innerHTML = `<i class="bi bi-info-circle me-1"></i>Preço mínimo: ${contractData.price} BNB`;
+          }
+          
+          // Adicionar validação em tempo real
+          priceField.oninput = function() {
+            const currentValue = parseFloat(this.value);
+            const minPrice = parseFloat(this.getAttribute('data-min-price'));
+            const feedback = this.parentElement.querySelector('.invalid-feedback');
+            
+            if (currentValue && currentValue < minPrice) {
+              this.setCustomValidity(`O preço não pode ser menor que ${minPrice} BNB`);
+              this.classList.add('is-invalid');
+              if (feedback) {
+                feedback.textContent = `Preço mínimo permitido: ${minPrice} BNB`;
+              }
+            } else {
+              this.setCustomValidity('');
+              this.classList.remove('is-invalid');
+              if (feedback) {
+                feedback.textContent = '';
+              }
+            }
+          };
+        }
+        
         // Mostrar seção de informações
         contractInfoSection.style.display = 'block';
         
@@ -604,7 +648,12 @@
         widgetConfig.network = parseInt(document.getElementById('config-network').value);
         widgetConfig.title = document.getElementById('config-title').value || 'Widget de Token';
         widgetConfig.logo = document.getElementById('config-logo').value;
-        widgetConfig.price = document.getElementById('config-price').value || null;
+        
+        // Capturar preço do campo, com validação
+        const priceField = document.getElementById('config-price');
+        const priceValue = priceField ? priceField.value.trim() : '';
+        widgetConfig.price = priceValue || null;
+        
         widgetConfig.theme = 'dark'; // Sempre tema escuro
 
         console.log('Atualizando widget com config:', widgetConfig);
