@@ -626,11 +626,22 @@ function generateSimpleCode() {
   var code = '<!-- xcafe Widget Ultra-Compacto -->\n';
   code += '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">\n';
   code += '<link href="https://cdn.jsdelivr.net/gh/andreval74/xcafe@main/styles/globals.css" rel="stylesheet">\n';
-  code += '<div id="xcafe-widget"></div>\n';
+  code += '<div id="wg-widget"></div>\n';
   code += '<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"><\/script>\n';
-  code += '<script src="https://cdn.jsdelivr.net/gh/andreval74/xcafe@main/js/xcafe-widget-core.js"><\/script>\n';
+  code += '<script src="https://cdn.jsdelivr.net/gh/andreval74/xcafe@main/js/wg-widget.js"><\/script>\n';
   code += '<script>\n';
-  code += `xcafeWidget.create('xcafe-widget', ${JSON.stringify(widgetConfig, null, 2)});\n`;
+  code += `createxcafeWidget({\n`;
+  code += `  containerId: 'wg-widget',\n`;
+  code += `  contract: ${JSON.stringify(widgetConfig.contract)},\n`;
+  code += `  network: ${JSON.stringify(widgetConfig.network)},\n`;
+  code += `  title: ${JSON.stringify(widgetConfig.title)},\n`;
+  code += `  logo: ${JSON.stringify(widgetConfig.logo)},\n`;
+  code += `  price: ${JSON.stringify(widgetConfig.price)},\n`;
+  code += `  initialQuantity: ${JSON.stringify(widgetConfig.initialQuantity)},\n`;
+  code += `  minQuantity: ${JSON.stringify(widgetConfig.minQuantity)},\n`;
+  code += `  maxQuantity: ${JSON.stringify(widgetConfig.maxQuantity)},\n`;
+  code += `  theme: ${JSON.stringify(widgetConfig.theme)}\n`;
+  code += `});\n`;
   code += '<\/script>';
 
   // Mostrar no textarea
