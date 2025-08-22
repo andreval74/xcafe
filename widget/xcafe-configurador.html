@@ -58,49 +58,6 @@
                 <small class="form-text text-muted">Cole o endereço e clique em Buscar para carregar as informações</small>
               </div>
               
-              <!-- Informações do Contrato (preenchidas automaticamente) -->
-              <div class="col-12" id="contract-info-section" style="display: none;">
-                <div class="card bg-secondary">
-                  <div class="card-body py-2">
-                    <h6 class="card-title text-light mb-2">
-                      <i class="bi bi-info-circle me-1"></i>Informações do Contrato
-                    </h6>
-                    <div class="row g-2">
-                      <div class="col-6">
-                        <label class="form-label small text-light">Nome do Token</label>
-                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
-                               id="token-name" readonly>
-                      </div>
-                      <div class="col-6">
-                        <label class="form-label small text-light">Símbolo</label>
-                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
-                               id="token-symbol" readonly>
-                      </div>
-                      <div class="col-6">
-                        <label class="form-label small text-light">Supply Total</label>
-                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
-                               id="token-supply" readonly>
-                      </div>
-                      <div class="col-6">
-                        <label class="form-label small text-light">Decimais</label>
-                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
-                               id="token-decimals" readonly>
-                      </div>
-                      <div class="col-6">
-                        <label class="form-label small text-light">Compra Mínima</label>
-                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
-                               id="token-min-purchase" readonly>
-                      </div>
-                      <div class="col-6">
-                        <label class="form-label small text-light">Compra Máxima</label>
-                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
-                               id="token-max-purchase" readonly>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
               <!-- TERCEIRO: Configuração de Compra -->
               <div class="col-12">
                 <div class="card bg-secondary border-secondary">
@@ -162,19 +119,29 @@
                   <span id="price-hint">Será preenchido automaticamente após buscar o contrato</span>
                 </div>
               </div>
-              <div class="col-6 d-flex align-items-end">
-                <button class="btn btn-warning w-100" onclick="updateWidget()">
-                  <i class="bi bi-arrow-clockwise me-1"></i>
-                  Atualizar Preview
-                </button>
               </div>
             </div>
             <hr class="border-secondary my-4">
-            <div class="text-center">
-              <button class="btn btn-success btn-lg" onclick="generateSimpleCode()">
-                <i class="bi bi-code-square me-2"></i>
-                Gerar Código Widget
-              </button>
+            <!-- BOTÕES DE AÇÃO -->
+            <div class="row g-2">
+              <div class="col-4">
+                <button class="btn btn-warning w-100" onclick="updateWidget()">
+                  <i class="bi bi-arrow-clockwise me-1"></i>
+                  Preview
+                </button>
+              </div>
+              <div class="col-4">
+                <button class="btn btn-success w-100" onclick="generateSimpleCode()">
+                  <i class="bi bi-code-square me-1"></i>
+                  Código
+                </button>
+              </div>
+              <div class="col-4">
+                <button class="btn btn-danger w-100" onclick="clearAllData()">
+                  <i class="bi bi-trash me-1"></i>
+                  Limpar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -227,11 +194,10 @@
         <div class="alert alert-info" role="alert">
           <h6 class="alert-heading">📚 Como usar:</h6>
           <ol class="mb-0">
-            <li>Configure o contrato, rede e personalização acima</li>
-            <li>Clique em "Atualizar Preview" para ver como ficará</li>
-            <li>Clique em "Gerar Código Widget" para obter o código HTML</li>
-            <li>Copie e cole o código em qualquer site HTML</li>
-            <li>O widget funcionará automaticamente!</li>
+            <li>Configure o contrato e rede</li>
+            <li>Clique em "Buscar" para carregar dados do contrato</li>
+            <li>Personalize título, preço e quantidades</li>
+            <li>Use "Preview" para visualizar, "Código" para gerar widget, "Limpar" para resetar</li>
           </ol>
         </div>
       </div>
@@ -778,10 +744,6 @@
       
       console.log('Rede alterada para:', networkName);
       
-      // Limpar informações do contrato quando trocar de rede
-      const contractInfoSection = document.getElementById('contract-info-section');
-      contractInfoSection.style.display = 'none';
-      
       // Mostrar mensagem informativa
       const previewContainer = document.getElementById('widget-preview');
       previewContainer.innerHTML = `
@@ -866,6 +828,53 @@
             </div>
           </div>
         `;
+      }
+    }
+
+    function clearAllData() {
+      // Limpar todos os campos de entrada
+      document.getElementById('config-contract').value = '';
+      document.getElementById('config-title').value = '';
+      document.getElementById('config-logo').value = '';
+      document.getElementById('config-price').value = '';
+      document.getElementById('config-initial-quantity').value = '';
+      document.getElementById('config-min-quantity').value = '';
+      document.getElementById('config-max-quantity').value = '';
+      
+      // Resetar rede para BSC Testnet
+      document.getElementById('config-network').value = '97';
+      
+      // Resetar preview
+      const previewContainer = document.getElementById('widget-preview');
+      previewContainer.innerHTML = `
+        <div class="alert alert-info text-center m-3">
+          <i class="bi bi-info-circle me-2"></i>
+          <div>
+            <strong>Preview do Widget</strong><br>
+            <small>Configure um contrato acima para ver o preview aqui</small>
+          </div>
+        </div>
+      `;
+      
+      // Resetar hint do preço
+      const priceHint = document.getElementById('price-hint');
+      if (priceHint) {
+        priceHint.innerHTML = 'Será preenchido automaticamente após buscar o contrato';
+      }
+      
+      // Feedback visual
+      const btn = document.querySelector('button[onclick="clearAllData()"]');
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check me-1"></i>Limpo!';
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.remove('btn-success');
+          btn.classList.add('btn-danger');
+        }, 1500);
       }
     }
 
