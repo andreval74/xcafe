@@ -8,18 +8,18 @@ class TemplateLoader {
     }
 
     async init() {
-        console.log('š€ Iniciando Template Loader...');
+    console.log('🚀 Iniciando Template Loader...');
         try {
             await this.loadAllComponents();
-            console.log('… Template Loader inicializado');
+            console.log('✅ Template Loader inicializado');
         } catch (error) {
-            console.error('âŒ Erro no Template Loader:', error);
+            console.error('❌ Erro no Template Loader:', error);
         }
     }
 
     async loadAllComponents() {
         const components = document.querySelectorAll('[data-component]');
-        console.log(`“¦ Encontrados ${components.length} componentes para carregar`);
+    console.log(`🔎 Encontrados ${components.length} componentes para carregar`);
         
         for (const element of components) {
             await this.loadComponent(element);
@@ -28,7 +28,7 @@ class TemplateLoader {
 
     async loadComponent(element) {
         const componentName = element.getAttribute('data-component');
-        console.log(`”„ Carregando componente: ${componentName}`);
+    console.log(`📦 Carregando componente: ${componentName}`);
         
         try {
             const response = await fetch(`${componentName}.html`);
@@ -40,10 +40,10 @@ class TemplateLoader {
             const content = this.extractBodyContent(html);
             element.innerHTML = content;
             
-            console.log(`… Componente ${componentName} carregado`);
+            console.log(`✅ Componente ${componentName} carregado`);
         } catch (error) {
-            console.error(`âŒ Erro ao carregar ${componentName}:`, error);
-            element.innerHTML = `<div style="color: red; padding: 20px;">âŒ Erro ao carregar ${componentName}</div>`;
+            console.error(`❌ Erro ao carregar ${componentName}:`, error);
+            element.innerHTML = `<div style="color: red; padding: 20px;">❌ Erro ao carregar ${componentName}</div>`;
         }
     }
 
