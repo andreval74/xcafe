@@ -29,15 +29,56 @@
             <div class="row g-3">
               <div class="col-12">
                 <label for="config-contract" class="form-label text-light">Endereço do Contrato</label>
-                <input type="text" 
-                       class="form-control bg-dark text-light border-secondary" 
-                       id="config-contract"
-                       value="0x7Ab950357Bb80172718a70FD04783e6949193006"
-                       placeholder="0x...">
+                <div class="input-group">
+                  <input type="text" 
+                         class="form-control bg-dark text-light border-secondary" 
+                         id="config-contract"
+                         value="0x7Ab950357Bb80172718a70FD04783e6949193006"
+                         placeholder="0x..."
+                         onpaste="setTimeout(onContractAddressPaste, 100)">
+                  <button class="btn btn-outline-info" type="button" onclick="fetchAndFillContractInfo()">
+                    <i class="bi bi-search me-1"></i>Buscar
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Informações do Contrato (preenchidas automaticamente) -->
+              <div class="col-12" id="contract-info-section" style="display: none;">
+                <div class="card bg-secondary">
+                  <div class="card-body py-2">
+                    <h6 class="card-title text-light mb-2">
+                      <i class="bi bi-info-circle me-1"></i>Informações do Contrato
+                    </h6>
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <label class="form-label small text-light">Nome do Token</label>
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="token-name" readonly>
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label small text-light">Símbolo</label>
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="token-symbol" readonly>
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label small text-light">Supply Total</label>
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="token-supply" readonly>
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label small text-light">Decimais</label>
+                        <input type="text" class="form-control form-control-sm bg-dark text-light border-secondary" 
+                               id="token-decimals" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="col-6">
                 <label for="config-network" class="form-label text-light">Rede</label>
-                <select class="form-select bg-dark text-light border-secondary" id="config-network">
+                <select class="form-select bg-dark text-light border-secondary" 
+                        id="config-network" 
+                        onchange="onNetworkChange()">
                   <option value="97" selected>BSC Testnet</option>
                   <option value="56">BSC Mainnet</option>
                   <option value="1">Ethereum Mainnet</option>
@@ -365,6 +406,113 @@
       }
     }
 
+    // Função para buscar e preencher informações do contrato
+    async function fetchAndFillContractInfo() {
+      const contractAddress = document.getElementById('config-contract').value.trim();
+      const networkId = parseInt(document.getElementById('config-network').value);
+      const btn = document.querySelector('button[onclick="fetchAndFillContractInfo()"]');
+      
+      if (!contractAddress || !contractAddress.startsWith('0x')) {
+        alert('Por favor, insira um endereço de contrato válido');
+        return;
+      }
+      
+      // Feedback visual no botão
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Buscando...';
+      btn.disabled = true;
+      
+      try {
+        console.log('Buscando informações do contrato:', contractAddress);
+        
+        // Buscar dados do contrato
+        const contractData = await fetchContractData(contractAddress, networkId);
+        
+        // Preencher campos de informações
+        document.getElementById('token-name').value = contractData.name;
+        document.getElementById('token-symbol').value = contractData.symbol;
+        document.getElementById('token-supply').value = contractData.totalSupply;
+        document.getElementById('token-decimals').value = contractData.decimals;
+        
+        // Mostrar seção de informações
+        document.getElementById('contract-info-section').style.display = 'block';
+        
+        // Atualizar título automaticamente se estiver vazio ou for o padrão
+        const titleField = document.getElementById('config-title');
+        if (!titleField.value || titleField.value === 'Comprar Token xcafe') {
+          titleField.value = `Comprar ${contractData.name} (${contractData.symbol})`;
+        }
+        
+        // Feedback de sucesso
+        btn.innerHTML = '<i class="bi bi-check me-1"></i>Encontrado!';
+        btn.classList.remove('btn-outline-info');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.remove('btn-success');
+          btn.classList.add('btn-outline-info');
+          btn.disabled = false;
+        }, 2000);
+        
+        // Atualizar preview automaticamente
+        await updateWidget();
+        
+      } catch (error) {
+        console.error('Erro ao buscar informações do contrato:', error);
+        
+        // Esconder seção de informações em caso de erro
+        document.getElementById('contract-info-section').style.display = 'none';
+        
+        // Feedback de erro
+        btn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Erro!';
+        btn.classList.remove('btn-outline-info');
+        btn.classList.add('btn-danger');
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.remove('btn-danger');
+          btn.classList.add('btn-outline-info');
+          btn.disabled = false;
+        }, 2000);
+        
+        alert(`Erro ao buscar contrato: ${error.message}`);
+      }
+    }
+    
+    // Função chamada quando um endereço é colado
+    async function onContractAddressPaste() {
+      const contractAddress = document.getElementById('config-contract').value.trim();
+      
+      console.log('Endereço colado:', contractAddress);
+      
+      // Verificar se é um endereço válido
+      if (contractAddress && contractAddress.startsWith('0x') && contractAddress.length === 42) {
+        console.log('Endereço válido detectado, buscando automaticamente...');
+        
+        // Pequeno delay para feedback visual
+        setTimeout(async () => {
+          await fetchAndFillContractInfo();
+        }, 500);
+      }
+    }
+    
+    // Função chamada quando a rede é alterada
+    async function onNetworkChange() {
+      console.log('Rede alterada, verificando se há contrato para rebuscar...');
+      
+      const contractAddress = document.getElementById('config-contract').value.trim();
+      const contractInfoSection = document.getElementById('contract-info-section');
+      
+      // Se já tem informações do contrato carregadas, rebuscar para nova rede
+      if (contractAddress && contractAddress.startsWith('0x') && contractInfoSection.style.display === 'block') {
+        await fetchAndFillContractInfo();
+      } else {
+        // Apenas atualizar preview
+        await updateWidget();
+      }
+    }
+    
     // FUNÇÕES DE CONFIGURAÇÃO
     async function updateWidget() {
       try {
@@ -447,7 +595,9 @@
     // INICIALIZAÇÃO
     window.addEventListener('load', async function() {
       console.log('Página carregada - inicializando widget...');
-      await updateWidget();
+      
+      // Buscar informações do contrato padrão
+      await fetchAndFillContractInfo();
     });
   </script>
 </body>
