@@ -4,31 +4,16 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>SCCAFE - Add Token</title>
-  <link href="imgs/sccafe.png" rel="icon">
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/css/main.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="imgs/xcafe-32x32.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="styles/globals.css" rel="stylesheet">
+  <link href="styles/link-generator.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    #networkAutocomplete {
-      position: absolute;
-      z-index: 10;
-      width: 100%;
-      max-height: 220px;
-      overflow-y: auto;
-      display: none;
-    }
-    .filled {
-      background: #e6ffe6;
-    }
-    #tokenLoading {
-      margin-bottom: 1rem;
-    }
-  </style>
 </head>
 
 <body>
-  <div id="header-include" class="fixed-top"></div>
+  <header data-component="header"></header>
   <main class="main">
     <div class="page-title light-background">
       <div class="container d-lg-flex justify-content-between align-items-center">
@@ -132,10 +117,8 @@
       </div>
     </section>
   </main>
-  <div id="footer-include"></div>
-  <script src="assets/js/include.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-  <script src="assets/js/main.js"></script>
+  <footer data-component="footer"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="js/link-index.js"></script>
 </body>
 </html>
