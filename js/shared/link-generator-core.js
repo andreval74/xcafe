@@ -32,8 +32,18 @@ export function setupLinkGenerator({
     selectedNetwork = network;
     document.getElementById(rpcUrlId).value = network.rpc[0];
     document.getElementById(blockExplorerId).value = network.explorers ? network.explorers[0].url : '';
-    document.getElementById(nativeCurrencyId).value = network.nativeCurrency.symbol;
-    document.getElementById(nativeDecimalsId).value = network.nativeCurrency.decimals;
+    
+    // Verifica se os campos de moeda nativa existem antes de tentar definir valores
+    const nativeCurrencyEl = document.getElementById(nativeCurrencyId);
+    if (nativeCurrencyEl) {
+      nativeCurrencyEl.value = network.nativeCurrency.symbol;
+    }
+    
+    const nativeDecimalsEl = document.getElementById(nativeDecimalsId);
+    if (nativeDecimalsEl) {
+      nativeDecimalsEl.value = network.nativeCurrency.decimals;
+    }
+    
     document.getElementById(networkSearchId).value = `${network.name} (${network.chainId})`;
     document.getElementById(networkAutocompleteId).style.display = 'none';
   }
@@ -102,8 +112,18 @@ export function setupLinkGenerator({
     document.getElementById(networkSearchId).value = '';
     document.getElementById(rpcUrlId).value = '';
     document.getElementById(blockExplorerId).value = '';
-    document.getElementById(nativeCurrencyId).value = '';
-    document.getElementById(nativeDecimalsId).value = '';
+    
+    // Verifica se os campos de moeda nativa existem antes de limpar
+    const nativeCurrencyEl = document.getElementById(nativeCurrencyId);
+    if (nativeCurrencyEl) {
+      nativeCurrencyEl.value = '';
+    }
+    
+    const nativeDecimalsEl = document.getElementById(nativeDecimalsId);
+    if (nativeDecimalsEl) {
+      nativeDecimalsEl.value = '';
+    }
+    
     document.getElementById(tokenAddressId).value = '';
     document.getElementById(tokenSymbolId).value = '';
     document.getElementById(tokenDecimalsId).value = '';
