@@ -88,14 +88,14 @@
           <div class="card bg-dark border-info shadow mb-4" id="contract-section" style="display: none;">
             <div class="card-header bg-info text-dark">
               <h5 class="card-title mb-0">
-                <i class="bi bi-file-earmark-code me-2"></i>2. Endereá§o do Contrato
+                <i class="bi bi-file-earmark-code me-2"></i>2. Endereço do Contrato
               </h5>
             </div>
             <div class="card-body">
-              <p class="text-secondary mb-3">Informe o endereá§o do contrato do token que deseja negociar</p>
+              <p class="text-secondary mb-3">Informe o endereço do contrato do token que deseja negociar</p>
               <div class="row g-3 align-items-end">
                 <div class="col-md-8">
-                  <label for="contract-address" class="form-label text-white">Endereá§o do Smart Contract</label>
+                  <label for="contract-address" class="form-label text-white">Endereço do Smart Contract</label>
                   <input type="text" class="form-control bg-dark text-white border-secondary" id="contract-address" 
                          placeholder="Conecte sua carteira primeiro..." style="font-family: monospace;" disabled>
                 </div>
@@ -118,7 +118,7 @@
           <div class="card bg-dark border-success shadow mb-4" id="token-info-section" style="display: none;">
             <div class="card-header bg-success text-dark">
               <h5 class="card-title mb-0">
-                <i class="bi bi-info-circle me-2"></i>3. Informaá§áµes do Token
+                <i class="bi bi-info-circle me-2"></i>3. Informações do Token
               </h5>
             </div>
             <div class="card-body">
@@ -128,7 +128,7 @@
                   <p id="tokenName" class="fw-bold mb-2">-</p>
                 </div>
                 <div class="col-md-6">
-                  <small class="text-muted">Sá­mbolo</small>
+                  <small class="text-muted">Símbolo</small>
                   <p id="tokenSymbol" class="fw-bold mb-2">-</p>
                 </div>
                 <div class="col-md-6">
@@ -144,7 +144,7 @@
                   <p id="contractBalance" class="fw-bold text-info mb-2">-</p>
                 </div>
                 <div class="col-md-6">
-                  <small class="text-muted">Tokens Disponá­veis</small>
+                  <small class="text-muted">Tokens Disponíveis</small>
                   <p id="tokensForSale" class="fw-bold text-warning mb-2">-</p>
                 </div>
               </div>
@@ -152,7 +152,7 @@
               <!-- Verificaá§á£o de Compatibilidade -->
               <div class="alert alert-secondary border-0">
                 <h6>
-                  <i class="bi bi-shield-check me-2"></i>Verificaá§á£o de Compatibilidade
+                  <i class="bi bi-shield-check me-2"></i>Verificação de Compatibilidade
                 </h6>
                 <div class="row g-2">
                   <div class="col-md-4">
@@ -160,7 +160,7 @@
                     <p id="erc20Status" class="fw-bold mb-1 text-warning">Verificando...</p>
                   </div>
                   <div class="col-md-4">
-                    <small class="text-muted">Transferáªncia</small>
+                    <small class="text-muted">Transferência</small>
                     <p id="transferStatus" class="fw-bold mb-1 text-warning">Verificando...</p>
                   </div>
                   <div class="col-md-4">
@@ -186,13 +186,13 @@
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label for="token-price" class="form-label text-white">
-                    <i class="bi bi-tag me-1"></i>Preá§o por Token (BNB)
+                    <i class="bi bi-tag me-1"></i>Preço por Token (BNB)
                   </label>
                   <input type="number" class="form-control bg-secondary text-white border-secondary" id="token-price" 
                          placeholder="Detectando..." step="0.000001" readonly disabled>
                   <div class="form-text text-warning">
                     <i class="bi bi-info-circle me-1"></i>
-                    Preá§o automá¡tico do contrato
+                    Preço automático do contrato
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -210,11 +210,11 @@
                 </h6>
                 <div class="row g-2 text-dark">
                   <div class="col-md-6">
-                    <small><strong>Compra Má­nima:</strong></small>
+                    <small><strong>Compra Mínima:</strong></small>
                     <p id="min-purchase-display" class="fw-bold mb-0">-</p>
                   </div>
                   <div class="col-md-6">
-                    <small><strong>Compra Má¡xima:</strong></small>
+                    <small><strong>Compra Máxima:</strong></small>
                     <p id="max-purchase-display" class="fw-bold mb-0">-</p>
                   </div>
                 </div>
@@ -250,7 +250,7 @@
                       </div>
                       <div class="col">
                         <small class="mb-0">
-                          <strong>Tokens disponá­veis:</strong> <span id="available-tokens-display">-</span>
+                          <strong>Tokens disponíveis:</strong> <span id="available-tokens-display">-</span>
                         </small>
                       </div>
                     </div>
@@ -294,13 +294,13 @@
           <div class="card bg-dark border-success shadow mb-4" id="transactionDetails" style="display: none;">
             <div class="card-header bg-success text-dark">
               <h5 class="card-title mb-0">
-                <i class="bi bi-receipt me-2"></i>5. Detalhes da Transaá§á£o
+                <i class="bi bi-receipt me-2"></i>5. Detalhes da Transação
               </h5>
             </div>
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <small class="text-muted">ID da Transaá§á£o</small>
+                  <small class="text-muted">ID da Transação</small>
                   <p id="txHash" class="fw-bold font-monospace small text-break text-primary">-</p>
                 </div>
                 <div class="col-md-6">

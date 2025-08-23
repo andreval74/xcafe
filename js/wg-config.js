@@ -537,12 +537,32 @@ async function updateWidget() {
 
     console.log('Atualizando widget com config:', widgetConfig);
     
-    // Feedback visual ao usuário
-    const previewContainer = document.getElementById('widget-preview');
-    previewContainer.innerHTML = '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Carregando...</span></div>';
+  // Feedback visual ao usuário
+  const previewContainer = document.getElementById('widget-preview');
+  previewContainer.innerHTML = '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Carregando...</span></div>';
     
-    // Buscar dados reais do contrato
-    await createPreviewWidget(widgetConfig, 'widget-preview');
+  // Gerar o código embed e usar para preview
+  generateSimpleCode();
+  // Limpar preview
+  previewContainer.innerHTML = '<div id="wg-widget-preview"></div>';
+    // Cria o widget real no preview, mas com botão de compra real visível
+    const configPreview = {...widgetConfig, containerId: 'wg-widget-preview'};
+    window.createxcafeWidget && createxcafeWidget(configPreview);
+    // Adiciona botão de compra real só no preview
+    setTimeout(() => {
+      const previewDiv = document.getElementById('wg-widget-preview');
+      if (previewDiv) {
+        const realBtn = document.createElement('button');
+        realBtn.className = 'btn btn-danger w-100 mt-3';
+        realBtn.innerHTML = '⚡ Comprar REAL (Teste)';
+        realBtn.onclick = function() {
+          // Força a compra real usando o widget
+          const buyBtn = previewDiv.querySelector('button');
+          if (buyBtn) buyBtn.click();
+        };
+        previewDiv.appendChild(realBtn);
+      }
+    }, 800);
     
     // Feedback de sucesso
     const btn = document.querySelector('button[onclick="updateWidget()"]');
