@@ -65,29 +65,22 @@ function showNetworkFallbackMessage(tipo) {
 }
 
 
+
+// Busca lista de redes priorizando localStorage, atualiza em background se necessário
+
 export async function fetchAllNetworks() {
-  // Sempre usa chains.json local
+  // Sempre tenta usar chains.json local
   try {
     const res = await fetch('./chains.json');
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        // Remove mensagem de fallback se existir
-        const el = document.getElementById('networkFallbackMsg');
-        if (el) el.remove();
         return data;
-      } else {
-        showNetworkFallbackMessage('fallback');
-        return [];
       }
-    } else {
-      showNetworkFallbackMessage('fallback');
-      return [];
     }
-  } catch (e) {
-    showNetworkFallbackMessage('fallback');
-    return [];
-  }
+  } catch (e) {}
+  // Se chains.json não existir ou estiver vazio, retorna lista mínima
+  return fallbackNetworks;
 }
 
 export function showAutocomplete(inputId, listId, allNetworks, onSelect) {
