@@ -1,11 +1,19 @@
 // js/shared/token-link-utils.js
 // Funções utilitárias para geração de link de token, autocomplete de redes, busca de token, copiar/compartilhar link
 
+
+import { fallbackNetworks } from './networks-fallback.js';
 import { fetchTokenData } from './token-global.js';
 
 export async function fetchAllNetworks() {
-  const res = await fetch('https://chainid.network/chains.json');
-  return await res.json();
+  try {
+    const res = await fetch('https://chainid.network/chains.json');
+    if (!res.ok) throw new Error('Erro ao buscar redes online');
+    return await res.json();
+  } catch (e) {
+    console.warn('Usando lista local de redes (fallback)');
+    return fallbackNetworks;
+  }
 }
 
 export function showAutocomplete(inputId, listId, allNetworks, onSelect) {
