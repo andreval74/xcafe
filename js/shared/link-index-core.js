@@ -143,15 +143,22 @@ export function setupLinkGenerator({
     // Link JavaScript para MetaMask (esse é o que realmente funciona)
     const metamaskLink = `javascript:if(typeof ethereum !== 'undefined'){ethereum.request({method: 'wallet_watchAsset', params: {type: 'ERC20', options: {address: '${tokenAddress}', symbol: '${tokenSymbol}', decimals: ${parseInt(tokenDecimals)}, image: '${tokenData.image || ''}'}}}).catch(console.error);}else{alert('MetaMask não detectado!');}`;
     
-    // Formato 2: Deep Link para mobile wallets - versão melhorada
-    // Usando chainIdHex já declarado para melhor compatibilidade
-    const mobileDeepLink = `https://metamask.app.link/dapp/metamask.github.io/test-dapp/?addToken=true&tokenAddress=${tokenAddress}&tokenSymbol=${tokenSymbol}&tokenDecimals=${tokenDecimals}&chainId=${chainIdHex}`;
+    // Formato 2: Deep Links para mobile wallets - versões corrigidas
     
-    // Deep link alternativo para TrustWallet
-    const trustWalletLink = `trust://add_asset?asset=c${selectedNetwork.chainId}_t${tokenAddress}`;
+    // MetaMask Mobile - Deep link direto com network switch
+    const metamaskMobileLink = `https://metamask.app.link/send/?address=${tokenAddress}&uint256=0&chainId=${selectedNetwork.chainId}`;
     
-    // Deep link universal (funciona para várias wallets)
-    const universalDeepLink = `https://link.trustwallet.com/add_asset?asset=c${selectedNetwork.chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&name=${encodeURIComponent(tokenName)}`;
+    // TrustWallet - Deep link nativo correto
+    const trustWalletNativeLink = `trust://add_asset?asset=c${selectedNetwork.chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}`;
+    
+    // Link universal para múltiplas wallets (WalletConnect padrão)
+    const walletConnectLink = `wc:add-token?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${selectedNetwork.chainId}&name=${encodeURIComponent(tokenName)}`;
+    
+    // Link web universal que funciona em várias wallets
+    const webUniversalLink = `https://app.uniswap.org/tokens/ethereum/${tokenAddress}?chain=${selectedNetwork.name.toLowerCase().replace(/\s+/g, '')}`;
+    
+    // Link direto do CoinGecko/DeFiPulse para adicionar token
+    const defiLink = `https://www.coingecko.com/en/coins/ethereum/contract/${tokenAddress}`;
     
     // Formato 3: Web3 Modal format 
     const web3Link = `ethereum:${tokenAddress}@${selectedNetwork.chainId}/transfer`;
@@ -232,42 +239,66 @@ if (typeof ethereum !== 'undefined') {
             <label class="form-label text-info">
               <i class="bi bi-3-circle"></i> <strong>Método 3: Deep Link Mobile</strong>
             </label>
+            
+            <!-- Botão de tentativa automática -->
+            <div class="mb-3">
+              <button class="btn btn-primary w-100" onclick="tryAddTokenMobile('${tokenAddress}', '${tokenSymbol}', '${tokenDecimals}', '${tokenName}', ${selectedNetwork.chainId})" type="button">
+                <i class="bi bi-phone"></i> Tentar Adicionar no Mobile (Auto)
+              </button>
+              <small class="text-muted">Tenta vários métodos automaticamente até encontrar um que funcione</small>
+            </div>
+            
+            <!-- QR Code para escanear do celular -->
+            <div class="mb-3">
+              <button class="btn btn-success w-100" onclick="generateTokenQR('${tokenAddress}', '${tokenSymbol}', '${tokenDecimals}', '${tokenName}', ${selectedNetwork.chainId})" type="button">
+                <i class="bi bi-qr-code"></i> Gerar QR Code para Escanear
+              </button>
+              <div id="qrCodeContainer" class="text-center mt-2" style="display:none;">
+                <div id="qrCodeDiv"></div>
+                <small class="text-muted">Escaneie com a câmera da sua carteira móvel</small>
+              </div>
+            </div>
+            
+            <!-- Links manuais para fallback -->
             <div class="mb-2">
-              <small class="text-muted">MetaMask Mobile:</small>
+              <small class="text-muted">MetaMask Mobile (Link Direto):</small>
               <div class="input-group mb-2">
-                <input class="form-control" readonly value="${mobileDeepLink}" id="mobileDeepLink" />
-                <button class="btn btn-outline-secondary" onclick="copyToClipboard('mobileDeepLink')" type="button">
+                <input class="form-control" readonly value="${metamaskMobileLink}" id="metamaskMobileLink" />
+                <button class="btn btn-outline-secondary" onclick="copyToClipboard('metamaskMobileLink')" type="button">
                   <i class="bi bi-clipboard"></i>
                 </button>
-                <button class="btn btn-outline-primary" onclick="window.open('${mobileDeepLink}', '_blank')" type="button">
+                <button class="btn btn-outline-primary" onclick="window.open('${metamaskMobileLink}', '_blank')" type="button">
                   <i class="bi bi-box-arrow-up-right"></i>
                 </button>
               </div>
             </div>
+            
             <div class="mb-2">
-              <small class="text-muted">TrustWallet Mobile:</small>
+              <small class="text-muted">TrustWallet Nativo:</small>
               <div class="input-group mb-2">
-                <input class="form-control" readonly value="${trustWalletLink}" id="trustWalletLink" />
-                <button class="btn btn-outline-secondary" onclick="copyToClipboard('trustWalletLink')" type="button">
+                <input class="form-control" readonly value="${trustWalletNativeLink}" id="trustWalletNativeLink" />
+                <button class="btn btn-outline-secondary" onclick="copyToClipboard('trustWalletNativeLink')" type="button">
                   <i class="bi bi-clipboard"></i>
                 </button>
-                <button class="btn btn-outline-primary" onclick="window.open('${trustWalletLink}', '_blank')" type="button">
+                <button class="btn btn-outline-primary" onclick="window.open('${trustWalletNativeLink}', '_blank')" type="button">
                   <i class="bi bi-box-arrow-up-right"></i>
                 </button>
               </div>
             </div>
+            
             <div class="mb-2">
-              <small class="text-muted">Universal (Várias Wallets):</small>
+              <small class="text-muted">Link Web Universal:</small>
               <div class="input-group mb-2">
-                <input class="form-control" readonly value="${universalDeepLink}" id="universalDeepLink" />
-                <button class="btn btn-outline-secondary" onclick="copyToClipboard('universalDeepLink')" type="button">
+                <input class="form-control" readonly value="${webUniversalLink}" id="webUniversalLink" />
+                <button class="btn btn-outline-secondary" onclick="copyToClipboard('webUniversalLink')" type="button">
                   <i class="bi bi-clipboard"></i>
                 </button>
-                <button class="btn btn-outline-primary" onclick="window.open('${universalDeepLink}', '_blank')" type="button">
+                <button class="btn btn-outline-primary" onclick="window.open('${webUniversalLink}', '_blank')" type="button">
                   <i class="bi bi-box-arrow-up-right"></i>
                 </button>
               </div>
             </div>
+            
           </div>
           
           <div class="mb-3">
@@ -535,4 +566,147 @@ ${image ? 'Imagem: ' + image : ''}
       });
     }
   }
+};
+
+// Função para tentar múltiplos métodos de adição de token no mobile
+window.tryAddTokenMobile = async function(tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
+  const userAgent = navigator.userAgent;
+  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  
+  if (!isMobile) {
+    alert('⚠️ Esta função foi otimizada para dispositivos móveis. Use o Método 1 (MetaMask Desktop) em computadores.');
+    return;
+  }
+  
+  // Lista de tentativas em ordem de prioridade
+  const attempts = [
+    {
+      name: 'TrustWallet Nativo',
+      url: `trust://add_asset?asset=c${chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}`
+    },
+    {
+      name: 'MetaMask Mobile Direto',
+      url: `https://metamask.app.link/send/?address=${tokenAddress}&uint256=0&chainId=${chainId}`
+    },
+    {
+      name: 'MetaMask com Network',
+      url: `metamask://addToken?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}`
+    },
+    {
+      name: 'SafePal Wallet',
+      url: `safepal://add_asset?contract=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}`
+    },
+    {
+      name: 'TokenPocket',
+      url: `tokenpocket://add_asset?contract=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}`
+    }
+  ];
+  
+  let currentAttempt = 0;
+  
+  function tryNext() {
+    if (currentAttempt >= attempts.length) {
+      // Todas as tentativas falharam, mostrar opções manuais
+      showManualOptions();
+      return;
+    }
+    
+    const attempt = attempts[currentAttempt];
+    
+    // Mostrar qual método está sendo tentado
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'alert alert-info';
+    resultDiv.innerHTML = `
+      🔄 Tentando: ${attempt.name}<br>
+      <small>Se não abrir nenhum app em 3 segundos, tentaremos o próximo método...</small>
+    `;
+    document.body.appendChild(resultDiv);
+    
+    // Tentar abrir o deep link
+    window.location.href = attempt.url;
+    
+    // Aguardar 3 segundos e tentar próximo se não funcionou
+    setTimeout(() => {
+      resultDiv.remove();
+      currentAttempt++;
+      tryNext();
+    }, 3000);
+  }
+  
+  function showManualOptions() {
+    const tokenInfo = `
+INFORMAÇÕES DO TOKEN
+====================
+Endereço: ${tokenAddress}
+Símbolo: ${tokenSymbol}
+Nome: ${tokenName}
+Decimais: ${tokenDecimals}
+Chain ID: ${chainId}
+
+INSTRUÇÕES MANUAIS:
+1. Abra sua carteira manualmente
+2. Procure por "Adicionar Token" ou "Import Token"
+3. Cole o endereço: ${tokenAddress}
+4. Preencha os outros campos se necessário
+`;
+    
+    if (confirm('❌ Nenhum método automático funcionou. Deseja copiar as informações para adicionar manualmente?')) {
+      navigator.clipboard.writeText(tokenInfo).then(() => {
+        alert('✅ Informações copiadas! Cole na sua carteira e adicione manualmente.');
+      }).catch(() => {
+        alert(tokenInfo);
+      });
+    }
+  }
+  
+  // Iniciar tentativas
+  alert('🚀 Iniciando tentativas automáticas...\n\nVários apps de carteira podem abrir. Escolha o que você deseja usar!');
+  tryNext();
+};
+
+// Função para gerar QR Code com informações do token
+window.generateTokenQR = function(tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
+  const container = document.getElementById('qrCodeContainer');
+  const qrDiv = document.getElementById('qrCodeDiv');
+  
+  // Limpar QR Code anterior
+  qrDiv.innerHTML = '';
+  
+  // Dados do token em formato JSON para QR
+  const tokenData = {
+    address: tokenAddress,
+    symbol: tokenSymbol,
+    name: tokenName,
+    decimals: parseInt(tokenDecimals),
+    chainId: chainId,
+    type: 'ERC20'
+  };
+  
+  // Tentar usar biblioteca QRCode se disponível, senão usar API online
+  const qrText = JSON.stringify(tokenData);
+  
+  // Usar API do Google Charts para gerar QR (funciona offline depois de carregar)
+  const qrSize = 200;
+  const qrImageUrl = `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${encodeURIComponent(qrText)}`;
+  
+  qrDiv.innerHTML = `
+    <img src="${qrImageUrl}" alt="QR Code do Token" style="max-width: 100%; height: auto; border: 2px solid #dee2e6; border-radius: 8px;">
+    <div class="mt-2">
+      <small class="text-muted">
+        <strong>Dados do QR:</strong><br>
+        ${tokenSymbol} (${tokenName})<br>
+        Chain ID: ${chainId}<br>
+        <button class="btn btn-sm btn-outline-secondary mt-1" onclick="copyToClipboard('qrData')" type="button">
+          Copiar JSON
+        </button>
+        <textarea id="qrData" style="display:none;">${qrText}</textarea>
+      </small>
+    </div>
+  `;
+  
+  // Mostrar container
+  container.style.display = 'block';
+  
+  // Rolar até o QR Code
+  container.scrollIntoView({ behavior: 'smooth' });
 };
