@@ -143,8 +143,15 @@ export function setupLinkGenerator({
     // Link JavaScript para MetaMask (esse é o que realmente funciona)
     const metamaskLink = `javascript:if(typeof ethereum !== 'undefined'){ethereum.request({method: 'wallet_watchAsset', params: {type: 'ERC20', options: {address: '${tokenAddress}', symbol: '${tokenSymbol}', decimals: ${parseInt(tokenDecimals)}, image: '${tokenData.image || ''}'}}}).catch(console.error);}else{alert('MetaMask não detectado!');}`;
     
-    // Formato 2: Deep Link para mobile wallets
-    const mobileDeepLink = `https://metamask.app.link/send/${tokenAddress}@${selectedNetwork.chainId}`;
+    // Formato 2: Deep Link para mobile wallets - versão melhorada
+    // Usando chainIdHex já declarado para melhor compatibilidade
+    const mobileDeepLink = `https://metamask.app.link/dapp/metamask.github.io/test-dapp/?addToken=true&tokenAddress=${tokenAddress}&tokenSymbol=${tokenSymbol}&tokenDecimals=${tokenDecimals}&chainId=${chainIdHex}`;
+    
+    // Deep link alternativo para TrustWallet
+    const trustWalletLink = `trust://add_asset?asset=c${selectedNetwork.chainId}_t${tokenAddress}`;
+    
+    // Deep link universal (funciona para várias wallets)
+    const universalDeepLink = `https://link.trustwallet.com/add_asset?asset=c${selectedNetwork.chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&name=${encodeURIComponent(tokenName)}`;
     
     // Formato 3: Web3 Modal format 
     const web3Link = `ethereum:${tokenAddress}@${selectedNetwork.chainId}/transfer`;
@@ -225,14 +232,41 @@ if (typeof ethereum !== 'undefined') {
             <label class="form-label text-info">
               <i class="bi bi-3-circle"></i> <strong>Método 3: Deep Link Mobile</strong>
             </label>
-            <div class="input-group mb-2">
-              <input class="form-control" readonly value="${mobileDeepLink}" id="mobileDeepLink" />
-              <button class="btn btn-outline-secondary" onclick="copyToClipboard('mobileDeepLink')" type="button">
-                <i class="bi bi-clipboard"></i>
-              </button>
-              <button class="btn btn-outline-primary" onclick="window.open('${mobileDeepLink}', '_blank')" type="button">
-                <i class="bi bi-box-arrow-up-right"></i>
-              </button>
+            <div class="mb-2">
+              <small class="text-muted">MetaMask Mobile:</small>
+              <div class="input-group mb-2">
+                <input class="form-control" readonly value="${mobileDeepLink}" id="mobileDeepLink" />
+                <button class="btn btn-outline-secondary" onclick="copyToClipboard('mobileDeepLink')" type="button">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+                <button class="btn btn-outline-primary" onclick="window.open('${mobileDeepLink}', '_blank')" type="button">
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </button>
+              </div>
+            </div>
+            <div class="mb-2">
+              <small class="text-muted">TrustWallet Mobile:</small>
+              <div class="input-group mb-2">
+                <input class="form-control" readonly value="${trustWalletLink}" id="trustWalletLink" />
+                <button class="btn btn-outline-secondary" onclick="copyToClipboard('trustWalletLink')" type="button">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+                <button class="btn btn-outline-primary" onclick="window.open('${trustWalletLink}', '_blank')" type="button">
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </button>
+              </div>
+            </div>
+            <div class="mb-2">
+              <small class="text-muted">Universal (Várias Wallets):</small>
+              <div class="input-group mb-2">
+                <input class="form-control" readonly value="${universalDeepLink}" id="universalDeepLink" />
+                <button class="btn btn-outline-secondary" onclick="copyToClipboard('universalDeepLink')" type="button">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+                <button class="btn btn-outline-primary" onclick="window.open('${universalDeepLink}', '_blank')" type="button">
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </button>
+              </div>
             </div>
           </div>
           
