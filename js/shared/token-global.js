@@ -1,4 +1,4 @@
-﻿// Funá§áµes globais para manipulaá§á£o de tokens e contratos
+﻿// Funções globais para manipulação de tokens e contratos
 
 /**
  * Fallback RPCs por rede
@@ -30,7 +30,7 @@ const rpcFallbacks = {
 };
 
 /**
- * Formata náºmeros grandes
+ * Formata números grandes
  */
 function formatarNumero(numero) {
     if (!numero) return '0';
@@ -51,7 +51,7 @@ function formatarNumero(numero) {
 }
 
 /**
- * Obtá©m dados do token usando Web3/Ethers
+ * Obtém dados do token usando Web3/Ethers
  */
 export async function fetchTokenData(tokenAddress, provider) {
     try {
@@ -82,13 +82,13 @@ export async function fetchTokenData(tokenAddress, provider) {
             address: tokenAddress
         };
     } catch (error) {
-        console.error("âŒ Erro ao buscar dados do token:", error);
+    console.error("❌ Erro ao buscar dados do token:", error);
         throw error;
     }
 }
 
 /**
- * Obtá©m nome da rede baseado no chainId
+ * Obtém nome da rede baseado no chainId
  */
 function getNetworkName(chainId) {
     const networks = {
@@ -103,7 +103,7 @@ function getNetworkName(chainId) {
 }
 
 /**
- * Obtá©m URL do explorer baseado no chainId
+ * Obtém URL do explorer baseado no chainId
  */
 function getExplorerUrl(chainId) {
     const explorers = {
@@ -118,11 +118,11 @@ function getExplorerUrl(chainId) {
 }
 
 /**
- * Conexá£o com MetaMask
+ * Conexão com MetaMask
  */
 async function connectMetaMask() {
     if (!window.ethereum) {
-        throw new Error('MetaMask ná£o detectado! Por favor, instale a extensá£o.');
+    throw new Error('MetaMask não detectado! Por favor, instale a extensão.');
     }
 
     try {
@@ -144,14 +144,14 @@ async function connectMetaMask() {
         
         throw new Error('Nenhuma conta encontrada');
     } catch (error) {
-        console.error('âŒ Erro ao conectar MetaMask:', error);
+    console.error('❌ Erro ao conectar MetaMask:', error);
         throw error;
     }
 }
 
 // ==================== EXPORTS GLOBAIS ====================
 
-// Torna as funá§áµes disponá­veis globalmente
+// Torna as funções disponíveis globalmente
 window.TokenGlobal = {
     rpcFallbacks,
     formatarNumero,
@@ -161,7 +161,7 @@ window.TokenGlobal = {
     connectMetaMask
 };
 
-console.log('Ž¯ [TOKEN-GLOBAL] Má³dulo carregado - Funá§áµes disponá­veis globalmente');
+console.log('[TOKEN-GLOBAL] Módulo carregado - Funções disponíveis globalmente');
 
 
 

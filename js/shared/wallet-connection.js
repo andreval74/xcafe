@@ -1,18 +1,18 @@
 ﻿/**
- * Má³dulo compartilhado para gerenciar conexá£o com a carteira
- * Este má³dulo pode ser importado por qualquer pá¡gina que precise de conexá£o com MetaMask
+ * Módulo compartilhado para gerenciar conexão com a carteira
+ * Este módulo pode ser importado por qualquer página que precise de conexão com MetaMask
  */
 
 import { connectMetaMask, listenMetaMask } from '../add-metamask.js';
 import { detectCurrentNetwork, updateNetworkInfo } from '../network-manager.js';
 
-// Estado do provider e da conexá£o
+// Estado do provider e da conexão
 let currentProvider = null;
 let isConnecting = false;
 
 /**
- * Atualiza a interface de conexá£o com o status atual
- * @param {string} status - Status da conexá£o ('connecting', 'connected', 'error', etc.)
+ * Atualiza a interface de conexão com o status atual
+ * @param {string} status - Status da conexão ('connecting', 'connected', 'error', etc.)
  */
 function updateConnectionInterface(status = '') {
     const connectionSection = document.querySelector('.connection-section');
@@ -22,7 +22,7 @@ function updateConnectionInterface(status = '') {
     const currentNetworkSpan = document.getElementById('current-network');
     const networkInfoSection = document.getElementById('network-info-section');
 
-    console.log('”„ Atualizando interface de conexá£o com status:', status);
+    console.log('Atualizando interface de conexão com status:', status);
 
     // Remove estado de carregamento
     if (connectionSection) {
@@ -32,14 +32,14 @@ function updateConnectionInterface(status = '') {
         }
     }
     
-    // Controla a visibilidade das informaá§áµes de rede
+    // Controla a visibilidade das informações de rede
     if (networkInfoSection) {
         if (status === 'connected') {
             networkInfoSection.style.display = 'block';
-            console.log('… Informaá§áµes de rede mostradas apá³s conexá£o');
+            console.log('Informações de rede mostradas após conexão');
         } else {
             networkInfoSection.style.display = 'none';
-            console.log('”’ Informaá§áµes de rede escondidas - ná£o conectado');
+            console.log('Informações de rede escondidas - não conectado');
         }
     }
     
@@ -51,16 +51,16 @@ function updateConnectionInterface(status = '') {
                 walletStatus.classList.remove('wallet-status-connected');
                 break;
             case 'connected':
-                // Busca o endereá§o completo da carteira
+                // Busca o endereço completo da carteira
                 if (ownerInput && ownerInput.value) {
-                    walletStatus.value = ownerInput.value; // Endereá§o completo
+                    walletStatus.value = ownerInput.value; // Endereço completo
                 } else {
                     walletStatus.value = 'Carteira conectada com sucesso!';
                 }
                 walletStatus.classList.add('wallet-status-connected');
                 break;
             case 'error':
-                walletStatus.value = 'Erro na conexá£o. Tente novamente.';
+                walletStatus.value = 'Erro na conexão. Tente novamente.';
                 walletStatus.classList.remove('wallet-status-connected');
                 break;
             default:
@@ -70,27 +70,27 @@ function updateConnectionInterface(status = '') {
         console.log('… Wallet status atualizado:', walletStatus.value);
     }
 
-    // Se houver um campo de proprietá¡rio, atualiza ele tambá©m
+    // Se houver um campo de proprietário, atualiza ele também
     if (ownerInput && ownerInput.value) {
         ownerInput.classList.add('filled');
     }
 
-    // Atualiza o span da rede se disponá­vel (sá³ quando conectado)
+    // Atualiza o span da rede se disponível (só quando conectado)
     if (currentNetworkSpan && status === 'connected') {
-        // A rede será¡ atualizada pela funá§á£o updateNetworkInfo do network-manager
+    // A rede será atualizada pela função updateNetworkInfo do network-manager
         console.log('… Preparado para atualizaá§á£o da rede via network-manager');
     } else if (currentNetworkSpan && status !== 'connected') {
-        // Limpa a rede quando ná£o conectado
+    // Limpa a rede quando não conectado
         currentNetworkSpan.textContent = '-';
     }
 
-    // Atualiza botá£o
+    // Atualiza botão
     if (btnConectar) {
         if (status === 'connected') {
             btnConectar.innerHTML = '<i class="bi bi-check-circle"></i> CONECTADO';
             btnConectar.disabled = true;
             btnConectar.className = 'btn btn-success';
-            console.log('… Botá£o marcado como conectado');
+            console.log('Botão marcado como conectado');
         } else if (status === 'connecting') {
             btnConectar.innerHTML = '<i class="spinner-border spinner-border-sm"></i> CONECTANDO...';
             btnConectar.disabled = true;
@@ -104,17 +104,17 @@ function updateConnectionInterface(status = '') {
 }
 
 /**
- * Inicializa o componente de conexá£o da carteira
+ * Inicializa o componente de conexão da carteira
  * Corrige o problema de speculation rule inserindo o HTML de forma segura
  */
 async function setupWalletConnection() {
     try {
-        console.log('”— Configurando conexá£o da carteira...');
+    console.log('Configurando conexão da carteira...');
         
         // Procura pelo local onde o template deve ser injetado
         const connectionSection = document.querySelector('.connection-section');
         if (!connectionSection) {
-            console.warn('âš ï¸ Seá§á£o de conexá£o ná£o encontrada na pá¡gina');
+            console.warn('⚠️ Seção de conexão não encontrada na página');
             return;
         }
 

@@ -5,13 +5,75 @@
 import { fallbackNetworks } from './networks-fallback.js';
 import { fetchTokenData } from './token-global.js';
 
+
+// Mostra mensagem visual de fallback
+function showNetworkFallbackMessage(tipo) {
+  let msg = '';
+  if (tipo === 'localStorage') {
+    msg = '⚠️ Usando lista de redes salva localmente (pode estar desatualizada).';
+  } else if (tipo === 'fallback') {
+    msg = '⚠️ Usando lista mínima de redes (offline).';
+  }
+  let el = document.getElementById('networkFallbackMsg');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'networkFallbackMsg';
+    el.className = 'alert alert-warning my-2';
+    const parent = document.querySelector('main') || document.body;
+    parent.prepend(el);
+  }
+  el.textContent = msg;
+}
+
 export async function fetchAllNetworks() {
+  // 1. Tenta chains.json local
   try {
-    const res = await fetch('https://chainid.network/chains.json');
+    const res = await fetch('./chains.json');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        // Remove mensagem de fallback se existir
+        const el = document.getElementById('networkFallbackMsg');
+        if (el) el.remove();
+        return data;
+      }
+    }
+  } catch (e) { /* ignora erro de arquivo local */ }
+
+  // 2. Tenta API online e atualiza chains.json/localStorage
+  const apiUrl = 'https://chainid.network/chains.json';
+  try {
+    const res = await fetch(apiUrl);
     if (!res.ok) throw new Error('Erro ao buscar redes online');
-    return await res.json();
+    const data = await res.json();
+    // Salva no localStorage para uso offline futuro
+    try {
+      localStorage.setItem('xcafe_networks_cache', JSON.stringify({ts: Date.now(), data}));
+    } catch (e) { /* ignore quota errors */ }
+    // Atualiza chains.json local via API (se rodando localmente, pode não funcionar em produção)
+    try {
+      fetch('./chains.json', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch (e) { /* ignore */ }
+    // Remove mensagem de fallback se existir
+    const el = document.getElementById('networkFallbackMsg');
+    if (el) el.remove();
+    return data;
   } catch (e) {
-    console.warn('Usando lista local de redes (fallback)');
+    // 3. Tenta cache localStorage
+    try {
+      const cache = localStorage.getItem('xcafe_networks_cache');
+      if (cache) {
+        const obj = JSON.parse(cache);
+        showNetworkFallbackMessage('localStorage');
+        return obj.data;
+      }
+    } catch (e2) { /* ignore */ }
+    // 4. Fallback mínimo
+    showNetworkFallbackMessage('fallback');
     return fallbackNetworks;
   }
 }
@@ -54,7 +116,7 @@ export function shareLink(elementId, text = 'Adicione este token à carteira') {
   if (navigator.share) {
     navigator.share({ text, url: link });
   } else {
-    alert('Compartilhamento direto não suportado neste navegador.');
+  alert('Compartilhamento direto não suportado neste navegador.');
   }
 }
 
