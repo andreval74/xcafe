@@ -1,3 +1,42 @@
+// Checa e baixa chains.json atualizado a cada 5 dias (432000000 ms)
+export async function autoUpdateChainsJson() {
+  const API_URL = 'https://chainid.network/chains.json';
+  const LOCAL_KEY = 'xcafe_chainsjson_lastupdate';
+  const now = Date.now();
+  let lastUpdate = 0;
+  try {
+    lastUpdate = parseInt(localStorage.getItem(LOCAL_KEY) || '0', 10);
+  } catch (e) {}
+  if (now - lastUpdate < 432000000) return; // menos de 5 dias
+  try {
+    const [apiRes, localRes] = await Promise.all([
+      fetch(API_URL),
+      fetch('./chains.json')
+    ]);
+    if (!apiRes.ok || !localRes.ok) return;
+    const [apiData, localData] = await Promise.all([
+      apiRes.text(),
+      localRes.text()
+    ]);
+    if (apiData !== localData) {
+      // Força download automático do novo arquivo
+      const blob = new Blob([apiData], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chains.json';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 1000);
+      alert('Arquivo chains.json atualizado! Salve o novo arquivo para garantir as redes mais recentes.');
+    }
+    localStorage.setItem(LOCAL_KEY, now.toString());
+  } catch (e) {}
+}
 // js/shared/token-link-utils.js
 // Funções utilitárias para geração de link de token, autocomplete de redes, busca de token, copiar/compartilhar link
 
@@ -25,8 +64,9 @@ function showNetworkFallbackMessage(tipo) {
   el.textContent = msg;
 }
 
+
 export async function fetchAllNetworks() {
-  // 1. Tenta chains.json local
+  // Sempre usa chains.json local
   try {
     const res = await fetch('./chains.json');
     if (res.ok) {
@@ -36,45 +76,17 @@ export async function fetchAllNetworks() {
         const el = document.getElementById('networkFallbackMsg');
         if (el) el.remove();
         return data;
+      } else {
+        showNetworkFallbackMessage('fallback');
+        return [];
       }
+    } else {
+      showNetworkFallbackMessage('fallback');
+      return [];
     }
-  } catch (e) { /* ignora erro de arquivo local */ }
-
-  // 2. Tenta API online e atualiza chains.json/localStorage
-  const apiUrl = 'https://chainid.network/chains.json';
-  try {
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error('Erro ao buscar redes online');
-    const data = await res.json();
-    // Salva no localStorage para uso offline futuro
-    try {
-      localStorage.setItem('xcafe_networks_cache', JSON.stringify({ts: Date.now(), data}));
-    } catch (e) { /* ignore quota errors */ }
-    // Atualiza chains.json local via API (se rodando localmente, pode não funcionar em produção)
-    try {
-      fetch('./chains.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-    } catch (e) { /* ignore */ }
-    // Remove mensagem de fallback se existir
-    const el = document.getElementById('networkFallbackMsg');
-    if (el) el.remove();
-    return data;
   } catch (e) {
-    // 3. Tenta cache localStorage
-    try {
-      const cache = localStorage.getItem('xcafe_networks_cache');
-      if (cache) {
-        const obj = JSON.parse(cache);
-        showNetworkFallbackMessage('localStorage');
-        return obj.data;
-      }
-    } catch (e2) { /* ignore */ }
-    // 4. Fallback mínimo
     showNetworkFallbackMessage('fallback');
-    return fallbackNetworks;
+    return [];
   }
 }
 
