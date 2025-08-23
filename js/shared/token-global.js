@@ -53,7 +53,7 @@ function formatarNumero(numero) {
 /**
  * Obtá©m dados do token usando Web3/Ethers
  */
-async function fetchTokenData(tokenAddress, provider) {
+export async function fetchTokenData(tokenAddress, provider) {
     try {
         const abi = [
             "function name() view returns (string)",
