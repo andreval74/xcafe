@@ -1,4 +1,4 @@
-// js/shared/link-generator-core.js
+// js/shared/link-index-core.js
 // Centraliza toda a lógica de geração de link de token para todas as telas
 import { fetchAllNetworks, showAutocomplete, copyToClipboard, shareLink, showCopyAndShareButtons } from './token-link-utils.js';
 import { fetchTokenData } from './token-global.js';
@@ -85,27 +85,62 @@ export function setupLinkGenerator({
       alert('Selecione uma rede válida antes de gerar o link!');
       return;
     }
+    
+    // Validar campos obrigatórios
+    const tokenAddress = document.getElementById(tokenAddressId).value.trim();
+    const tokenSymbol = document.getElementById(tokenSymbolId).value.trim();
+    const tokenDecimals = document.getElementById(tokenDecimalsId).value.trim();
+    
+    if (!tokenAddress) {
+      alert('⚠️ Informe o endereço do token.');
+      return;
+    }
+    
+    if (!tokenSymbol) {
+      alert('⚠️ Informe o símbolo do token.');
+      return;
+    }
+    
+    if (!tokenDecimals) {
+      alert('⚠️ Informe os decimais do token.');
+      return;
+    }
+    
     const data = {
-      chainId: selectedNetwork.chainId,
-      chainName: selectedNetwork.name,
-      rpcUrl: document.getElementById(rpcUrlId).value,
-      blockExplorer: document.getElementById(blockExplorerId).value,
-      nativeCurrency: document.getElementById(nativeCurrencyId).value,
-      nativeDecimals: document.getElementById(nativeDecimalsId).value,
-      tokenAddress: document.getElementById(tokenAddressId).value,
-      tokenSymbol: document.getElementById(tokenSymbolId).value,
-      tokenDecimals: document.getElementById(tokenDecimalsId).value,
-      tokenImage: document.getElementById(tokenImageId).value,
-      tokenName: document.getElementById(tokenNameId) ? document.getElementById(tokenNameId).value : '',
-      networkName: document.getElementById(networkSearchId) ? document.getElementById(networkSearchId).value : ''
+      type: 'ERC20',
+      options: {
+        address: tokenAddress,
+        symbol: tokenSymbol,
+        decimals: parseInt(tokenDecimals),
+        image: document.getElementById(tokenImageId).value || ''
+      }
     };
-    const link = `https://metamask.app.link/dapp/seusite.com/addtoken?${new URLSearchParams(data).toString()}`;
+    
+    // Gerar link no formato MetaMask wallet_addEthereumChain
+    const params = new URLSearchParams({
+      chainId: `0x${selectedNetwork.chainId.toString(16)}`,
+      chainName: selectedNetwork.name,
+      rpcUrls: selectedNetwork.rpc[0],
+      nativeCurrency: JSON.stringify(selectedNetwork.nativeCurrency),
+      blockExplorerUrls: selectedNetwork.explorers ? selectedNetwork.explorers[0].url : '',
+      tokenAddress: tokenAddress,
+      tokenSymbol: tokenSymbol,
+      tokenDecimals: tokenDecimals,
+      tokenImage: document.getElementById(tokenImageId).value || ''
+    });
+    
+    const link = `https://metamask.app.link/add-token?${params.toString()}`;
     document.getElementById(generatedLinkId).value = link;
     if (generatedLinkContainerId && document.getElementById(generatedLinkContainerId)) {
       document.getElementById(generatedLinkContainerId).style.display = 'block';
     }
     showCopyAndShareButtons(btnCopyLinkId, btnShareLinkId, true);
-    if (onLinkGenerated) onLinkGenerated(link, data);
+    if (onLinkGenerated) onLinkGenerated(link, {
+      tokenAddress: tokenAddress,
+      tokenSymbol: tokenSymbol,
+      tokenDecimals: tokenDecimals,
+      network: selectedNetwork
+    });
   }
 
   function clearForm() {
