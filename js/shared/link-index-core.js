@@ -27,9 +27,13 @@ export function setupLinkGenerator({
 } = {}) {
   let allNetworks = [];
   let selectedNetwork = null;
+  
+  // Tornar selectedNetwork globalmente acessível
+  window.selectedNetwork = null;
 
   function selectNetwork(network) {
     selectedNetwork = network;
+    window.selectedNetwork = network; // Atualizar variável global também
     document.getElementById(rpcUrlId).value = network.rpc[0];
     document.getElementById(blockExplorerId).value = network.explorers ? network.explorers[0].url : '';
     
@@ -196,7 +200,8 @@ if (typeof ethereum !== 'undefined') {
               <i class="bi bi-1-circle"></i> <strong>Método 1: Botão Direto (Recomendado)</strong>
             </label>
             <button class="btn btn-primary w-100 mb-2" onclick="addTokenToMetaMask('${tokenAddress}', '${tokenSymbol}', ${parseInt(tokenDecimals)}, '${tokenData.image || ''}')">
-              <i class="bi bi-fox"></i> Adicionar Token ao MetaMask
+              <i class="bi bi-fox"></i> Adicionar Token ao MetaMask 
+              <small class="d-block">⚡ Adiciona automaticamente a rede ${selectedNetwork.name} se necessário</small>
             </button>
           </div>
           
@@ -250,11 +255,21 @@ if (typeof ethereum !== 'undefined') {
             <i class="bi bi-info-circle"></i>
             <strong>Como usar:</strong>
             <ul class="mb-0 mt-2">
-              <li><strong>Método 1:</strong> Clique no botão azul (mais fácil)</li>
+              <li><strong>Método 1:</strong> Clique no botão azul - adiciona automaticamente a rede e o token</li>
               <li><strong>Método 2:</strong> Para desenvolvedores - cole no console</li>
               <li><strong>Método 3:</strong> Para dispositivos móveis</li>
               <li><strong>Método 4:</strong> Copie o endereço e adicione manualmente</li>
             </ul>
+            
+            <div class="alert alert-info mt-2 mb-0">
+              <i class="bi bi-lightbulb"></i>
+              <strong>Novo:</strong> O botão azul agora detecta automaticamente se você está na rede correta e:
+              <ul class="mb-0 mt-1">
+                <li>✅ Muda para a rede correta se você já tem ela</li>
+                <li>✅ Adiciona a rede se você não tem ela</li>
+                <li>✅ Adiciona o token depois que a rede está configurada</li>
+              </ul>
+            </div>
           </div>
           
           <div class="alert alert-warning mt-2">
@@ -309,6 +324,7 @@ if (typeof ethereum !== 'undefined') {
       document.getElementById(generatedLinkContainerId).style.display = 'none';
     }
     selectedNetwork = null;
+    window.selectedNetwork = null; // Limpar variável global também
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
@@ -377,6 +393,67 @@ window.copyToClipboard = function(elementId) {
 window.addTokenToMetaMask = async function(address, symbol, decimals, image = '') {
   if (typeof window.ethereum !== 'undefined') {
     try {
+      // Verificar se temos uma rede selecionada
+      if (!window.selectedNetwork) {
+        alert('❌ Por favor, selecione uma rede primeiro.');
+        return;
+      }
+      
+      // Primeiro: verificar/adicionar a rede se necessário
+      const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+      const requiredChainId = `0x${window.selectedNetwork.chainId.toString(16)}`;
+      
+      if (currentChainId !== requiredChainId) {
+        console.log(`Rede atual: ${currentChainId}, Rede necessária: ${requiredChainId}`);
+        
+        try {
+          // Tentar mudar para a rede necessária
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: requiredChainId }],
+          });
+          
+          console.log('✅ Rede alterada com sucesso');
+        } catch (switchError) {
+          // Se a rede não existe, adicionar ela
+          if (switchError.code === 4902) {
+            console.log('🔗 Rede não encontrada, adicionando...');
+            
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: requiredChainId,
+                  chainName: window.selectedNetwork.name,
+                  nativeCurrency: {
+                    name: window.selectedNetwork.nativeCurrency.symbol,
+                    symbol: window.selectedNetwork.nativeCurrency.symbol,
+                    decimals: window.selectedNetwork.nativeCurrency.decimals
+                  },
+                  rpcUrls: window.selectedNetwork.rpc,
+                  blockExplorerUrls: window.selectedNetwork.explorers ? [window.selectedNetwork.explorers[0].url] : null
+                }]
+              });
+              
+              console.log('✅ Rede adicionada e selecionada com sucesso');
+            } catch (addError) {
+              console.error('❌ Erro ao adicionar rede:', addError);
+              alert(`❌ Erro ao adicionar rede ${window.selectedNetwork.name}: ${addError.message}`);
+              return;
+            }
+          } else {
+            console.error('❌ Erro ao trocar rede:', switchError);
+            alert(`❌ Erro ao trocar para rede ${window.selectedNetwork.name}: ${switchError.message}`);
+            return;
+          }
+        }
+      }
+      
+      // Aguardar um pouco para a rede se estabilizar
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Segundo: adicionar o token
+      console.log('🪙 Adicionando token...');
       const wasAdded = await window.ethereum.request({
         method: 'wallet_watchAsset',
         params: {
@@ -391,7 +468,7 @@ window.addTokenToMetaMask = async function(address, symbol, decimals, image = ''
       });
 
       if (wasAdded) {
-        alert('✅ Token adicionado ao MetaMask com sucesso!');
+        alert(`✅ Token ${symbol} adicionado ao MetaMask com sucesso na rede ${window.selectedNetwork.name}!`);
       } else {
         alert('❌ Token não foi adicionado. Verifique se você confirmou a ação no MetaMask.');
       }
@@ -406,14 +483,17 @@ window.addTokenToMetaMask = async function(address, symbol, decimals, image = ''
   } else {
     alert('❌ MetaMask não foi detectado! Instale o MetaMask ou use outro método.');
     // Fallback: mostrar instruções manuais
+    const networkInfo = window.selectedNetwork || { name: 'Desconhecida', chainId: '?', rpc: ['?'] };
     const tokenInfo = `
 Adicione manualmente:
-Endereço: ${address}
+Rede: ${networkInfo.name} (Chain ID: ${networkInfo.chainId})
+RPC: ${networkInfo.rpc[0]}
+Endereço do Token: ${address}
 Símbolo: ${symbol}
 Decimais: ${decimals}
 ${image ? 'Imagem: ' + image : ''}
     `;
-    if (confirm('MetaMask não detectado. Copiar informações do token?')) {
+    if (confirm('MetaMask não detectado. Copiar informações completas?')) {
       navigator.clipboard.writeText(tokenInfo).then(() => {
         alert('✅ Informações copiadas! Cole no seu aplicativo de carteira.');
       }).catch(() => {
