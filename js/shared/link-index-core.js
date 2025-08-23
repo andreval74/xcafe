@@ -116,23 +116,160 @@ export function setupLinkGenerator({
       }
     };
     
-    // Gerar link no formato MetaMask wallet_addEthereumChain
-    const params = new URLSearchParams({
-      chainId: `0x${selectedNetwork.chainId.toString(16)}`,
-      chainName: selectedNetwork.name,
-      rpcUrls: selectedNetwork.rpc[0],
-      nativeCurrency: JSON.stringify(selectedNetwork.nativeCurrency),
-      blockExplorerUrls: selectedNetwork.explorers ? selectedNetwork.explorers[0].url : '',
-      tokenAddress: tokenAddress,
-      tokenSymbol: tokenSymbol,
-      tokenDecimals: tokenDecimals,
-      tokenImage: document.getElementById(tokenImageId).value || ''
-    });
+    // Gerar links funcionais para diferentes wallets
+    const chainIdHex = `0x${selectedNetwork.chainId.toString(16)}`;
+    const tokenData = {
+      address: tokenAddress,
+      symbol: tokenSymbol,
+      decimals: parseInt(tokenDecimals),
+      image: document.getElementById(tokenImageId).value || ''
+    };
     
-    const link = `https://metamask.app.link/add-token?${params.toString()}`;
-    document.getElementById(generatedLinkId).value = link;
-    if (generatedLinkContainerId && document.getElementById(generatedLinkContainerId)) {
-      document.getElementById(generatedLinkContainerId).style.display = 'block';
+    // Formato 1: MetaMask - Método wallet_watchAsset
+    const metamaskData = {
+      type: 'ERC20',
+      options: {
+        address: tokenAddress,
+        symbol: tokenSymbol,
+        decimals: parseInt(tokenDecimals),
+        image: tokenData.image || ''
+      }
+    };
+    
+    // Link JavaScript para MetaMask (esse é o que realmente funciona)
+    const metamaskLink = `javascript:if(typeof ethereum !== 'undefined'){ethereum.request({method: 'wallet_watchAsset', params: {type: 'ERC20', options: {address: '${tokenAddress}', symbol: '${tokenSymbol}', decimals: ${parseInt(tokenDecimals)}, image: '${tokenData.image || ''}'}}}).catch(console.error);}else{alert('MetaMask não detectado!');}`;
+    
+    // Formato 2: Deep Link para mobile wallets
+    const mobileDeepLink = `https://metamask.app.link/send/${tokenAddress}@${selectedNetwork.chainId}`;
+    
+    // Formato 3: Web3 Modal format 
+    const web3Link = `ethereum:${tokenAddress}@${selectedNetwork.chainId}/transfer`;
+    
+    // Formato 4: Link direto no explorador de blocos com instrução
+    const explorerLink = selectedNetwork.explorers ? `${selectedNetwork.explorers[0].url}/token/${tokenAddress}` : `https://etherscan.io/token/${tokenAddress}`;
+    
+    // Formato 5: Código JavaScript para copiar e executar
+    const jsCode = `
+// Cole este código no console do navegador (F12 > Console)
+if (typeof ethereum !== 'undefined') {
+  ethereum.request({
+    method: 'wallet_watchAsset',
+    params: {
+      type: 'ERC20',
+      options: {
+        address: '${tokenAddress}',
+        symbol: '${tokenSymbol}',
+        decimals: ${parseInt(tokenDecimals)},
+        image: '${tokenData.image || ''}'
+      }
+    }
+  }).then((success) => {
+    if (success) {
+      console.log('Token adicionado com sucesso!');
+    } else {
+      console.log('Token não foi adicionado.');
+    }
+  }).catch((error) => {
+    console.error('Erro ao adicionar token:', error);
+  });
+} else {
+  alert('MetaMask não está instalado!');
+}
+    `.trim();
+    
+    // Link principal (código JS)
+    const mainLink = jsCode;
+    
+    // Exibir o link principal
+    const linkField = document.getElementById(generatedLinkId);
+    linkField.value = mainLink;
+    
+    // Criar seção com métodos funcionais
+    const linkContainer = document.getElementById(generatedLinkContainerId);
+    if (linkContainer) {
+      linkContainer.innerHTML = `
+        <div class="mb-3">
+          <label class="form-label">Métodos para Adicionar o Token:</label>
+          
+          <div class="mb-3">
+            <label class="form-label text-primary">
+              <i class="bi bi-1-circle"></i> <strong>Método 1: Botão Direto (Recomendado)</strong>
+            </label>
+            <button class="btn btn-primary w-100 mb-2" onclick="addTokenToMetaMask('${tokenAddress}', '${tokenSymbol}', ${parseInt(tokenDecimals)}, '${tokenData.image || ''}')">
+              <i class="bi bi-fox"></i> Adicionar Token ao MetaMask
+            </button>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label text-success">
+              <i class="bi bi-2-circle"></i> <strong>Método 2: Código JavaScript (Console)</strong>
+            </label>
+            <div class="alert alert-info">
+              <small>1. Abra o console do navegador (F12 > Console)<br>
+              2. Cole o código abaixo e pressione Enter</small>
+            </div>
+            <div class="input-group mb-2">
+              <textarea class="form-control" readonly rows="3" id="jsCodeArea">${jsCode}</textarea>
+              <button class="btn btn-outline-secondary" onclick="copyToClipboard('jsCodeArea')" type="button">
+                <i class="bi bi-clipboard"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label text-info">
+              <i class="bi bi-3-circle"></i> <strong>Método 3: Deep Link Mobile</strong>
+            </label>
+            <div class="input-group mb-2">
+              <input class="form-control" readonly value="${mobileDeepLink}" id="mobileDeepLink" />
+              <button class="btn btn-outline-secondary" onclick="copyToClipboard('mobileDeepLink')" type="button">
+                <i class="bi bi-clipboard"></i>
+              </button>
+              <button class="btn btn-outline-primary" onclick="window.open('${mobileDeepLink}', '_blank')" type="button">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label text-warning">
+              <i class="bi bi-4-circle"></i> <strong>Método 4: Manual (Explorador)</strong>
+            </label>
+            <div class="input-group mb-2">
+              <input class="form-control" readonly value="${explorerLink}" id="explorerLink" />
+              <button class="btn btn-outline-secondary" onclick="copyToClipboard('explorerLink')" type="button">
+                <i class="bi bi-clipboard"></i>
+              </button>
+              <button class="btn btn-outline-warning" onclick="window.open('${explorerLink}', '_blank')" type="button">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="alert alert-success mt-3">
+            <i class="bi bi-info-circle"></i>
+            <strong>Como usar:</strong>
+            <ul class="mb-0 mt-2">
+              <li><strong>Método 1:</strong> Clique no botão azul (mais fácil)</li>
+              <li><strong>Método 2:</strong> Para desenvolvedores - cole no console</li>
+              <li><strong>Método 3:</strong> Para dispositivos móveis</li>
+              <li><strong>Método 4:</strong> Copie o endereço e adicione manualmente</li>
+            </ul>
+          </div>
+          
+          <div class="alert alert-warning mt-2">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Informações do Token:</strong><br>
+            <small>
+              <strong>Endereço:</strong> ${tokenAddress}<br>
+              <strong>Símbolo:</strong> ${tokenSymbol}<br>
+              <strong>Decimais:</strong> ${parseInt(tokenDecimals)}<br>
+              <strong>Rede:</strong> ${selectedNetwork.name} (${selectedNetwork.chainId})
+            </small>
+          </div>
+        </div>
+      `;
+      linkContainer.style.display = 'block';
     }
     showCopyAndShareButtons(btnCopyLinkId, btnShareLinkId, true);
     if (onLinkGenerated) onLinkGenerated(link, {
@@ -203,3 +340,85 @@ export function setupLinkGenerator({
     });
   });
 }
+
+// Função global para copiar links individuais
+window.copyToClipboard = function(elementId) {
+  const el = document.getElementById(elementId);
+  if (el) {
+    el.select();
+    el.setSelectionRange(0, 99999); // Para dispositivos móveis
+    navigator.clipboard.writeText(el.value).then(() => {
+      // Feedback visual
+      const button = el.nextElementSibling;
+      if (button) {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i>';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-secondary');
+        }, 1500);
+      }
+    }).catch(() => {
+      // Fallback para navegadores mais antigos
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        alert('Não foi possível copiar automaticamente. Selecione e copie manualmente.');
+      }
+    });
+  }
+};
+
+// Função global para adicionar token diretamente ao MetaMask
+window.addTokenToMetaMask = async function(address, symbol, decimals, image = '') {
+  if (typeof window.ethereum !== 'undefined') {
+    try {
+      const wasAdded = await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: address,
+            symbol: symbol,
+            decimals: decimals,
+            image: image
+          }
+        }
+      });
+
+      if (wasAdded) {
+        alert('✅ Token adicionado ao MetaMask com sucesso!');
+      } else {
+        alert('❌ Token não foi adicionado. Verifique se você confirmou a ação no MetaMask.');
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar token:', error);
+      if (error.code === 4001) {
+        alert('❌ Usuário rejeitou a solicitação.');
+      } else {
+        alert('❌ Erro ao adicionar token: ' + error.message);
+      }
+    }
+  } else {
+    alert('❌ MetaMask não foi detectado! Instale o MetaMask ou use outro método.');
+    // Fallback: mostrar instruções manuais
+    const tokenInfo = `
+Adicione manualmente:
+Endereço: ${address}
+Símbolo: ${symbol}
+Decimais: ${decimals}
+${image ? 'Imagem: ' + image : ''}
+    `;
+    if (confirm('MetaMask não detectado. Copiar informações do token?')) {
+      navigator.clipboard.writeText(tokenInfo).then(() => {
+        alert('✅ Informações copiadas! Cole no seu aplicativo de carteira.');
+      }).catch(() => {
+        alert(tokenInfo);
+      });
+    }
+  }
+};
