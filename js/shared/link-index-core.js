@@ -665,7 +665,7 @@ INSTRUÇÕES MANUAIS:
 };
 
 // Função para gerar QR Code com informações do token
-window.generateTokenQR = function(tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
+window.generateTokenQR = async function(tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
   const container = document.getElementById('qrCodeContainer');
   const qrDiv = document.getElementById('qrCodeDiv');
   
@@ -697,59 +697,78 @@ window.generateTokenQR = function(tokenAddress, tokenSymbol, tokenDecimals, toke
   
   const qrText = JSON.stringify(tokenData);
   
-  console.log('🔍 Verificando biblioteca QRCode...', typeof QRCode);
-  console.log('📄 Dados do QR:', qrText);
-  
-  // Tentar múltiplos métodos para gerar o QR Code
-  setTimeout(() => {
-    // Método 1: Tentar biblioteca QRCode.js
-    if (typeof QRCode !== 'undefined') {
-      console.log('✅ Usando biblioteca QRCode.js');
-      
-      try {
-        // Limpar conteúdo
-        qrDiv.innerHTML = '';
-        
-        // Criar canvas
-        const canvas = document.createElement('canvas');
-        qrDiv.appendChild(canvas);
-        
-        QRCode.toCanvas(canvas, qrText, {
-          width: 256,
-          margin: 2,
-          color: {
-            dark: '#000000',
-            light: '#FFFFFF'
-          },
-          errorCorrectionLevel: 'M'
-        }, function (error) {
-          if (error) {
-            console.error('❌ Erro ao gerar QR Code:', error);
-            generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
-          } else {
-            console.log('✅ QR Code gerado com sucesso!');
-            canvas.style.border = '2px solid #28a745';
-            canvas.style.borderRadius = '8px';
-            canvas.style.maxWidth = '100%';
-            addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
-          }
-        });
-        
-      } catch (error) {
-        console.error('❌ Erro na biblioteca QRCode:', error);
-        generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
-      }
-      
-    } else {
-      console.warn('⚠️ Biblioteca QRCode não carregada, usando fallback');
-      generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
-    }
-  }, 100);
+  console.log('� Dados do QR:', qrText);
   
   // Mostrar container
   container.style.display = 'block';
   container.scrollIntoView({ behavior: 'smooth' });
+  
+  // Tentar aguardar carregamento da biblioteca
+  try {
+    console.log('⏳ Aguardando biblioteca QRCode...');
+    
+    // Se window.qrCodeReady existe, aguardar
+    if (window.qrCodeReady) {
+      await window.qrCodeReady;
+    }
+    
+    // Verificar novamente se está disponível
+    if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
+      console.log('✅ Usando biblioteca QRCode.js');
+      await generateCanvasQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+    } else {
+      console.warn('⚠️ Biblioteca não disponível, usando API externa');
+      generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao aguardar biblioteca:', error);
+    console.log('🔄 Usando API externa como fallback');
+    generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+  }
 };
+
+// Função para gerar QR Code usando biblioteca (canvas)
+async function generateCanvasQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Limpar conteúdo
+      qrDiv.innerHTML = '';
+      
+      // Criar canvas
+      const canvas = document.createElement('canvas');
+      qrDiv.appendChild(canvas);
+      
+      QRCode.toCanvas(canvas, qrText, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        },
+        errorCorrectionLevel: 'M'
+      }, function (error) {
+        if (error) {
+          console.error('❌ Erro ao gerar QR Code:', error);
+          generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+          reject(error);
+        } else {
+          console.log('✅ QR Code gerado com sucesso via canvas!');
+          canvas.style.border = '2px solid #28a745';
+          canvas.style.borderRadius = '8px';
+          canvas.style.maxWidth = '100%';
+          addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+          resolve();
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ Erro na biblioteca QRCode:', error);
+      generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+      reject(error);
+    }
+  });
+}
 
 // Função para gerar QR Code usando API externa (fallback)
 function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
