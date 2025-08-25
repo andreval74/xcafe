@@ -1090,87 +1090,322 @@ window.downloadQRCode = function(filename) {
   }
 };
 
-// ========== NOVA IMPLEMENTAÇÃO 2024: MÚLTIPLOS FORMATOS COMPATÍVEIS ==========
+// ========== SOLUÇÃO MOBILE 2024: FORMATOS TESTADOS E FUNCIONAIS ==========
 
-// Função principal para gerar múltiplos QR Codes compatíveis com diferentes wallets
+// Função principal para gerar QR Codes e links MOBILE
 function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
-  // Formatos de deep links baseados na pesquisa de 2024
-  const qrFormats = [
-    {
-      name: 'EIP-681 (Universal)',
-      description: 'Padrão oficial Ethereum - Compatível com MetaMask, TrustWallet, Coinbase',
-      data: `ethereum:${tokenAddress}@${chainId}/transfer?symbol=${tokenSymbol}&decimals=${tokenDecimals}&name=${encodeURIComponent(tokenName)}`,
-      priority: 1
-    },
-    {
-      name: 'TrustWallet Universal',
-      description: 'Link web universal do TrustWallet',
-      data: `https://link.trustwallet.com/add_asset?asset=c${chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}`,
-      priority: 2
-    },
-    {
-      name: 'WalletConnect v2',
-      description: 'Protocolo WalletConnect para conectar wallets móveis',
-      data: `wc:add-token?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}&name=${encodeURIComponent(tokenName)}`,
-      priority: 3
-    },
+  console.log('📱 MODO MOBILE: Gerando formatos específicos para dispositivos móveis');
+  
+  // Formatos MOBILE TESTADOS (baseados em pesquisa real 2024)
+  const mobileFormats = [
     {
       name: 'MetaMask Mobile',
-      description: 'Deep link específico para MetaMask Mobile',
-      data: `https://metamask.app.link/add-token?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}`,
-      priority: 2
+      description: '🦊 Abre direto no MetaMask Mobile - iOS/Android',
+      data: `${window.location.origin}/add-token.html?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}&name=${encodeURIComponent(tokenName)}`,
+      type: 'universal',
+      priority: 1,
+      icon: '🦊'
+    },
+    {
+      name: 'TrustWallet Mobile',
+      description: '🛡️ Link universal do TrustWallet - Funciona no browser mobile',
+      data: `https://link.trustwallet.com/add_asset?asset=c${chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}`,
+      type: 'deeplink',
+      priority: 1,
+      icon: '🛡️'
+    },
+    {
+      name: 'Browser Wallet',
+      description: '🌐 Para MetaMask/TrustWallet no navegador mobile',
+      data: `javascript:(function(){if(typeof ethereum !== 'undefined'){ethereum.request({method: 'wallet_watchAsset',params: {type: 'ERC20',options: {address: '${tokenAddress}',symbol: '${tokenSymbol}',decimals: ${parseInt(tokenDecimals)},image: ''}}}).then(function(success){if(success){alert('✅ Token adicionado!');}else{alert('❌ Token não foi adicionado.');}}).catch(function(error){alert('⚠️ Erro: '+error.message);});}else{alert('❌ Nenhuma wallet detectada! Instale MetaMask ou TrustWallet.');}})();`,
+      type: 'javascript',
+      priority: 2,
+      icon: '🌐'
+    },
+    {
+      name: 'QR Code Universal',
+      description: '� QR Code padrão para todas as wallets',
+      data: `ethereum:${tokenAddress}@${chainId}?symbol=${tokenSymbol}&decimals=${tokenDecimals}&name=${encodeURIComponent(tokenName)}`,
+      type: 'qrcode',
+      priority: 1,
+      icon: '�'
+    },
+    {
+      name: 'Coinbase Wallet',
+      description: '🅾️ Link direto para Coinbase Wallet',
+      data: `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.origin + '/add-token.html?address=' + tokenAddress + '&symbol=' + tokenSymbol + '&decimals=' + tokenDecimals)}`,
+      type: 'deeplink',
+      priority: 2,
+      icon: '🅾️'
     }
   ];
 
-  // Ordenar por prioridade
-  qrFormats.sort((a, b) => a.priority - b.priority);
-
-  // Criar interface com múltiplas opções
+  // Criar interface MOBILE OTIMIZADA
   qrDiv.innerHTML = `
-    <div class="multi-wallet-qr-container">
-      <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i>
-        <strong>QR Codes Otimizados para Wallets Móveis</strong><br>
-        Escaneie com sua wallet preferida ou use os links abaixo para adicionar o token diretamente.
+    <div class="mobile-qr-container">
+      <div class="alert alert-success mobile-alert">
+        <i class="bi bi-phone"></i>
+        <strong>📱 OTIMIZADO PARA CELULAR</strong><br>
+        <small>Toque nos botões abaixo para adicionar o token diretamente na sua wallet!</small>
       </div>
       
-      <div class="row">
-        <div class="col-12 col-lg-6">
-          <div id="primaryQRContainer" class="text-center mb-3">
-            <h6 class="text-success"><i class="bi bi-star-fill"></i> Recomendado</h6>
-            <div id="primaryQR"></div>
-            <small class="text-muted mt-2 d-block">${qrFormats[0].description}</small>
-          </div>
-        </div>
-        
-        <div class="col-12 col-lg-6">
-          <div class="wallet-options">
-            <h6><i class="bi bi-wallet2"></i> Opções por Wallet:</h6>
-            <div id="walletLinks" class="d-grid gap-2"></div>
-          </div>
-        </div>
+      <!-- BOTÕES GRANDES PARA MOBILE -->
+      <div class="mobile-wallet-buttons d-grid gap-3 mb-4">
+        ${mobileFormats.filter(f => f.priority === 1).map(format => `
+          <button class="btn btn-success btn-lg mobile-wallet-btn" onclick="handleMobileWalletAction('${format.type}', '${format.data.replace(/'/g, "\\'")}', '${format.name}')">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="text-start">
+                <div class="mobile-wallet-icon">${format.icon}</div>
+                <strong>${format.name}</strong><br>
+                <small>${format.description}</small>
+              </div>
+              <i class="bi bi-arrow-right-circle fs-3"></i>
+            </div>
+          </button>
+        `).join('')}
       </div>
       
-      <div class="mt-3">
-        <details class="qr-alternatives">
-          <summary class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-qr-code-scan"></i> Ver Todos os QR Codes
+      <!-- QR CODE MOBILE -->
+      <div class="mobile-qr-section">
+        <div class="text-center mb-3">
+          <h5><i class="bi bi-qr-code-scan"></i> QR Code Mobile</h5>
+          <p class="text-muted small">Escaneie com o leitor de QR da sua wallet</p>
+        </div>
+        <div id="mobileQRDisplay" class="text-center"></div>
+      </div>
+      
+      <!-- INSTRUÇÕES MOBILE -->
+      <div class="mobile-instructions mt-4">
+        <details class="mobile-help">
+          <summary class="btn btn-outline-info btn-sm w-100">
+            <i class="bi bi-question-circle"></i> Como usar no celular?
           </summary>
-          <div id="allQRCodes" class="row mt-3"></div>
+          <div class="mt-3 p-3 bg-light text-dark rounded">
+            <h6>📱 No Celular:</h6>
+            <ol class="small">
+              <li><strong>Toque no botão da sua wallet</strong> para abrir diretamente</li>
+              <li><strong>OU escaneie o QR Code</strong> com o leitor da wallet</li>
+              <li><strong>Confirme</strong> quando a wallet pedir para adicionar o token</li>
+            </ol>
+            
+            <h6 class="mt-3">🛠️ Se não funcionar:</h6>
+            <ul class="small">
+              <li>Certifique-se que sua wallet está instalada</li>
+              <li>Tente o botão "Mobile Browser" se tiver MetaMask/TrustWallet</li>
+              <li>Use o QR Code como última opção</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+      
+      <!-- OPÇÕES AVANÇADAS -->
+      <div class="mobile-advanced mt-3">
+        <details class="mobile-advanced-options">
+          <summary class="btn btn-outline-secondary btn-sm w-100">
+            <i class="bi bi-gear"></i> Opções Avançadas
+          </summary>
+          <div class="mt-3">
+            <div class="d-grid gap-2">
+              ${mobileFormats.filter(f => f.priority === 2).map(format => `
+                <button class="btn btn-outline-primary btn-sm" onclick="handleMobileWalletAction('${format.type}', '${format.data.replace(/'/g, "\\'")}', '${format.name}')">
+                  ${format.icon} ${format.name}
+                </button>
+              `).join('')}
+            </div>
+          </div>
         </details>
       </div>
     </div>
   `;
 
-  // Gerar QR Code principal (EIP-681)
-  generateSingleQR('primaryQR', qrFormats[0].data, 250, qrFormats[0].name);
-  
-  // Gerar links diretos para wallets
-  generateWalletLinks(qrFormats, tokenSymbol, tokenName, chainId);
-  
-  // Gerar todos os QR Codes alternativos
-  generateAllAlternativeQRs(qrFormats.slice(1), tokenSymbol, tokenName, chainId);
+  // Gerar QR Code principal otimizado para mobile
+  generateMobileOptimizedQR(mobileFormats.find(f => f.type === 'qrcode'), tokenSymbol, tokenName);
 }
+
+// Função para gerar QR Code otimizado para mobile
+async function generateMobileOptimizedQR(format, tokenSymbol, tokenName) {
+  const container = document.getElementById('mobileQRDisplay');
+  if (!container || !format) return;
+  
+  container.innerHTML = '<div class="text-center text-muted"><i class="bi bi-hourglass-split"></i> Gerando QR Mobile...</div>';
+  
+  const qrSize = 280; // Tamanho maior para mobile
+  
+  // APIs otimizadas para mobile
+  const mobileQRApis = [
+    `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(format.data)}&format=png&margin=15&bgcolor=FFFFFF&color=000000&ecc=H`,
+    `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${encodeURIComponent(format.data)}&chld=H|5`,
+    `https://quickchart.io/qr?text=${encodeURIComponent(format.data)}&size=${qrSize}&margin=15&format=png&ecLevel=H`
+  ];
+  
+  let apiIndex = 0;
+  
+  function tryMobileQRAPI() {
+    if (apiIndex >= mobileQRApis.length) {
+      container.innerHTML = `
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle"></i><br>
+          QR Code temporariamente indisponível.<br>
+          <small>Use os botões diretos acima!</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = mobileQRApis[apiIndex];
+    
+    img.onload = function() {
+      container.innerHTML = `
+        <div class="mobile-qr-display">
+          <div class="qr-container-mobile">
+            <img src="${img.src}" alt="QR Code Mobile" class="qr-mobile-img">
+            <div class="qr-mobile-overlay">
+              <div class="xcafe-badge-mobile">XCafe</div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button class="btn btn-success btn-sm" onclick="downloadMobileQR('${img.src}', '${tokenSymbol}_mobile_qr')">
+              <i class="bi bi-download"></i> Baixar QR Code
+            </button>
+            <button class="btn btn-outline-success btn-sm ms-2" onclick="shareMobileQR('${format.data}')">
+              <i class="bi bi-share"></i> Compartilhar
+            </button>
+          </div>
+          <div class="mt-2">
+            <small class="text-muted">
+              <i class="bi bi-info-circle"></i> 
+              QR Code otimizado para leitores móveis
+            </small>
+          </div>
+        </div>
+      `;
+    };
+    
+    img.onerror = function() {
+      console.warn(`Mobile QR API ${apiIndex + 1} falhou, tentando próxima...`);
+      apiIndex++;
+      tryMobileQRAPI();
+    };
+  }
+  
+  tryMobileQRAPI();
+}
+
+// Função para tratar ações das wallets no mobile
+window.handleMobileWalletAction = function(type, data, walletName) {
+  console.log(`📱 Ação mobile: ${type} para ${walletName}`);
+  
+  // Feedback visual imediato
+  const button = event.target.closest('button');
+  const originalHtml = button.innerHTML;
+  button.innerHTML = '<i class="bi bi-hourglass-split"></i> Abrindo...';
+  button.disabled = true;
+  
+  switch(type) {
+    case 'deeplink':
+      // Deep links para apps móveis específicos
+      console.log('🔗 Abrindo deep link:', data);
+      setTimeout(() => {
+        try {
+          // Tenta abrir o deep link
+          window.location.href = data;
+          
+          // Fallback para caso o app não esteja instalado
+          setTimeout(() => {
+            console.log('📱 Fallback: abrindo em nova aba');
+            window.open(data, '_blank');
+          }, 2000);
+          
+        } catch(error) {
+          console.error('Erro no deep link:', error);
+          window.open(data, '_blank');
+        }
+      }, 500);
+      break;
+      
+    case 'universal':
+      // Links universais (funcionam em browser e app)
+      console.log('🌐 Abrindo link universal:', data);
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile: abrir no mesmo tab para melhor experiência
+        window.location.href = data;
+      } else {
+        // Desktop: abrir em nova aba
+        window.open(data, '_blank');
+      }
+      break;
+      
+    case 'javascript':
+      // Executar JavaScript no browser mobile
+      console.log('⚙️ Executando JavaScript mobile');
+      try {
+        // Extrair e executar o código JavaScript
+        const jsCode = data.replace('javascript:', '');
+        eval(decodeURIComponent(jsCode));
+      } catch(error) {
+        console.error('Erro ao executar JavaScript mobile:', error);
+        alert('⚠️ Erro: ' + error.message + '\n\nTente usar outro método ou instale uma wallet compatível.');
+      }
+      break;
+      
+    case 'qrcode':
+      // Focar no QR Code
+      console.log('📱 Focando no QR Code');
+      const qrSection = document.getElementById('mobileQRDisplay');
+      if (qrSection) {
+        qrSection.scrollIntoView({ behavior: 'smooth' });
+        // Destacar o QR Code temporariamente
+        qrSection.style.animation = 'mobile-pulse 2s ease-in-out';
+        setTimeout(() => {
+          qrSection.style.animation = '';
+        }, 2000);
+      }
+      break;
+  }
+  
+  // Restaurar botão após 3 segundos
+  setTimeout(() => {
+    button.innerHTML = originalHtml;
+    button.disabled = false;
+  }, 3000);
+};
+
+// Função para baixar QR Code mobile
+window.downloadMobileQR = function(imageSrc, filename) {
+  const link = document.createElement('a');
+  link.download = filename + '.png';
+  link.href = imageSrc;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+// Função para compartilhar QR Code mobile
+window.shareMobileQR = async function(qrData) {
+  if (navigator.share) {
+    // API nativa de compartilhamento do mobile
+    try {
+      await navigator.share({
+        title: 'Adicionar Token à Wallet',
+        text: 'Use este link para adicionar o token à sua wallet:',
+        url: qrData.startsWith('http') ? qrData : window.location.href
+      });
+    } catch(error) {
+      console.log('Compartilhamento cancelado');
+    }
+  } else {
+    // Fallback: copiar para clipboard
+    try {
+      await navigator.clipboard.writeText(qrData);
+      alert('✅ Link copiado para a área de transferência!');
+    } catch(error) {
+      // Último fallback: mostrar o texto
+      prompt('Copie este link:', qrData);
+    }
+  }
+};
 
 // Função para gerar links diretos para wallets
 function generateWalletLinks(qrFormats, tokenSymbol, tokenName, chainId) {

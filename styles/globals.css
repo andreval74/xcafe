@@ -1606,169 +1606,264 @@ EXEMPLO USO WIDGET - STYLES ESPECÍFICOS
 
 /*
 ==========================================================================
-QR CODES MULTI-WALLET INTERFACE - Estilos 2024
+QR CODES MOBILE INTERFACE - Estilos Otimizados para Celular 2024
 ==========================================================================
 */
 
-.multi-wallet-qr-container {
+.mobile-qr-container {
   background: var(--card-bg);
-  border: 2px solid var(--border-color);
+  border: 3px solid var(--bs-success);
+  border-radius: 20px;
+  padding: 25px;
+  margin: 20px 0;
+  box-shadow: 0 10px 30px rgba(40, 167, 69, 0.2);
+}
+
+.mobile-alert {
+  background: linear-gradient(135deg, var(--bs-success), var(--bs-info));
+  border: none;
+  color: white;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  padding: 20px;
+  text-align: center;
+}
+
+/* BOTÕES GRANDES PARA MOBILE */
+.mobile-wallet-btn {
+  background: linear-gradient(135deg, var(--bs-success), var(--bs-info));
+  border: 3px solid transparent;
   border-radius: 15px;
   padding: 20px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-wallet-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(40, 167, 69, 0.4);
+  border-color: var(--bs-warning);
+}
+
+.mobile-wallet-btn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.mobile-wallet-icon {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+/* QR CODE MOBILE */
+.mobile-qr-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed var(--bs-warning);
+  border-radius: 15px;
+  padding: 25px;
   margin: 20px 0;
 }
 
-.multi-wallet-qr-container .alert-info {
-  background: linear-gradient(135deg, var(--bs-info), var(--bs-primary));
-  border: none;
-  color: white;
+.qr-container-mobile {
+  position: relative;
+  display: inline-block;
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.qr-mobile-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
   border-radius: 10px;
 }
 
-#primaryQRContainer {
-  background: rgba(40, 167, 69, 0.1);
-  border: 2px dashed var(--bs-success);
+.qr-mobile-overlay {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}
+
+.xcafe-badge-mobile {
+  background: var(--bs-success);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* INSTRUÇÕES MOBILE */
+.mobile-instructions {
+  background: rgba(59, 130, 246, 0.1);
   border-radius: 15px;
-  padding: 20px;
+  padding: 15px;
+  border: 1px solid var(--bs-info);
+}
+
+.mobile-help summary {
+  cursor: pointer;
+  outline: none;
+  background: var(--bs-info);
+  color: white;
+  border-radius: 10px;
+  padding: 15px;
   transition: all 0.3s ease;
 }
 
-#primaryQRContainer:hover {
-  background: rgba(40, 167, 69, 0.15);
+.mobile-help summary:hover {
+  background: var(--bs-primary);
   transform: translateY(-2px);
 }
 
-.wallet-options {
-  background: rgba(255, 255, 255, 0.05);
+.mobile-help[open] summary {
+  background: var(--bs-success);
+  border-radius: 10px 10px 0 0;
+}
+
+/* OPÇÕES AVANÇADAS */
+.mobile-advanced {
+  background: rgba(107, 114, 128, 0.1);
   border-radius: 15px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border: 1px solid var(--bs-secondary);
 }
 
-.wallet-options h6 {
-  color: var(--bs-warning);
-  border-bottom: 2px solid var(--bs-warning);
-  padding-bottom: 8px;
-  margin-bottom: 15px;
-}
-
-.qr-alternatives summary {
+.mobile-advanced-options summary {
   cursor: pointer;
   outline: none;
-  border: 2px dashed var(--bs-secondary);
-  border-radius: 8px;
-  padding: 10px 15px;
+  background: var(--bs-secondary);
+  color: white;
+  border-radius: 10px;
+  padding: 15px;
   transition: all 0.3s ease;
 }
 
-.qr-alternatives summary:hover {
-  border-color: var(--bs-primary);
-  background: rgba(248, 93, 35, 0.1);
-}
-
-.qr-alternatives[open] summary {
-  border-color: var(--bs-success);
-  background: rgba(40, 167, 69, 0.1);
-}
-
-.qr-result canvas {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease;
-}
-
-.qr-result canvas:hover {
-  transform: scale(1.02);
-}
-
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  border-color: var(--bs-primary);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(248, 93, 35, 0.2);
-}
-
-.card-header {
-  background: linear-gradient(135deg, var(--bs-dark), var(--bs-secondary)) !important;
-  border-bottom: 2px solid var(--bs-primary);
-}
-
-.card-header h6 {
-  color: var(--bs-success);
-}
-
-/* Animações para botões */
-.btn-group .btn {
-  transition: all 0.3s ease;
-}
-
-.btn-group .btn:hover {
+.mobile-advanced-options summary:hover {
+  background: var(--bs-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Feedback visual para ações */
-@keyframes pulse-success {
-  0% { background-color: var(--bs-success); }
-  50% { background-color: var(--bs-warning); }
-  100% { background-color: var(--bs-success); }
-}
-
-.btn-success.animate-pulse {
-  animation: pulse-success 1.5s ease-in-out;
-}
-
-/* Responsividade melhorada */
+/* RESPONSIVIDADE MOBILE ESPECÍFICA */
 @media (max-width: 768px) {
-  .multi-wallet-qr-container {
-    padding: 15px;
-    margin: 10px 0;
+  .mobile-qr-container {
+    padding: 20px;
+    margin: 15px 0;
+    border-width: 2px;
   }
   
-  #primaryQRContainer {
+  .mobile-alert {
+    padding: 15px;
+    font-size: 1rem;
+  }
+  
+  .mobile-wallet-btn {
+    padding: 15px;
+    font-size: 0.95rem;
+  }
+  
+  .mobile-wallet-icon {
+    font-size: 1.5rem;
+  }
+  
+  .mobile-qr-section {
+    padding: 15px;
+    margin: 15px 0;
+  }
+  
+  .qr-container-mobile {
+    padding: 10px;
+  }
+  
+  .mobile-help summary,
+  .mobile-advanced-options summary {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-qr-container {
+    padding: 15px;
+    border-radius: 15px;
+  }
+  
+  .mobile-wallet-btn {
+    padding: 12px;
+  }
+  
+  .mobile-wallet-btn .d-flex {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .mobile-wallet-btn .bi-arrow-right-circle {
+    margin-top: 10px;
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ANIMAÇÕES MOBILE */
+@keyframes mobile-pulse {
+  0% { 
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  70% { 
+    box-shadow: 0 0 0 15px rgba(40, 167, 69, 0);
+  }
+  100% { 
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+.mobile-wallet-btn:focus {
+  animation: mobile-pulse 2s infinite;
+}
+
+/* FEEDBACK VISUAL MOBILE */
+.mobile-wallet-btn:disabled {
+  opacity: 0.7;
+  animation: mobile-loading 1s infinite;
+}
+
+@keyframes mobile-loading {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* DARK MODE MOBILE */
+@media (prefers-color-scheme: dark) {
+  .mobile-qr-section {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .qr-container-mobile {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+}
+
+/* LANDSCAPE MODE MOBILE */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-qr-container {
     padding: 15px;
   }
   
-  .wallet-options {
-    padding: 15px;
-    margin-top: 20px;
+  .mobile-wallet-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   
-  .card-body {
-    padding: 15px;
+  .mobile-wallet-btn {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px;
   }
-}
-
-/* Estilos específicos para deep links */
-.wallet-link-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-left: 4px solid var(--bs-primary);
-  transition: all 0.3s ease;
-}
-
-.wallet-link-item:hover {
-  background: rgba(248, 93, 35, 0.1);
-  border-left-color: var(--bs-warning);
-}
-
-/* Indicadores de prioridade */
-.priority-1::before {
-  content: "⭐";
-  margin-right: 5px;
-}
-
-.priority-2::before {
-  content: "🔥";
-  margin-right: 5px;
-}
-
-.priority-3::before {
-  content: "✅";
-  margin-right: 5px;
 }
 
 
