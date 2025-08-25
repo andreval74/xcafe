@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador de Link para Token | xcafe</title>
+  <title>Gerador de Link para Token Desktop | xcafe</title>
   <link rel="icon" type="image/png" href="imgs/xcafe-32x32.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -27,9 +27,12 @@
       <div class="col-lg-8 col-xl-7">
         <div class="card shadow-lg border-primary">
           <div class="card-header bg-primary text-white">
-            <h2 class="mb-0"><i class="bi bi-link-45deg me-2"></i>Gerador de Link para Token</h2>
+            <h2 class="mb-0"><i class="bi bi-desktop me-2"></i>Gerador de Link para Token (Desktop)</h2>
           </div>
           <div class="card-body">
+            <div class="alert alert-warning border-warning" role="alert">
+              <i class="bi bi-exclamation-triangle-fill"></i> <strong>Desktop Only:</strong> Este sistema foi otimizado exclusivamente para uso em computadores desktop com MetaMask instalado.
+            </div>
             <form id="token-link-form" autocomplete="off" onsubmit="return false;">
               <div class="mb-3">
                 <label for="networkSearch" class="form-label">Rede Blockchain</label>
@@ -87,12 +90,16 @@
                 </button>
               </div>
               <div id="generatedLinkContainer" class="mb-4" style="display:none;">
-                <label class="form-label">Link Gerado:</label>
+                <div class="alert alert-info mb-3" role="alert">
+                  <i class="bi bi-info-circle"></i> <strong>Atenção:</strong> Este link foi otimizado apenas para uso em <strong>computadores desktop</strong> com MetaMask instalado no navegador.
+                </div>
+                <label class="form-label">Link Gerado para Desktop:</label>
                 <div class="input-group">
                   <input id="generatedLink" class="form-control" readonly />
                   <button class="btn btn-outline-secondary" id="btnCopyLink" type="button"><i class="bi bi-clipboard"></i></button>
                   <button class="btn btn-outline-success" id="btnShareLink" type="button"><i class="bi bi-share"></i></button>
                 </div>
+                <small class="text-muted">O link levará os usuários a uma página onde podem adicionar o token ao MetaMask com um clique.</small>
               </div>
             </form>
           </div>
