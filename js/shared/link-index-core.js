@@ -701,31 +701,15 @@ window.generateTokenQR = async function(tokenAddress, tokenSymbol, tokenDecimals
   
   // Mostrar container
   container.style.display = 'block';
-  container.scrollIntoView({ behavior: 'smooth' });
   
-  // Tentar aguardar carregamento da biblioteca
-  try {
-    console.log('⏳ Aguardando biblioteca QRCode...');
-    
-    // Se window.qrCodeReady existe, aguardar
-    if (window.qrCodeReady) {
-      await window.qrCodeReady;
-    }
-    
-    // Verificar novamente se está disponível
-    if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
-      console.log('✅ Usando biblioteca QRCode.js');
-      await generateCanvasQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
-    } else {
-      console.warn('⚠️ Biblioteca não disponível, usando API externa');
-      generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
-    }
-    
-  } catch (error) {
-    console.error('❌ Erro ao aguardar biblioteca:', error);
-    console.log('🔄 Usando API externa como fallback');
-    generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
-  }
+  // Usar sempre API externa (mais confiável que bibliotecas externas)
+  console.log('🌐 Usando API externa para QR Code (método confiável)');
+  generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+  
+  // Rolar até o QR Code
+  setTimeout(() => {
+    container.scrollIntoView({ behavior: 'smooth' });
+  }, 500);
 };
 
 // Função para gerar QR Code usando biblioteca (canvas)
@@ -771,28 +755,74 @@ async function generateCanvasQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) 
 }
 
 // Função para gerar QR Code usando API externa (fallback)
+// Função para gerar QR Code usando API externa (método confiável)
 function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
-  console.log('🔄 Usando API externa para QR Code');
+  console.log('🌐 Gerando QR Code via API externa');
   
-  const qrSize = 256;
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(qrText)}&format=png&margin=10`;
+  const qrSize = 300;
   
-  qrDiv.innerHTML = `
-    <div class="text-center">
-      <img src="${qrImageUrl}" 
-           alt="QR Code do Token" 
-           style="max-width: 100%; height: auto; border: 2px solid #28a745; border-radius: 8px;"
-           onload="console.log('✅ QR Code carregado via API externa')"
-           onerror="console.error('❌ Erro ao carregar QR Code via API'); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2Y4ZjlmYSIgc3Ryb2tlPSIjZGVlMmU2IiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIxMjgiIHk9IjEyOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2Yzc1N2QiPkVycm8gYW8gZ2VyYXIgUVI8L3RleHQ+PC9zdmc+'" />
-      <div class="mt-2">
-        <small class="text-info">
-          <i class="bi bi-cloud"></i> Gerado via API externa
-        </small>
-      </div>
-    </div>
-  `;
+  // Usar múltiplas APIs para garantir funcionamento
+  const apiUrls = [
+    `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(qrText)}&format=png&margin=10&bgcolor=FFFFFF&color=000000`,
+    `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${encodeURIComponent(qrText)}`,
+    `https://quickchart.io/qr?text=${encodeURIComponent(qrText)}&size=${qrSize}&margin=2`
+  ];
   
-  addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+  let currentAPI = 0;
+  
+  function tryNextAPI() {
+    if (currentAPI >= apiUrls.length) {
+      // Se todas as APIs falharam, mostrar dados em texto
+      qrDiv.innerHTML = `
+        <div class="alert alert-warning text-center">
+          <i class="bi bi-exclamation-triangle"></i>
+          <h6>QR Code não pôde ser gerado</h6>
+          <p class="small">APIs externas indisponíveis. Use os dados abaixo:</p>
+          <textarea class="form-control font-monospace small" rows="6" readonly style="font-size: 11px;">${qrText}</textarea>
+          <div class="mt-3">
+            <button class="btn btn-primary btn-sm" onclick="copyToClipboard('qrFallbackTextarea')">
+              <i class="bi bi-clipboard"></i> Copiar Dados JSON
+            </button>
+            <small class="text-muted d-block mt-2">
+              Cole estes dados em uma wallet que suporte importação via JSON
+            </small>
+          </div>
+          <textarea id="qrFallbackTextarea" style="display:none;">${qrText}</textarea>
+        </div>
+      `;
+      return;
+    }
+    
+    const img = document.createElement('img');
+    img.src = apiUrls[currentAPI];
+    img.alt = 'QR Code do Token';
+    img.style.cssText = 'max-width: 100%; height: auto; border: 2px solid #28a745; border-radius: 8px; background: white;';
+    
+    img.onload = function() {
+      console.log(`✅ QR Code carregado via API ${currentAPI + 1}`);
+      qrDiv.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'text-center';
+      wrapper.appendChild(img);
+      
+      const label = document.createElement('div');
+      label.className = 'mt-2';
+      label.innerHTML = '<small class="text-success"><i class="bi bi-cloud-check"></i> Gerado via API externa</small>';
+      wrapper.appendChild(label);
+      
+      qrDiv.appendChild(wrapper);
+      addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+    };
+    
+    img.onerror = function() {
+      console.warn(`❌ API ${currentAPI + 1} falhou, tentando próxima...`);
+      currentAPI++;
+      tryNextAPI();
+    };
+  }
+  
+  tryNextAPI();
 }
 
 // Função para adicionar informações e botões ao QR Code

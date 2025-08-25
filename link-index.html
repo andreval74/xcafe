@@ -11,73 +11,11 @@
   <link href="styles/globals.css" rel="stylesheet">
   <link href="styles/link-index.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <!-- Biblioteca QRCode.js com carregamento robusto -->
+  <!-- Sistema simplificado para QR Code -->
   <script>
-    // Função para carregar QRCode dinamicamente
-    window.loadQRCodeLibrary = function() {
-      return new Promise((resolve, reject) => {
-        // Se já estiver carregada
-        if (typeof QRCode !== 'undefined') {
-          console.log('✅ Biblioteca QRCode já estava carregada');
-          resolve(QRCode);
-          return;
-        }
-
-        // Lista de CDNs para tentar
-        const cdnUrls = [
-          'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-          'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
-          'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js'
-        ];
-
-        let currentIndex = 0;
-
-        function tryLoadNext() {
-          if (currentIndex >= cdnUrls.length) {
-            console.error('❌ Todos os CDNs de QRCode falharam');
-            reject(new Error('Falha ao carregar biblioteca QRCode'));
-            return;
-          }
-
-          const script = document.createElement('script');
-          script.src = cdnUrls[currentIndex];
-          
-          script.onload = function() {
-            if (typeof QRCode !== 'undefined') {
-              console.log(`✅ QRCode carregado via CDN ${currentIndex + 1}: ${cdnUrls[currentIndex]}`);
-              resolve(QRCode);
-            } else {
-              console.warn(`⚠️ CDN ${currentIndex + 1} carregou mas QRCode não está disponível`);
-              currentIndex++;
-              tryLoadNext();
-            }
-          };
-
-          script.onerror = function() {
-            console.warn(`❌ Falha no CDN ${currentIndex + 1}: ${cdnUrls[currentIndex]}`);
-            currentIndex++;
-            tryLoadNext();
-          };
-
-          // Timeout de segurança
-          setTimeout(() => {
-            if (typeof QRCode === 'undefined') {
-              console.warn(`⏰ Timeout no CDN ${currentIndex + 1}`);
-              currentIndex++;
-              tryLoadNext();
-            }
-          }, 3000);
-
-          document.head.appendChild(script);
-        }
-
-        console.log('🔄 Iniciando carregamento da biblioteca QRCode...');
-        tryLoadNext();
-      });
-    };
-
-    // Tentar carregar a biblioteca quando a página carregar
-    window.qrCodeReady = window.loadQRCodeLibrary();
+    // Simplificar: usar sempre API externa que é mais confiável
+    console.log('📱 Sistema de QR Code inicializado (modo API externa)');
+    window.qrCodeReady = Promise.resolve(); // Promise já resolvida
   </script>
 </head>
 <body>
@@ -169,28 +107,10 @@
   <script type="module" src="js/link-index.js"></script>
   <script src="js/template-loader.js"></script>
   
-  <!-- Script de verificação da biblioteca QRCode -->
+  <!-- Script de verificação simplificado -->
   <script>
-    // Verificar se a biblioteca QRCode foi carregada
-    document.addEventListener('DOMContentLoaded', async function() {
-      console.log('🔍 Verificando biblioteca QRCode...');
-      
-      try {
-        // Aguardar o carregamento da biblioteca
-        await window.qrCodeReady;
-        console.log('✅ Biblioteca QRCode carregada e pronta para uso!');
-        
-        // Testar se realmente funciona
-        if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
-          console.log('🎯 QRCode.toCanvas disponível - tudo funcionando!');
-        } else {
-          console.warn('⚠️ QRCode carregado mas toCanvas não disponível');
-        }
-        
-      } catch (error) {
-        console.error('❌ Falha ao carregar biblioteca QRCode:', error.message);
-        console.log('🔄 QR Codes serão gerados via API externa');
-      }
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('✅ Sistema de QR Code pronto (usando API externa confiável)');
     });
   </script>
 </body>
