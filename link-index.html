@@ -11,8 +11,19 @@
   <link href="styles/globals.css" rel="stylesheet">
   <link href="styles/link-index.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <!-- Biblioteca QRCode.js -->
+  <!-- Biblioteca QRCode.js com fallback -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    // Fallback para carregar QRCode se o primeiro falhar
+    if (typeof QRCode === 'undefined') {
+      console.warn('⚠️ Primeira tentativa de carregar QRCode falhou, tentando CDN alternativo...');
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
+      script.onload = () => console.log('✅ QRCode carregado via CDN alternativo');
+      script.onerror = () => console.error('❌ Falha ao carregar QRCode via CDN alternativo');
+      document.head.appendChild(script);
+    }
+  </script>
 </head>
 <body>
 <!-- Header -->

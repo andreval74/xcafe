@@ -669,8 +669,13 @@ window.generateTokenQR = function(tokenAddress, tokenSymbol, tokenDecimals, toke
   const container = document.getElementById('qrCodeContainer');
   const qrDiv = document.getElementById('qrCodeDiv');
   
+  if (!container || !qrDiv) {
+    alert('❌ Elementos do QR Code não encontrados no HTML!');
+    return;
+  }
+  
   // Limpar QR Code anterior
-  qrDiv.innerHTML = '';
+  qrDiv.innerHTML = '<div class="text-center"><i class="bi bi-hourglass-split"></i> Gerando QR Code...</div>';
   
   // Dados do token em formato estruturado para wallets
   const tokenData = {
@@ -692,87 +697,144 @@ window.generateTokenQR = function(tokenAddress, tokenSymbol, tokenDecimals, toke
   
   const qrText = JSON.stringify(tokenData);
   
-  // Verificar se a biblioteca QRCode está carregada
-  if (typeof QRCode === 'undefined') {
-    // Fallback para API online se biblioteca não estiver disponível
-    const qrSize = 200;
-    const qrImageUrl = `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${encodeURIComponent(qrText)}`;
-    
-    qrDiv.innerHTML = `
-      <img src="${qrImageUrl}" alt="QR Code do Token" style="max-width: 100%; height: auto; border: 2px solid #dee2e6; border-radius: 8px;">
-      <div class="mt-2">
-        <small class="text-warning">
-          <i class="bi bi-exclamation-triangle"></i> Usando API externa (biblioteca QRCode não carregada)
-        </small>
-      </div>
-    `;
-  } else {
-    // Usar biblioteca QRCode.js
-    const canvas = document.createElement('canvas');
-    
-    QRCode.toCanvas(canvas, qrText, {
-      width: 200,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    }, function (error) {
-      if (error) {
-        console.error('Erro ao gerar QR Code:', error);
-        qrDiv.innerHTML = `
-          <div class="alert alert-danger">
-            <i class="bi bi-exclamation-triangle"></i> Erro ao gerar QR Code: ${error.message}
-          </div>
-        `;
-        return;
+  console.log('🔍 Verificando biblioteca QRCode...', typeof QRCode);
+  console.log('📄 Dados do QR:', qrText);
+  
+  // Tentar múltiplos métodos para gerar o QR Code
+  setTimeout(() => {
+    // Método 1: Tentar biblioteca QRCode.js
+    if (typeof QRCode !== 'undefined') {
+      console.log('✅ Usando biblioteca QRCode.js');
+      
+      try {
+        // Limpar conteúdo
+        qrDiv.innerHTML = '';
+        
+        // Criar canvas
+        const canvas = document.createElement('canvas');
+        qrDiv.appendChild(canvas);
+        
+        QRCode.toCanvas(canvas, qrText, {
+          width: 256,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          },
+          errorCorrectionLevel: 'M'
+        }, function (error) {
+          if (error) {
+            console.error('❌ Erro ao gerar QR Code:', error);
+            generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+          } else {
+            console.log('✅ QR Code gerado com sucesso!');
+            canvas.style.border = '2px solid #28a745';
+            canvas.style.borderRadius = '8px';
+            canvas.style.maxWidth = '100%';
+            addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+          }
+        });
+        
+      } catch (error) {
+        console.error('❌ Erro na biblioteca QRCode:', error);
+        generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
       }
       
-      // Adicionar o canvas ao container
-      canvas.style.border = '2px solid #dee2e6';
-      canvas.style.borderRadius = '8px';
-      qrDiv.appendChild(canvas);
-    });
-  }
-  
-  // Adicionar informações e botões
-  const infoDiv = document.createElement('div');
-  infoDiv.className = 'mt-2';
-  infoDiv.innerHTML = `
-    <small class="text-muted">
-      <strong>Dados do QR:</strong><br>
-      ${tokenSymbol} (${tokenName})<br>
-      Chain ID: ${chainId}<br>
-      <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyToClipboard('qrDataTextarea')" type="button">
-        <i class="bi bi-clipboard"></i> Copiar JSON
-      </button>
-      <button class="btn btn-sm btn-outline-secondary mt-2 ms-2" onclick="downloadQRCode('${tokenSymbol}_token_qr')" type="button">
-        <i class="bi bi-download"></i> Baixar QR
-      </button>
-    </small>
-    <textarea id="qrDataTextarea" style="display:none;">${qrText}</textarea>
-  `;
-  
-  qrDiv.appendChild(infoDiv);
+    } else {
+      console.warn('⚠️ Biblioteca QRCode não carregada, usando fallback');
+      generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+    }
+  }, 100);
   
   // Mostrar container
   container.style.display = 'block';
-  
-  // Rolar até o QR Code
   container.scrollIntoView({ behavior: 'smooth' });
 };
+
+// Função para gerar QR Code usando API externa (fallback)
+function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
+  console.log('🔄 Usando API externa para QR Code');
+  
+  const qrSize = 256;
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(qrText)}&format=png&margin=10`;
+  
+  qrDiv.innerHTML = `
+    <div class="text-center">
+      <img src="${qrImageUrl}" 
+           alt="QR Code do Token" 
+           style="max-width: 100%; height: auto; border: 2px solid #28a745; border-radius: 8px;"
+           onload="console.log('✅ QR Code carregado via API externa')"
+           onerror="console.error('❌ Erro ao carregar QR Code via API'); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2Y4ZjlmYSIgc3Ryb2tlPSIjZGVlMmU2IiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIxMjgiIHk9IjEyOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2Yzc1N2QiPkVycm8gYW8gZ2VyYXIgUVI8L3RleHQ+PC9zdmc+'" />
+      <div class="mt-2">
+        <small class="text-info">
+          <i class="bi bi-cloud"></i> Gerado via API externa
+        </small>
+      </div>
+    </div>
+  `;
+  
+  addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+}
+
+// Função para adicionar informações e botões ao QR Code
+function addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
+  const infoDiv = document.createElement('div');
+  infoDiv.className = 'mt-3';
+  infoDiv.innerHTML = `
+    <div class="text-center">
+      <small class="text-muted">
+        <strong>📱 ${tokenSymbol} (${tokenName})</strong><br>
+        <strong>🔗 Chain ID:</strong> ${chainId}<br>
+        <div class="mt-2">
+          <button class="btn btn-sm btn-outline-primary me-2" onclick="copyToClipboard('qrDataTextarea')" type="button">
+            <i class="bi bi-clipboard"></i> Copiar JSON
+          </button>
+          <button class="btn btn-sm btn-outline-success" onclick="downloadQRCode('${tokenSymbol}_token_qr')" type="button">
+            <i class="bi bi-download"></i> Baixar PNG
+          </button>
+        </div>
+      </small>
+      <textarea id="qrDataTextarea" style="display:none;">${qrText}</textarea>
+    </div>
+  `;
+  
+  qrDiv.appendChild(infoDiv);
+}
 
 // Função para baixar o QR Code como imagem
 window.downloadQRCode = function(filename) {
   const canvas = document.querySelector('#qrCodeDiv canvas');
-  if (!canvas) {
-    alert('❌ QR Code não encontrado. Gere um QR Code primeiro.');
-    return;
-  }
+  const img = document.querySelector('#qrCodeDiv img');
   
-  // Criar link de download
-  const link = document.createElement('a');
-  link.download = filename + '.png';
-  link.href = canvas.toDataURL();
-  link.click();
+  if (canvas) {
+    // Se foi gerado via biblioteca QRCode.js (canvas)
+    console.log('📥 Baixando QR Code do canvas');
+    const link = document.createElement('a');
+    link.download = filename + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+  } else if (img) {
+    // Se foi gerado via API externa (imagem)
+    console.log('📥 Baixando QR Code da imagem');
+    
+    // Criar canvas temporário para converter imagem em download
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    
+    tempCanvas.width = 256;
+    tempCanvas.height = 256;
+    
+    // Desenhar a imagem no canvas
+    ctx.drawImage(img, 0, 0, 256, 256);
+    
+    // Fazer download
+    const link = document.createElement('a');
+    link.download = filename + '.png';
+    link.href = tempCanvas.toDataURL('image/png');
+    link.click();
+    
+  } else {
+    alert('❌ QR Code não encontrado. Gere um QR Code primeiro.');
+  }
 };
