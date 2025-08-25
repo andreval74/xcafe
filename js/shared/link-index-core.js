@@ -757,15 +757,22 @@ async function generateCanvasQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) 
 // Função para gerar QR Code usando API externa (fallback)
 // Função para gerar QR Code usando API externa (método confiável)
 function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
-  console.log('🌐 Gerando QR Code via API externa');
+  console.log('🌐 Gerando QR Code personalizado via API externa');
   
-  const qrSize = 300;
+  const qrSize = 350;
   
-  // Usar múltiplas APIs para garantir funcionamento
+  // Criar QR Code customizado com logo XCafe
+  generateCustomQRWithLogo(qrDiv, qrText, qrSize, tokenSymbol, tokenName, chainId);
+}
+
+// Função para gerar QR Code customizado com logo XCafe
+async function generateCustomQRWithLogo(qrDiv, qrText, size, tokenSymbol, tokenName, chainId) {
+  
+  // APIs para QR Code base (sem logo ainda)
   const apiUrls = [
-    `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(qrText)}&format=png&margin=10&bgcolor=FFFFFF&color=000000`,
-    `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${encodeURIComponent(qrText)}`,
-    `https://quickchart.io/qr?text=${encodeURIComponent(qrText)}&size=${qrSize}&margin=2`
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrText)}&format=png&margin=5&bgcolor=FFFFFF&color=000000&ecc=M`,
+    `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(qrText)}&chld=M|2`,
+    `https://quickchart.io/qr?text=${encodeURIComponent(qrText)}&size=${size}&margin=5&format=png`
   ];
   
   let currentAPI = 0;
@@ -773,46 +780,29 @@ function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   function tryNextAPI() {
     if (currentAPI >= apiUrls.length) {
       // Se todas as APIs falharam, mostrar dados em texto
-      qrDiv.innerHTML = `
-        <div class="alert alert-warning text-center">
-          <i class="bi bi-exclamation-triangle"></i>
-          <h6>QR Code não pôde ser gerado</h6>
-          <p class="small">APIs externas indisponíveis. Use os dados abaixo:</p>
-          <textarea class="form-control font-monospace small" rows="6" readonly style="font-size: 11px;">${qrText}</textarea>
-          <div class="mt-3">
-            <button class="btn btn-primary btn-sm" onclick="copyToClipboard('qrFallbackTextarea')">
-              <i class="bi bi-clipboard"></i> Copiar Dados JSON
-            </button>
-            <small class="text-muted d-block mt-2">
-              Cole estes dados em uma wallet que suporte importação via JSON
-            </small>
-          </div>
-          <textarea id="qrFallbackTextarea" style="display:none;">${qrText}</textarea>
-        </div>
-      `;
+      showTextFallback(qrDiv, qrText, tokenSymbol, tokenName, chainId);
       return;
     }
     
-    const img = document.createElement('img');
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.src = apiUrls[currentAPI];
-    img.alt = 'QR Code do Token';
-    img.style.cssText = 'max-width: 100%; height: auto; border: 2px solid #28a745; border-radius: 8px; background: white;';
     
     img.onload = function() {
-      console.log(`✅ QR Code carregado via API ${currentAPI + 1}`);
-      qrDiv.innerHTML = '';
+      console.log(`✅ QR Code base carregado via API ${currentAPI + 1}`);
       
-      const wrapper = document.createElement('div');
-      wrapper.className = 'text-center';
-      wrapper.appendChild(img);
+      // Criar canvas para adicionar logo
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
       
-      const label = document.createElement('div');
-      label.className = 'mt-2';
-      label.innerHTML = '<small class="text-success"><i class="bi bi-cloud-check"></i> Gerado via API externa</small>';
-      wrapper.appendChild(label);
+      canvas.width = size;
+      canvas.height = size;
       
-      qrDiv.appendChild(wrapper);
-      addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+      // Desenhar QR Code de base
+      ctx.drawImage(img, 0, 0, size, size);
+      
+      // Carregar e adicionar logo XCafe
+      addLogoToQR(canvas, ctx, size, qrDiv, qrText, tokenSymbol, tokenName, chainId);
     };
     
     img.onerror = function() {
@@ -823,6 +813,108 @@ function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   }
   
   tryNextAPI();
+}
+
+// Função para adicionar logo XCafe ao centro do QR Code
+function addLogoToQR(canvas, ctx, qrSize, qrDiv, qrText, tokenSymbol, tokenName, chainId) {
+  const logo = new Image();
+  logo.crossOrigin = 'anonymous';
+  logo.src = 'imgs/xcafe-192x192.png';
+  
+  logo.onload = function() {
+    console.log('✅ Logo XCafe carregado');
+    
+    // Calcular tamanho e posição do logo (cerca de 15% do QR Code)
+    const logoSize = Math.round(qrSize * 0.15);
+    const logoX = (qrSize - logoSize) / 2;
+    const logoY = (qrSize - logoSize) / 2;
+    
+    // Criar fundo branco circular para o logo
+    const bgSize = logoSize + 10;
+    const bgX = (qrSize - bgSize) / 2;
+    const bgY = (qrSize - bgSize) / 2;
+    
+    // Desenhar fundo circular branco
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(qrSize/2, qrSize/2, bgSize/2, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Desenhar borda cinza ao redor do logo
+    ctx.strokeStyle = '#E5E7EB';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(qrSize/2, qrSize/2, bgSize/2, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    // Desenhar logo XCafe no centro
+    ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    
+    // Finalizar QR Code customizado
+    finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId);
+  };
+  
+  logo.onerror = function() {
+    console.warn('⚠️ Logo não carregou, usando QR Code simples');
+    // Usar QR Code sem logo
+    finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId);
+  };
+}
+
+// Função para finalizar e exibir o QR Code customizado
+function finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId) {
+  qrDiv.innerHTML = '';
+  
+  // Container principal
+  const wrapper = document.createElement('div');
+  wrapper.className = 'text-center';
+  
+  // Adicionar canvas estilizado
+  canvas.style.cssText = 'max-width: 100%; height: auto; border: 3px solid #28a745; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);';
+  wrapper.appendChild(canvas);
+  
+  // Adicionar marca XCafe
+  const brandDiv = document.createElement('div');
+  brandDiv.className = 'mt-2 mb-2';
+  brandDiv.innerHTML = `
+    <small class="text-success fw-bold">
+      <img src="imgs/xcafe-32x32.png" alt="XCafe" style="width: 16px; height: 16px; margin-right: 5px;">
+      Gerado por XCafe.app
+    </small>
+  `;
+  wrapper.appendChild(brandDiv);
+  
+  qrDiv.appendChild(wrapper);
+  
+  // Adicionar informações e botões
+  addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+  
+  console.log('🎨 QR Code personalizado com logo XCafe criado com sucesso!');
+}
+
+// Função fallback para mostrar dados em texto
+function showTextFallback(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
+  qrDiv.innerHTML = `
+    <div class="alert alert-warning text-center">
+      <div class="mb-2">
+        <img src="imgs/xcafe-32x32.png" alt="XCafe" style="width: 24px; height: 24px;">
+        <strong class="ms-2">XCafe.app</strong>
+      </div>
+      <i class="bi bi-exclamation-triangle"></i>
+      <h6>QR Code não pôde ser gerado</h6>
+      <p class="small">APIs externas indisponíveis. Use os dados abaixo:</p>
+      <textarea class="form-control font-monospace small" rows="6" readonly style="font-size: 11px;">${qrText}</textarea>
+      <div class="mt-3">
+        <button class="btn btn-primary btn-sm" onclick="copyToClipboard('qrFallbackTextarea')">
+          <i class="bi bi-clipboard"></i> Copiar Dados JSON
+        </button>
+        <small class="text-muted d-block mt-2">
+          Cole estes dados em uma wallet que suporte importação via JSON
+        </small>
+      </div>
+      <textarea id="qrFallbackTextarea" style="display:none;">${qrText}</textarea>
+    </div>
+  `;
 }
 
 // Função para adicionar informações e botões ao QR Code
@@ -856,32 +948,58 @@ window.downloadQRCode = function(filename) {
   const img = document.querySelector('#qrCodeDiv img');
   
   if (canvas) {
-    // Se foi gerado via biblioteca QRCode.js (canvas)
-    console.log('📥 Baixando QR Code do canvas');
+    // Se foi gerado via canvas personalizado (com logo XCafe)
+    console.log('📥 Baixando QR Code personalizado XCafe');
     const link = document.createElement('a');
-    link.download = filename + '.png';
-    link.href = canvas.toDataURL('image/png');
+    link.download = filename + '_xcafe.png';
+    link.href = canvas.toDataURL('image/png', 1.0);
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    
+    // Mostrar feedback visual
+    const button = document.querySelector('button[onclick*="downloadQRCode"]');
+    if (button) {
+      const originalText = button.innerHTML;
+      button.innerHTML = '<i class="bi bi-check-circle"></i> Baixado!';
+      button.className = 'btn btn-sm btn-success';
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.className = 'btn btn-sm btn-outline-success';
+      }, 2000);
+    }
     
   } else if (img) {
-    // Se foi gerado via API externa (imagem)
+    // Se foi gerado via API externa (imagem simples)
     console.log('📥 Baixando QR Code da imagem');
     
-    // Criar canvas temporário para converter imagem em download
+    // Criar canvas temporário para adicionar marca XCafe
     const tempCanvas = document.createElement('canvas');
     const ctx = tempCanvas.getContext('2d');
     
-    tempCanvas.width = 256;
-    tempCanvas.height = 256;
+    tempCanvas.width = img.naturalWidth || 300;
+    tempCanvas.height = (img.naturalHeight || 300) + 40; // Espaço extra para marca
     
-    // Desenhar a imagem no canvas
-    ctx.drawImage(img, 0, 0, 256, 256);
+    // Fundo branco
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    
+    // Desenhar QR Code
+    ctx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.width);
+    
+    // Adicionar texto "Gerado por XCafe.app"
+    ctx.fillStyle = '#28a745';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Gerado por XCafe.app', tempCanvas.width / 2, tempCanvas.height - 15);
     
     // Fazer download
     const link = document.createElement('a');
-    link.download = filename + '.png';
-    link.href = tempCanvas.toDataURL('image/png');
+    link.download = filename + '_xcafe.png';
+    link.href = tempCanvas.toDataURL('image/png', 1.0);
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     
   } else {
     alert('❌ QR Code não encontrado. Gere um QR Code primeiro.');
