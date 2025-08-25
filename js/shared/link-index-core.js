@@ -703,8 +703,18 @@ window.generateTokenQR = async function(tokenAddress, tokenSymbol, tokenDecimals
   container.style.display = 'block';
   
   // Usar sempre API externa (mais confiável que bibliotecas externas)
-  console.log('🌐 Usando API externa para QR Code (método confiável)');
-  generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+  console.log('🌐 Usando API externa para QR Code personalizado XCafe');
+  
+  // Converter para formato EIP-681 se necessário
+  let finalQRText = qrText;
+  
+  // Se qrText parece ser JSON, extrair informações e criar formato EIP-681
+  if (qrText.includes('wallet_watchAsset') || qrText.includes('"method"')) {
+    finalQRText = `ethereum:${tokenAddress}@${chainId}/transfer?symbol=${tokenSymbol}&decimals=${tokenDecimals}&name=${encodeURIComponent(tokenName)}`;
+    console.log('🔄 Usando formato EIP-681 para compatibilidade:', finalQRText);
+  }
+  
+  generateFallbackQR(qrDiv, finalQRText, tokenSymbol, tokenName, chainId);
   
   // Rolar até o QR Code
   setTimeout(() => {
@@ -768,11 +778,31 @@ function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
 // Função para gerar QR Code customizado com logo XCafe
 async function generateCustomQRWithLogo(qrDiv, qrText, size, tokenSymbol, tokenName, chainId) {
   
+  // Corrigir formato do QR Code para ser reconhecido pelas wallets
+  // Usar formato EIP-681 ao invés de JSON complexo
+  let correctedQRText = qrText;
+  
+  // Se qrText for JSON, converter para formato EIP-681
+  if (qrText.startsWith('{')) {
+    try {
+      const tokenData = JSON.parse(qrText);
+      const address = tokenData.params?.options?.address || '';
+      const symbol = tokenData.params?.options?.symbol || tokenSymbol;
+      const decimals = tokenData.params?.options?.decimals || 18;
+      const name = tokenName || symbol;
+      
+      correctedQRText = `ethereum:${address}@${chainId}/transfer?symbol=${symbol}&decimals=${decimals}&name=${encodeURIComponent(name)}`;
+      console.log('🔄 Convertido de JSON para EIP-681:', correctedQRText);
+    } catch (e) {
+      console.warn('⚠️ Erro ao converter JSON, usando formato original');
+    }
+  }
+  
   // APIs para QR Code base (sem logo ainda)
   const apiUrls = [
-    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrText)}&format=png&margin=5&bgcolor=FFFFFF&color=000000&ecc=M`,
-    `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(qrText)}&chld=M|2`,
-    `https://quickchart.io/qr?text=${encodeURIComponent(qrText)}&size=${size}&margin=5&format=png`
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(correctedQRText)}&format=png&margin=5&bgcolor=FFFFFF&color=000000&ecc=M`,
+    `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(correctedQRText)}&chld=M|2`,
+    `https://quickchart.io/qr?text=${encodeURIComponent(correctedQRText)}&size=${size}&margin=5&format=png`
   ];
   
   let currentAPI = 0;
@@ -780,7 +810,7 @@ async function generateCustomQRWithLogo(qrDiv, qrText, size, tokenSymbol, tokenN
   function tryNextAPI() {
     if (currentAPI >= apiUrls.length) {
       // Se todas as APIs falharam, mostrar dados em texto
-      showTextFallback(qrDiv, qrText, tokenSymbol, tokenName, chainId);
+      showTextFallback(qrDiv, correctedQRText, tokenSymbol, tokenName, chainId);
       return;
     }
     
@@ -802,7 +832,7 @@ async function generateCustomQRWithLogo(qrDiv, qrText, size, tokenSymbol, tokenN
       ctx.drawImage(img, 0, 0, size, size);
       
       // Carregar e adicionar logo XCafe
-      addLogoToQR(canvas, ctx, size, qrDiv, qrText, tokenSymbol, tokenName, chainId);
+      addLogoToQR(canvas, ctx, size, qrDiv, correctedQRText, tokenSymbol, tokenName, chainId);
     };
     
     img.onerror = function() {
@@ -819,45 +849,99 @@ async function generateCustomQRWithLogo(qrDiv, qrText, size, tokenSymbol, tokenN
 function addLogoToQR(canvas, ctx, qrSize, qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   const logo = new Image();
   logo.crossOrigin = 'anonymous';
-  logo.src = 'imgs/xcafe-192x192.png';
+  
+  // Tentar carregar o logo do XCafe
+  logo.src = './imgs/xcafe-192x192.png';
   
   logo.onload = function() {
-    console.log('✅ Logo XCafe carregado');
+    console.log('✅ Logo XCafe carregado com sucesso');
     
-    // Calcular tamanho e posição do logo (cerca de 15% do QR Code)
-    const logoSize = Math.round(qrSize * 0.15);
+    // Calcular tamanho e posição do logo (cerca de 20% do QR Code)
+    const logoSize = Math.round(qrSize * 0.18);
     const logoX = (qrSize - logoSize) / 2;
     const logoY = (qrSize - logoSize) / 2;
     
     // Criar fundo branco circular para o logo
-    const bgSize = logoSize + 10;
+    const bgSize = logoSize + 16;
     const bgX = (qrSize - bgSize) / 2;
     const bgY = (qrSize - bgSize) / 2;
     
-    // Desenhar fundo circular branco
+    // Desenhar fundo circular branco com sombra
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
     ctx.fillStyle = '#FFFFFF';
     ctx.beginPath();
     ctx.arc(qrSize/2, qrSize/2, bgSize/2, 0, 2 * Math.PI);
     ctx.fill();
     
-    // Desenhar borda cinza ao redor do logo
-    ctx.strokeStyle = '#E5E7EB';
-    ctx.lineWidth = 2;
+    // Remover sombra
+    ctx.shadowColor = 'transparent';
+    
+    // Desenhar borda verde ao redor do logo
+    ctx.strokeStyle = '#28a745';
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(qrSize/2, qrSize/2, bgSize/2, 0, 2 * Math.PI);
+    ctx.arc(qrSize/2, qrSize/2, bgSize/2 - 2, 0, 2 * Math.PI);
     ctx.stroke();
     
     // Desenhar logo XCafe no centro
     ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    
+    console.log('🎨 Logo XCafe adicionado ao QR Code');
     
     // Finalizar QR Code customizado
     finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId);
   };
   
   logo.onerror = function() {
-    console.warn('⚠️ Logo não carregou, usando QR Code simples');
-    // Usar QR Code sem logo
-    finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId);
+    console.warn('⚠️ Não foi possível carregar logo XCafe, tentando caminho alternativo...');
+    
+    // Tentar caminho alternativo
+    logo.src = 'imgs/xcafe.png';
+    
+    logo.onload = function() {
+      console.log('✅ Logo XCafe carregado (caminho alternativo)');
+      
+      // Mesmo processo de adicionar logo
+      const logoSize = Math.round(qrSize * 0.18);
+      const logoX = (qrSize - logoSize) / 2;
+      const logoY = (qrSize - logoSize) / 2;
+      const bgSize = logoSize + 16;
+      
+      // Fundo circular branco
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(qrSize/2, qrSize/2, bgSize/2, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      ctx.shadowColor = 'transparent';
+      
+      // Borda verde
+      ctx.strokeStyle = '#28a745';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(qrSize/2, qrSize/2, bgSize/2 - 2, 0, 2 * Math.PI);
+      ctx.stroke();
+      
+      // Logo
+      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+      
+      finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId);
+    };
+    
+    logo.onerror = function() {
+      console.error('❌ Não foi possível carregar nenhuma versão do logo XCafe');
+      // Usar QR Code sem logo
+      finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId);
+    };
   };
 }
 
@@ -1004,4 +1088,267 @@ window.downloadQRCode = function(filename) {
   } else {
     alert('❌ QR Code não encontrado. Gere um QR Code primeiro.');
   }
+};
+
+// ========== NOVA IMPLEMENTAÇÃO 2024: MÚLTIPLOS FORMATOS COMPATÍVEIS ==========
+
+// Função principal para gerar múltiplos QR Codes compatíveis com diferentes wallets
+function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
+  // Formatos de deep links baseados na pesquisa de 2024
+  const qrFormats = [
+    {
+      name: 'EIP-681 (Universal)',
+      description: 'Padrão oficial Ethereum - Compatível com MetaMask, TrustWallet, Coinbase',
+      data: `ethereum:${tokenAddress}@${chainId}/transfer?symbol=${tokenSymbol}&decimals=${tokenDecimals}&name=${encodeURIComponent(tokenName)}`,
+      priority: 1
+    },
+    {
+      name: 'TrustWallet Universal',
+      description: 'Link web universal do TrustWallet',
+      data: `https://link.trustwallet.com/add_asset?asset=c${chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}`,
+      priority: 2
+    },
+    {
+      name: 'WalletConnect v2',
+      description: 'Protocolo WalletConnect para conectar wallets móveis',
+      data: `wc:add-token?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}&name=${encodeURIComponent(tokenName)}`,
+      priority: 3
+    },
+    {
+      name: 'MetaMask Mobile',
+      description: 'Deep link específico para MetaMask Mobile',
+      data: `https://metamask.app.link/add-token?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}`,
+      priority: 2
+    }
+  ];
+
+  // Ordenar por prioridade
+  qrFormats.sort((a, b) => a.priority - b.priority);
+
+  // Criar interface com múltiplas opções
+  qrDiv.innerHTML = `
+    <div class="multi-wallet-qr-container">
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        <strong>QR Codes Otimizados para Wallets Móveis</strong><br>
+        Escaneie com sua wallet preferida ou use os links abaixo para adicionar o token diretamente.
+      </div>
+      
+      <div class="row">
+        <div class="col-12 col-lg-6">
+          <div id="primaryQRContainer" class="text-center mb-3">
+            <h6 class="text-success"><i class="bi bi-star-fill"></i> Recomendado</h6>
+            <div id="primaryQR"></div>
+            <small class="text-muted mt-2 d-block">${qrFormats[0].description}</small>
+          </div>
+        </div>
+        
+        <div class="col-12 col-lg-6">
+          <div class="wallet-options">
+            <h6><i class="bi bi-wallet2"></i> Opções por Wallet:</h6>
+            <div id="walletLinks" class="d-grid gap-2"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-3">
+        <details class="qr-alternatives">
+          <summary class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-qr-code-scan"></i> Ver Todos os QR Codes
+          </summary>
+          <div id="allQRCodes" class="row mt-3"></div>
+        </details>
+      </div>
+    </div>
+  `;
+
+  // Gerar QR Code principal (EIP-681)
+  generateSingleQR('primaryQR', qrFormats[0].data, 250, qrFormats[0].name);
+  
+  // Gerar links diretos para wallets
+  generateWalletLinks(qrFormats, tokenSymbol, tokenName, chainId);
+  
+  // Gerar todos os QR Codes alternativos
+  generateAllAlternativeQRs(qrFormats.slice(1), tokenSymbol, tokenName, chainId);
+}
+
+// Função para gerar links diretos para wallets
+function generateWalletLinks(qrFormats, tokenSymbol, tokenName, chainId) {
+  const walletLinksDiv = document.getElementById('walletLinks');
+  
+  const walletButtons = qrFormats.map(format => `
+    <div class="d-flex align-items-center justify-content-between p-2 border rounded">
+      <div class="flex-grow-1">
+        <strong class="text-primary">${format.name}</strong><br>
+        <small class="text-muted">${format.description}</small>
+      </div>
+      <div class="btn-group btn-group-sm">
+        <button class="btn btn-success" onclick="openWalletLink('${format.data.replace(/'/g, "\\'")}')">
+          <i class="bi bi-box-arrow-up-right"></i> Abrir
+        </button>
+        <button class="btn btn-outline-success" onclick="copyWalletLink('${format.data.replace(/'/g, "\\'")}')">
+          <i class="bi bi-clipboard"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+  
+  walletLinksDiv.innerHTML = walletButtons;
+}
+
+// Função para gerar QR Code individual
+async function generateSingleQR(containerId, qrData, size = 200, title = '') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  container.innerHTML = '<div class="text-center text-muted"><i class="bi bi-hourglass-split"></i> Gerando...</div>';
+  
+  // APIs para QR Code com fallback
+  const qrApis = [
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrData)}&format=png&margin=10&bgcolor=FFFFFF&color=000000&ecc=M`,
+    `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(qrData)}&chld=M|4`,
+    `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=${size}&margin=10&format=png`
+  ];
+  
+  let apiIndex = 0;
+  
+  function tryNextAPI() {
+    if (apiIndex >= qrApis.length) {
+      container.innerHTML = `
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle"></i><br>
+          Erro ao gerar QR Code.<br>
+          <small>Dados: ${qrData.length > 50 ? qrData.substring(0, 50) + '...' : qrData}</small>
+        </div>
+      `;
+      return;
+    }
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = qrApis[apiIndex];
+    
+    img.onload = function() {
+      // Criar canvas para adicionar logo XCafe
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = size;
+      canvas.height = size;
+      
+      // Desenhar QR Code base
+      ctx.drawImage(img, 0, 0, size, size);
+      
+      // Adicionar logo XCafe pequeno no canto
+      addXCafeMark(ctx, size);
+      
+      // Mostrar resultado
+      container.innerHTML = `
+        <div class="qr-result">
+          <canvas width="${size}" height="${size}" style="max-width: 100%; border: 2px solid #28a745; border-radius: 10px;"></canvas>
+          <div class="mt-2">
+            <button class="btn btn-sm btn-success" onclick="downloadQR(this.parentNode.parentNode.querySelector('canvas'), '${title || 'qrcode'}_xcafe')">
+              <i class="bi bi-download"></i> Download
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Copiar canvas gerado para o canvas no HTML
+      const displayCanvas = container.querySelector('canvas');
+      const displayCtx = displayCanvas.getContext('2d');
+      displayCtx.drawImage(canvas, 0, 0);
+    };
+    
+    img.onerror = function() {
+      apiIndex++;
+      tryNextAPI();
+    };
+  }
+  
+  tryNextAPI();
+}
+
+// Função para adicionar marca XCafe discretamente
+function addXCafeMark(ctx, qrSize) {
+  const markSize = qrSize * 0.15;
+  const markX = qrSize - markSize - 5;
+  const markY = qrSize - markSize - 5;
+  
+  // Fundo semi-transparente
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.fillRect(markX - 3, markY - 3, markSize + 6, markSize + 6);
+  
+  // Borda verde
+  ctx.strokeStyle = '#28a745';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(markX - 3, markY - 3, markSize + 6, markSize + 6);
+  
+  // Texto XCafe
+  ctx.fillStyle = '#28a745';
+  ctx.font = `bold ${markSize/4}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.fillText('XCafe', markX + markSize/2, markY + markSize/2 + 2);
+}
+
+// Função para gerar QR Codes alternativos
+function generateAllAlternativeQRs(formats, tokenSymbol, tokenName, chainId) {
+  const allQRDiv = document.getElementById('allQRCodes');
+  
+  const qrCards = formats.map((format, index) => `
+    <div class="col-12 col-md-6 mb-3">
+      <div class="card">
+        <div class="card-header bg-light">
+          <h6 class="mb-0">
+            <i class="bi bi-qr-code"></i> ${format.name}
+          </h6>
+          <small class="text-muted">${format.description}</small>
+        </div>
+        <div class="card-body text-center">
+          <div id="altQR_${index}">
+            <button class="btn btn-outline-primary" onclick="generateSingleQR('altQR_${index}', '${format.data.replace(/'/g, "\\'")}', 180, '${format.name}')">
+              <i class="bi bi-qr-code-scan"></i> Gerar QR Code
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  allQRDiv.innerHTML = qrCards;
+}
+
+// Funções auxiliares para interação
+window.openWalletLink = function(url) {
+  console.log('🔗 Abrindo link da wallet:', url);
+  window.open(url, '_blank');
+};
+
+window.copyWalletLink = function(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    // Feedback visual
+    const button = event.target.closest('button');
+    const originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-check"></i>';
+    button.classList.add('btn-success');
+    button.classList.remove('btn-outline-success');
+    
+    setTimeout(() => {
+      button.innerHTML = originalHtml;
+      button.classList.remove('btn-success');
+      button.classList.add('btn-outline-success');
+    }, 1500);
+  }).catch(err => {
+    console.error('Erro ao copiar:', err);
+    alert('Link copiado: ' + url);
+  });
+};
+
+window.downloadQR = function(canvas, filename) {
+  const link = document.createElement('a');
+  link.download = filename + '.png';
+  link.href = canvas.toDataURL('image/png', 1.0);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
