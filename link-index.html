@@ -27,11 +27,11 @@
       <div class="col-lg-8 col-xl-7">
         <div class="card shadow-lg border-primary">
           <div class="card-header bg-primary text-white">
-            <h2 class="mb-0"><i class="bi bi-desktop me-2"></i>Gerador de Link para Token (Desktop)</h2>
+            <h2 class="mb-0"><i class="bi bi-cpu me-2"></i>Gerador de Link Inteligente para Token</h2>
           </div>
           <div class="card-body">
             <div class="alert alert-warning border-warning" role="alert">
-              <i class="bi bi-exclamation-triangle-fill"></i> <strong>Desktop Only:</strong> Este sistema foi otimizado para uso em computadores desktop com <strong>MetaMask</strong> ou <strong>TrustWallet</strong> instalados.
+              <i class="bi bi-cpu"></i> <strong>Sistema Inteligente:</strong> Este gerador cria links que detectam automaticamente <strong>MetaMask</strong> ou <strong>TrustWallet</strong> no desktop do usuário e usam o método apropriado.
             </div>
             <form id="token-link-form" autocomplete="off" onsubmit="return false;">
               <div class="mb-3">
@@ -90,16 +90,19 @@
                 </button>
               </div>
               <div id="generatedLinkContainer" class="mb-4" style="display:none;">
-                <div class="alert alert-info mb-3" role="alert">
-                  <i class="bi bi-info-circle"></i> <strong>Atenção:</strong> Este link foi otimizado para uso em <strong>computadores desktop</strong> com MetaMask ou TrustWallet instalados no navegador.
+                <div class="alert alert-success mb-3" role="alert">
+                  <i class="bi bi-check-circle"></i> <strong>Link Gerado com Sucesso!</strong><br>
+                  <small>Este link detecta automaticamente MetaMask ou TrustWallet no desktop do usuário.</small>
                 </div>
-                <label class="form-label">Link Gerado para Desktop:</label>
-                <div class="input-group">
+                <label class="form-label">Link Compartilhável (Desktop):</label>
+                <div class="input-group mb-2">
                   <input id="generatedLink" class="form-control" readonly />
-                  <button class="btn btn-outline-secondary" id="btnCopyLink" type="button"><i class="bi bi-clipboard"></i></button>
-                  <button class="btn btn-outline-success" id="btnShareLink" type="button"><i class="bi bi-share"></i></button>
+                  <button class="btn btn-outline-secondary" id="btnCopyLink" type="button"><i class="bi bi-clipboard"></i> Copiar</button>
+                  <button class="btn btn-outline-success" id="btnShareLink" type="button"><i class="bi bi-share"></i> Compartilhar</button>
                 </div>
-                <small class="text-muted">O link levará os usuários a uma página onde podem adicionar o token ao MetaMask ou TrustWallet com um clique.</small>
+                <small class="text-muted">
+                  💡 <strong>Como funciona:</strong> O destinatário do link verá um botão inteligente que detecta automaticamente se tem MetaMask ou TrustWallet instalado e usa o método apropriado para adicionar o token.
+                </small>
               </div>
             </form>
           </div>

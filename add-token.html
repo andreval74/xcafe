@@ -52,27 +52,29 @@
                 <i class="bi bi-info-circle me-2"></i>
                 <strong>Como adicionar:</strong>
                 <ol class="mb-0 mt-2">
-                  <li>Clique no botão da sua wallet preferida abaixo</li>
-                  <li>Sua wallet abrirá automaticamente</li>
-                  <li>Confirme a adição do token na wallet</li>
+                  <li>Clique no botão "Adicionar à Wallet" abaixo</li>
+                  <li>O sistema detectará sua wallet automaticamente</li>
+                  <li>Confirme a adição do token na sua wallet</li>
                 </ol>
               </div>
 
               <div class="d-grid gap-2 mb-3">
-                <button id="addToMetaMaskBtn" class="btn btn-warning btn-lg">
-                  <img src="imgs/metamask-fox.svg" width="20" height="20" style="margin-right: 8px;">
-                  Adicionar ao MetaMask
-                </button>
-                
-                <button id="addToTrustWalletBtn" class="btn btn-primary btn-lg">
-                  <i class="bi bi-shield-check me-2"></i>
-                  Adicionar ao TrustWallet
+                <button id="addToWalletBtn" class="btn btn-success btn-lg">
+                  <i class="bi bi-wallet2 me-2"></i>
+                  <span id="walletBtnText">Adicionar à Wallet</span>
                 </button>
                 
                 <button id="copyAddressBtn" class="btn btn-outline-secondary">
                   <i class="bi bi-clipboard me-2"></i>
                   Copiar Endereço do Contrato
                 </button>
+              </div>
+
+              <div class="text-center">
+                <small class="text-muted" id="walletDetected">
+                  <i class="bi bi-search"></i>
+                  Detectando wallet...
+                </small>
               </div>
 
               <div class="text-center">
@@ -142,19 +144,49 @@
     }
 
     function setupButtons(address, symbol, decimals, name, chainId) {
-      const metaMaskBtn = document.getElementById('addToMetaMaskBtn');
-      const trustWalletBtn = document.getElementById('addToTrustWalletBtn');
+      const walletBtn = document.getElementById('addToWalletBtn');
       const copyBtn = document.getElementById('copyAddressBtn');
+      const walletDetected = document.getElementById('walletDetected');
+      const walletBtnText = document.getElementById('walletBtnText');
 
-      // Botão MetaMask
-      metaMaskBtn.addEventListener('click', async function() {
+      // Detectar wallet disponível
+      let walletType = 'none';
+      let walletIcon = 'bi-wallet2';
+      
+      if (typeof window.ethereum !== 'undefined') {
+        if (window.ethereum.isMetaMask) {
+          walletType = 'metamask';
+          walletIcon = 'metamask-fox.svg';
+          walletDetected.innerHTML = '<i class="bi bi-check-circle text-success"></i> MetaMask detectado';
+          walletBtnText.innerHTML = '<img src="imgs/metamask-fox.svg" width="20" height="20" style="margin-right: 8px;"> Adicionar ao MetaMask';
+          walletBtn.className = 'btn btn-warning btn-lg';
+        } else if (window.ethereum.isTrust) {
+          walletType = 'trustwallet';
+          walletDetected.innerHTML = '<i class="bi bi-shield-check text-success"></i> TrustWallet detectado';
+          walletBtnText.innerHTML = '<i class="bi bi-shield-check me-2"></i> Adicionar ao TrustWallet';
+          walletBtn.className = 'btn btn-primary btn-lg';
+        } else {
+          walletType = 'web3';
+          walletDetected.innerHTML = '<i class="bi bi-check-circle text-success"></i> Wallet Web3 detectada';
+          walletBtnText.innerHTML = '<i class="bi bi-wallet2 me-2"></i> Adicionar à Wallet';
+          walletBtn.className = 'btn btn-success btn-lg';
+        }
+      } else {
+        walletType = 'fallback';
+        walletDetected.innerHTML = '<i class="bi bi-exclamation-triangle text-warning"></i> Nenhuma wallet detectada - Usando método universal';
+        walletBtnText.innerHTML = '<i class="bi bi-link-45deg me-2"></i> Abrir no TrustWallet';
+        walletBtn.className = 'btn btn-primary btn-lg';
+      }
+
+      // Botão único inteligente
+      walletBtn.addEventListener('click', async function() {
         const originalText = this.innerHTML;
-        this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Conectando...';
+        this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processando...';
         this.disabled = true;
 
         try {
-          if (typeof window.ethereum !== 'undefined') {
-            // MetaMask disponível
+          if (walletType === 'metamask' || walletType === 'web3') {
+            // Usar API wallet_watchAsset para MetaMask e outras wallets Web3
             await window.ethereum.request({
               method: 'wallet_watchAsset',
               params: {
@@ -171,61 +203,32 @@
             this.innerHTML = '<i class="bi bi-check-circle me-2"></i>Token Adicionado!';
             this.className = 'btn btn-success btn-lg';
             
-          } else {
-            // MetaMask não disponível
-            this.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>MetaMask Não Encontrado';
-            this.className = 'btn btn-secondary btn-lg';
+          } else if (walletType === 'trustwallet' || walletType === 'fallback') {
+            // Usar link universal do TrustWallet
+            const trustWalletUrl = `https://link.trustwallet.com/add_asset?asset=c${chainId}_t${address}&symbol=${symbol}&decimals=${decimals}&name=${encodeURIComponent(name)}`;
+            
+            window.open(trustWalletUrl, '_blank');
+            
+            this.innerHTML = '<i class="bi bi-check-circle me-2"></i>Wallet Aberta!';
+            this.className = 'btn btn-success btn-lg';
             
             setTimeout(() => {
               this.innerHTML = originalText;
-              this.className = 'btn btn-warning btn-lg';
+              this.className = walletType === 'trustwallet' ? 'btn btn-primary btn-lg' : 'btn btn-primary btn-lg';
               this.disabled = false;
             }, 3000);
           }
           
         } catch (error) {
-          console.error('Erro MetaMask:', error);
+          console.error('Erro ao adicionar token:', error);
           this.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Erro - Tente Novamente';
           this.className = 'btn btn-danger btn-lg';
           
           setTimeout(() => {
             this.innerHTML = originalText;
-            this.className = 'btn btn-warning btn-lg';
-            this.disabled = false;
-          }, 3000);
-        }
-      });
-
-      // Botão TrustWallet
-      trustWalletBtn.addEventListener('click', async function() {
-        const originalText = this.innerHTML;
-        this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Abrindo TrustWallet...';
-        this.disabled = true;
-
-        try {
-          // URL oficial do TrustWallet para adicionar tokens
-          const trustWalletUrl = `https://link.trustwallet.com/add_asset?asset=c${chainId}_t${address}&symbol=${symbol}&decimals=${decimals}&name=${encodeURIComponent(name)}`;
-          
-          // Abrir TrustWallet
-          window.open(trustWalletUrl, '_blank');
-          
-          this.innerHTML = '<i class="bi bi-check-circle me-2"></i>TrustWallet Aberto!';
-          this.className = 'btn btn-success btn-lg';
-          
-          setTimeout(() => {
-            this.innerHTML = originalText;
-            this.className = 'btn btn-primary btn-lg';
-            this.disabled = false;
-          }, 3000);
-          
-        } catch (error) {
-          console.error('Erro TrustWallet:', error);
-          this.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i>Erro - Tente Novamente';
-          this.className = 'btn btn-danger btn-lg';
-          
-          setTimeout(() => {
-            this.innerHTML = originalText;
-            this.className = 'btn btn-primary btn-lg';
+            this.className = walletType === 'metamask' ? 'btn btn-warning btn-lg' : 
+                           walletType === 'trustwallet' ? 'btn btn-primary btn-lg' : 
+                           'btn btn-success btn-lg';
             this.disabled = false;
           }, 3000);
         }
