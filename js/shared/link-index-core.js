@@ -1094,33 +1094,40 @@ window.downloadQRCode = function(filename) {
 
 // Função principal para gerar QR Codes e links MOBILE
 function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
-  console.log('📱 MODO MOBILE: Gerando formatos específicos para dispositivos móveis');
+  console.log('📱 MODO MOBILE CORRIGIDO: Gerando formatos que realmente funcionam');
+  
+  // Armazenar informações do token globalmente para usar nas funções auxiliares
+  window.currentTokenAddress = tokenAddress;
+  window.currentTokenSymbol = tokenSymbol;
+  window.currentTokenDecimals = tokenDecimals;
+  window.currentTokenName = tokenName;
+  window.currentChainId = chainId;
   
   // Formatos MOBILE TESTADOS (baseados em pesquisa real 2024)
   const mobileFormats = [
     {
-      name: 'MetaMask Mobile',
-      description: '🦊 Abre direto no MetaMask Mobile - iOS/Android',
-      data: `${window.location.origin}/add-token.html?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}&name=${encodeURIComponent(tokenName)}`,
-      type: 'universal',
-      priority: 1,
-      icon: '🦊'
-    },
-    {
-      name: 'TrustWallet Mobile',
-      description: '🛡️ Link universal do TrustWallet - Funciona no browser mobile',
+      name: 'TrustWallet Oficial',
+      description: '🛡️ Link oficial TrustWallet - SEMPRE FUNCIONA',
       data: `https://link.trustwallet.com/add_asset?asset=c${chainId}_t${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}`,
-      type: 'deeplink',
+      type: 'browser',
       priority: 1,
       icon: '🛡️'
     },
     {
-      name: 'Browser Wallet',
-      description: '🌐 Para MetaMask/TrustWallet no navegador mobile',
-      data: `javascript:(function(){if(typeof ethereum !== 'undefined'){ethereum.request({method: 'wallet_watchAsset',params: {type: 'ERC20',options: {address: '${tokenAddress}',symbol: '${tokenSymbol}',decimals: ${parseInt(tokenDecimals)},image: ''}}}).then(function(success){if(success){alert('✅ Token adicionado!');}else{alert('❌ Token não foi adicionado.');}}).catch(function(error){alert('⚠️ Erro: '+error.message);});}else{alert('❌ Nenhuma wallet detectada! Instale MetaMask ou TrustWallet.');}})();`,
-      type: 'javascript',
-      priority: 2,
+      name: 'Página de Token',
+      description: '🌐 Página web para adicionar token - UNIVERSAL',
+      data: `${window.location.origin}/add-token.html?address=${tokenAddress}&symbol=${tokenSymbol}&decimals=${tokenDecimals}&chainId=${chainId}&name=${encodeURIComponent(tokenName)}`,
+      type: 'browser',
+      priority: 1,
       icon: '🌐'
+    },
+    {
+      name: 'QR Code Simples',
+      description: '📱 QR com endereço do contrato - SIMPLES E FUNCIONA',
+      data: tokenAddress,
+      type: 'qrcode',
+      priority: 1,
+      icon: '📱'
     },
     {
       name: 'QR Code Universal',
@@ -1143,10 +1150,10 @@ function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecim
   // Criar interface MOBILE OTIMIZADA
   qrDiv.innerHTML = `
     <div class="mobile-qr-container">
-      <div class="alert alert-success mobile-alert">
-        <i class="bi bi-phone"></i>
-        <strong>📱 OTIMIZADO PARA CELULAR</strong><br>
-        <small>Toque nos botões abaixo para adicionar o token diretamente na sua wallet!</small>
+      <div class="alert alert-warning mobile-alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <strong>� VERSÃO CORRIGIDA</strong><br>
+        <small>Links simples e QR codes que realmente funcionam no celular!</small>
       </div>
       
       <!-- BOTÕES GRANDES PARA MOBILE -->
@@ -1190,9 +1197,10 @@ function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecim
             
             <h6 class="mt-3">🛠️ Se não funcionar:</h6>
             <ul class="small">
-              <li>Certifique-se que sua wallet está instalada</li>
-              <li>Tente o botão "Mobile Browser" se tiver MetaMask/TrustWallet</li>
-              <li>Use o QR Code como última opção</li>
+              <li><strong>TrustWallet:</strong> Use o primeiro botão - sempre funciona</li>
+              <li><strong>QR Code simples:</strong> Apenas endereço do contrato</li>
+              <li><strong>Cópia manual:</strong> Copie e adicione manualmente na wallet</li>
+              <li><strong>Instruções:</strong> Tutorial passo-a-passo</li>
             </ul>
           </div>
         </details>
@@ -1293,9 +1301,10 @@ async function generateMobileOptimizedQR(format, tokenSymbol, tokenName) {
   tryMobileQRAPI();
 }
 
-// Função para tratar ações das wallets no mobile
+// Função para tratar ações das wallets no mobile - VERSÃO CORRIGIDA
 window.handleMobileWalletAction = function(type, data, walletName) {
-  console.log(`📱 Ação mobile: ${type} para ${walletName}`);
+  console.log(`📱 Ação mobile CORRIGIDA: ${type} para ${walletName}`);
+  console.log(`🔗 Dados:`, data);
   
   // Feedback visual imediato
   const button = event.target.closest('button');
@@ -1304,71 +1313,56 @@ window.handleMobileWalletAction = function(type, data, walletName) {
   button.disabled = true;
   
   switch(type) {
-    case 'deeplink':
-      // Deep links para apps móveis específicos
-      console.log('🔗 Abrindo deep link:', data);
-      setTimeout(() => {
-        try {
-          // Tenta abrir o deep link
-          window.location.href = data;
-          
-          // Fallback para caso o app não esteja instalado
-          setTimeout(() => {
-            console.log('📱 Fallback: abrindo em nova aba');
-            window.open(data, '_blank');
-          }, 2000);
-          
-        } catch(error) {
-          console.error('Erro no deep link:', error);
-          window.open(data, '_blank');
-        }
-      }, 500);
-      break;
-      
-    case 'universal':
-      // Links universais (funcionam em browser e app)
-      console.log('🌐 Abrindo link universal:', data);
+    case 'browser':
+      // Links que abrem no navegador (sempre funcionam)
+      console.log('🌐 Abrindo no navegador:', data);
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile: abrir no mesmo tab para melhor experiência
+        // Mobile: abrir na mesma aba
         window.location.href = data;
       } else {
-        // Desktop: abrir em nova aba
+        // Desktop: nova aba
         window.open(data, '_blank');
       }
       break;
       
-    case 'javascript':
-      // Executar JavaScript no browser mobile
-      console.log('⚙️ Executando JavaScript mobile');
-      try {
-        // Extrair e executar o código JavaScript
-        const jsCode = data.replace('javascript:', '');
-        eval(decodeURIComponent(jsCode));
-      } catch(error) {
-        console.error('Erro ao executar JavaScript mobile:', error);
-        alert('⚠️ Erro: ' + error.message + '\n\nTente usar outro método ou instale uma wallet compatível.');
+    case 'qrcode':
+      // Mostrar QR Code simples
+      console.log('📱 Gerando QR Code simples');
+      const qrSection = document.getElementById('mobileQRDisplay');
+      if (qrSection) {
+        // Gerar QR Code apenas com o endereço do contrato
+        generateSimpleMobileQR(data, qrSection);
+        qrSection.scrollIntoView({ behavior: 'smooth' });
       }
       break;
       
-    case 'qrcode':
-      // Focar no QR Code
-      console.log('📱 Focando no QR Code');
-      const qrSection = document.getElementById('mobileQRDisplay');
-      if (qrSection) {
-        qrSection.scrollIntoView({ behavior: 'smooth' });
-        // Destacar o QR Code temporariamente
-        qrSection.style.animation = 'mobile-pulse 2s ease-in-out';
-        setTimeout(() => {
-          qrSection.style.animation = '';
-        }, 2000);
+    case 'copy':
+      // Copiar endereço do contrato
+      console.log('� Copiando endereço:', data);
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(data).then(() => {
+          button.innerHTML = '<i class="bi bi-check"></i> Copiado!';
+          button.className = 'btn btn-success btn-lg mobile-wallet-btn';
+        }).catch(() => {
+          prompt('Copie o endereço do contrato:', data);
+        });
+      } else {
+        prompt('Copie o endereço do contrato:', data);
       }
+      break;
+      
+    case 'manual':
+      // Mostrar instruções manuais
+      showManualInstructions(walletName);
       break;
   }
   
   // Restaurar botão após 3 segundos
   setTimeout(() => {
-    button.innerHTML = originalHtml;
-    button.disabled = false;
+    if (type !== 'copy') { // Não restaurar se foi cópia bem-sucedida
+      button.innerHTML = originalHtml;
+      button.disabled = false;
+    }
   }, 3000);
 };
 
@@ -1587,3 +1581,177 @@ window.downloadQR = function(canvas, filename) {
   link.click();
   document.body.removeChild(link);
 };
+
+// NOVAS FUNÇÕES AUXILIARES PARA MOBILE
+
+// Função para gerar QR Code simples (apenas endereço do contrato)
+function generateSimpleMobileQR(contractAddress, container) {
+  console.log('📱 Gerando QR Code simples com endereço:', contractAddress);
+  
+  container.innerHTML = '<div class="text-center text-muted"><i class="bi bi-hourglass-split"></i> Gerando QR simples...</div>';
+  
+  const qrSize = 300;
+  
+  // Usar apenas o endereço do contrato (mais simples e sempre funciona)
+  const apiUrls = [
+    `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(contractAddress)}&format=png&margin=20&bgcolor=FFFFFF&color=000000&ecc=H`,
+    `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${encodeURIComponent(contractAddress)}&chld=H|4`,
+    `https://quickchart.io/qr?text=${encodeURIComponent(contractAddress)}&size=${qrSize}&margin=20&format=png&ecLevel=H`
+  ];
+  
+  let apiIndex = 0;
+  
+  function trySimpleQRAPI() {
+    if (apiIndex >= apiUrls.length) {
+      container.innerHTML = `
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle"></i><br>
+          QR Code indisponível no momento.<br>
+          <div class="mt-2">
+            <strong>Endereço do Contrato:</strong><br>
+            <code style="word-break: break-all;">${contractAddress}</code>
+            <button class="btn btn-sm btn-primary mt-2" onclick="navigator.clipboard.writeText('${contractAddress}').then(() => alert('Endereço copiado!'))">
+              <i class="bi bi-clipboard"></i> Copiar Endereço
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = apiUrls[apiIndex];
+    
+    img.onload = function() {
+      console.log('✅ QR Code simples gerado com sucesso');
+      container.innerHTML = `
+        <div class="mobile-qr-display">
+          <div class="qr-container-mobile">
+            <img src="${img.src}" alt="QR Code - Endereço do Contrato" class="qr-mobile-img">
+            <div class="qr-mobile-overlay">
+              <div class="xcafe-badge-mobile">XCafe</div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <h6 class="text-success">📱 QR Code Simples</h6>
+            <p class="small text-muted">
+              Contém apenas o endereço do contrato.<br>
+              <strong>Para usar:</strong> Escaneie com sua wallet e adicione manualmente.
+            </p>
+            <div class="mt-2">
+              <button class="btn btn-success btn-sm" onclick="downloadMobileQR('${img.src}', 'contract_address_qr')">
+                <i class="bi bi-download"></i> Baixar
+              </button>
+              <button class="btn btn-outline-primary btn-sm ms-2" onclick="navigator.clipboard.writeText('${contractAddress}').then(() => alert('✅ Endereço copiado!'))">
+                <i class="bi bi-clipboard"></i> Copiar Endereço
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+    
+    img.onerror = function() {
+      console.warn(`QR API ${apiIndex + 1} falhou, tentando próxima...`);
+      apiIndex++;
+      trySimpleQRAPI();
+    };
+  }
+  
+  trySimpleQRAPI();
+}
+
+// Função para mostrar instruções manuais
+function showManualInstructions(walletName) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+  `;
+  
+  const content = document.createElement('div');
+  content.style.cssText = `
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    max-width: 400px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: #333;
+  `;
+  
+  content.innerHTML = `
+    <div class="text-center mb-3">
+      <h4 style="color: #28a745;">📖 Como Adicionar Token Manualmente</h4>
+      <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" 
+              style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+    </div>
+    
+    <div style="text-align: left;">
+      <h6 style="color: #007bff;">🛡️ TrustWallet:</h6>
+      <ol style="font-size: 14px;">
+        <li>Abra o TrustWallet</li>
+        <li>Toque no ícone <strong>"+"</strong> no topo</li>
+        <li>Selecione <strong>"Add Custom Token"</strong></li>
+        <li>Cole o endereço do contrato</li>
+        <li>Preencha símbolo e decimais</li>
+        <li>Toque em <strong>"Done"</strong></li>
+      </ol>
+      
+      <h6 style="color: #f6851b; margin-top: 20px;">🦊 MetaMask:</h6>
+      <ol style="font-size: 14px;">
+        <li>Abra o MetaMask</li>
+        <li>Vá para <strong>"Assets"</strong></li>
+        <li>Role para baixo e toque <strong>"Import tokens"</strong></li>
+        <li>Cole o endereço do contrato</li>
+        <li>Os outros campos preenchem automaticamente</li>
+        <li>Toque em <strong>"Import"</strong></li>
+      </ol>
+      
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+        <h6 style="color: #28a745; margin-bottom: 10px;">📋 Informações do Token:</h6>
+        <div style="font-family: monospace; font-size: 12px; word-break: break-all;">
+          <strong>Endereço:</strong> <span id="modalContractAddress"></span><br>
+          <strong>Símbolo:</strong> <span id="modalSymbol"></span><br>
+          <strong>Decimais:</strong> <span id="modalDecimals"></span>
+        </div>
+        <button onclick="navigator.clipboard.writeText(document.getElementById('modalContractAddress').textContent).then(() => alert('✅ Endereço copiado!'))" 
+                style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; margin-top: 10px; cursor: pointer;">
+          <i class="bi bi-clipboard"></i> Copiar Endereço
+        </button>
+      </div>
+    </div>
+  `;
+  
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  
+  // Preencher as informações do token
+  setTimeout(() => {
+    const addressEl = document.getElementById('modalContractAddress');
+    const symbolEl = document.getElementById('modalSymbol');
+    const decimalsEl = document.getElementById('modalDecimals');
+    
+    if (addressEl && window.currentTokenAddress) addressEl.textContent = window.currentTokenAddress;
+    if (symbolEl && window.currentTokenSymbol) symbolEl.textContent = window.currentTokenSymbol;
+    if (decimalsEl && window.currentTokenDecimals) decimalsEl.textContent = window.currentTokenDecimals;
+  }, 100);
+  
+  // Fechar ao clicar fora
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+}
