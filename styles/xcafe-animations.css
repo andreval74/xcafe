@@ -268,3 +268,34 @@ Sistema otimizado para trabalhar com globals.css (evita duplicações)
     outline: 2px solid var(--bs-primary);
     outline-offset: 2px;
 }
+
+/* ===== ANIMAÇÕES PARA RESULTADO DE DEPLOY ===== */
+
+/* Pulse Animation para ícone de sucesso */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.success-animation i {
+    animation: pulse 2s infinite;
+}
+
+/* Gradient cards para resultado */
+.bg-gradient-dark {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d) !important;
+}
+
+.card.border-success:hover,
+.card.border-info:hover,
+.card.border-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}

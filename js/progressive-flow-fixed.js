@@ -23,16 +23,9 @@ class ProgressiveFlow {
 
     setupFormEvents() {
         // Botões de navegação
-        const walletNextBtn = document.getElementById('wallet-next-btn');
         const basicPrevBtn = document.getElementById('basic-info-prev-btn');
         const basicNextBtn = document.getElementById('basic-info-next-btn');
         const deployPrevBtn = document.getElementById('deploy-prev-btn');
-
-        if (walletNextBtn) {
-            walletNextBtn.addEventListener('click', () => {
-                this.enableSection('basicinfo');
-            });
-        }
         
         if (basicPrevBtn) {
             basicPrevBtn.addEventListener('click', () => {
