@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xcafe Token Creator - Criação Simples de Tokens</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  
+  <!-- xcafe Styles -->
+  <link rel="stylesheet" href="styles/globals.css">
+  <link rel="stylesheet" href="styles/xcafe-home.css">
+  <link rel="stylesheet" href="styles/xcafe-animations.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="imgs/xcafe-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="imgs/xcafe-16x16.png">
+</head>
+
+<body class="bg-dark text-white">
+  <!-- Header -->
+  <header data-component="header"></header>
+
+  <!-- Main Content -->
+  <main class="container-fluid py-5">
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="row justify-content-center mb-5">
+        <div class="col-lg-8 text-center">
+          <div class="hero-section fade-in">
+            <img src="imgs/xcafe-192x192.png" alt="xcafe Logo" class="mb-4 logo-bounce" style="height: 120px;">
+            <h1 class="display-4 fw-bold text-gradient mb-3">
+              Crie seu Token em
+              <span class="text-warning">2 Minutos</span>
+            </h1>
+            <p class="lead text-muted mb-4">
+              Interface simples, segura e rápida para criar tokens ERC-20 na BSC.<br>
+              Sem conhecimento técnico necessário. Deploy em menos de 2 minutos.
+            </p>
+            
+            <!-- Stats Row -->
+            <div class="row g-3 mb-4">
+              <div class="col-6 col-md-3">
+                <div class="stat-card">
+                  <div class="stat-number text-primary">2min</div>
+                  <div class="stat-label">Deploy Rápido</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="stat-card">
+                  <div class="stat-number text-warning">0.01 BNB</div>
+                  <div class="stat-label">Preço Justo</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="stat-card">
+                  <div class="stat-number text-success">100%</div>
+                  <div class="stat-label">Seguro</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="stat-card">
+                  <div class="stat-number text-info">BSC</div>
+                  <div class="stat-label">Blockchain</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Token Creation Form -->
+      <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+          <div class="creator-card bg-dark-secondary border border-primary rounded-4 shadow-lg p-4 p-lg-5">
+            
+            <!-- Price Selection -->
+            <div class="price-section mb-5">
+              <h3 class="text-center text-primary mb-4">
+                <i class="bi bi-tag-fill me-2"></i>Escolha seu Plano
+              </h3>
+              
+              <div class="row g-4">
+                <!-- Basic Plan -->
+                <div class="col-md-6">
+                  <div class="price-card h-100" id="basic-plan">
+                    <div class="price-card-header bg-primary text-white">
+                      <h5 class="mb-0">
+                        <i class="bi bi-lightning-charge me-2"></i>Básico
+                      </h5>
+                    </div>
+                    <div class="price-card-body">
+                      <div class="price-amount text-center mb-3">
+                        <span class="price-value">0.01</span>
+                        <span class="price-currency">BNB</span>
+                      </div>
+                      <ul class="price-features">
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Deploy em 1 minuto</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Endereço padrão</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>ERC-20 compliant</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Verificação automática</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Suporte 24/7</li>
+                      </ul>
+                      <div class="form-check price-radio">
+                        <input class="form-check-input" type="radio" name="planType" 
+                               id="plan-basic" value="basic" checked>
+                        <label class="form-check-label" for="plan-basic">
+                          Selecionar Plano Básico
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Premium Plan -->
+                <div class="col-md-6">
+                  <div class="price-card h-100 premium-card" id="premium-plan">
+                    <div class="price-card-header bg-warning text-dark position-relative">
+                      <h5 class="mb-0">
+                        <i class="bi bi-star-fill me-2"></i>Premium
+                      </h5>
+                      <span class="popular-badge">POPULAR</span>
+                    </div>
+                    <div class="price-card-body">
+                      <div class="price-amount text-center mb-3">
+                        <span class="price-value">0.02</span>
+                        <span class="price-currency">BNB</span>
+                      </div>
+                      <ul class="price-features">
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Deploy personalizado</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Endereço customizado</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>CREATE2 deployment</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Endereço memorável</li>
+                        <li><i class="bi bi-check-circle text-success me-2"></i>Tudo do Básico</li>
+                      </ul>
+                      <div class="form-check price-radio">
+                        <input class="form-check-input" type="radio" name="planType" 
+                               id="plan-premium" value="premium">
+                        <label class="form-check-label" for="plan-premium">
+                          Selecionar Plano Premium
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Wallet Connection -->
+            <div class="wallet-section mb-5">
+              <h4 class="text-primary mb-3">
+                <i class="bi bi-wallet2 me-2"></i>1. Conecte sua Carteira
+              </h4>
+              
+              <div class="wallet-connect-card">
+                <div class="row g-3 align-items-center">
+                  <div class="col-lg-8">
+                    <div class="wallet-status">
+                      <input type="text" class="form-control wallet-input" id="wallet-display" 
+                             placeholder="Clique em 'Conectar' para começar" readonly>
+                    </div>
+                  </div>
+                  <div class="col-lg-4">
+                    <button id="connect-wallet-btn" class="btn btn-warning w-100 btn-lg fw-bold">
+                      <i class="bi bi-wallet2 me-2"></i>CONECTAR
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Token Configuration -->
+            <div class="token-config-section" id="token-form" style="display: none;">
+              <h4 class="text-primary mb-3">
+                <i class="bi bi-gear-fill me-2"></i>2. Configure seu Token
+              </h4>
+              
+              <div class="row g-4">
+                <!-- Basic Info -->
+                <div class="col-md-6">
+                  <label for="token-name" class="form-label">
+                    <i class="bi bi-tag me-1"></i>Nome do Token *
+                  </label>
+                  <input type="text" class="form-control" id="token-name" 
+                         placeholder="Ex: Bitcoin Brasil" required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="token-symbol" class="form-label">
+                    <i class="bi bi-code-square me-1"></i>Símbolo *
+                  </label>
+                  <input type="text" class="form-control" id="token-symbol" 
+                         placeholder="Ex: BTCBR" maxlength="10" required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="token-supply" class="form-label">
+                    <i class="bi bi-cash-stack me-1"></i>Total Supply *
+                  </label>
+                  <input type="text" class="form-control" id="token-supply" 
+                         placeholder="Ex: 1000000" required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label for="token-decimals" class="form-label">
+                    <i class="bi bi-123 me-1"></i>Decimais
+                  </label>
+                  <select class="form-control" id="token-decimals">
+                    <option value="18" selected>18 (Padrão)</option>
+                    <option value="8">8 (Como Bitcoin)</option>
+                    <option value="6">6 (Como USDC)</option>
+                  </select>
+                </div>
+                
+                <!-- Premium Options -->
+                <div class="col-12" id="premium-options" style="display: none;">
+                  <div class="premium-section">
+                    <h6 class="text-warning mb-3">
+                      <i class="bi bi-star me-2"></i>Opções Premium
+                    </h6>
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label for="custom-suffix" class="form-label">
+                          <i class="bi bi-bullseye me-1"></i>Últimos 4 caracteres (hex)
+                        </label>
+                        <input type="text" class="form-control" id="custom-suffix" 
+                               placeholder="cafe" maxlength="4">
+                        <small class="form-text text-muted">Apenas 0-9 e a-f</small>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">
+                          <i class="bi bi-pin-map me-1"></i>Endereço Previsto
+                        </label>
+                        <input type="text" class="form-control" id="predicted-address" 
+                               placeholder="Será calculado automaticamente" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Summary and Deploy -->
+            <div class="deploy-section" id="deploy-section" style="display: none;">
+              <h4 class="text-primary mb-3">
+                <i class="bi bi-rocket-takeoff me-2"></i>3. Deploy do Token
+              </h4>
+              
+              <!-- Summary -->
+              <div class="summary-card mb-4">
+                <h6 class="text-warning mb-3">Resumo da Configuração</h6>
+                <div class="row g-2" id="token-summary">
+                  <!-- Será preenchido dinamicamente -->
+                </div>
+              </div>
+              
+              <!-- Deploy Button -->
+              <div class="text-center">
+                <button id="deploy-btn" class="btn btn-success btn-lg px-5 py-3 fw-bold">
+                  <i class="bi bi-rocket-takeoff me-2"></i>
+                  CRIAR MEU TOKEN
+                </button>
+                <div class="mt-2">
+                  <small class="text-muted">
+                    Certifique-se de ter BNB suficiente para o gas
+                  </small>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Section -->
+      <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+          <h3 class="text-center mb-4">Por que escolher xcafe?</h3>
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="feature-card text-center">
+                <i class="bi bi-shield-check feature-icon text-success"></i>
+                <h5>100% Seguro</h5>
+                <p class="text-muted">Contratos auditados e testados. Código verificado automaticamente.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card text-center">
+                <i class="bi bi-lightning-charge feature-icon text-warning"></i>
+                <h5>Super Rápido</h5>
+                <p class="text-muted">Deploy em menos de 2 minutos. Interface otimizada para velocidade.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="feature-card text-center">
+                <i class="bi bi-currency-dollar feature-icon text-primary"></i>
+                <h5>Preço Justo</h5>
+                <p class="text-muted">A partir de 0.01 BNB. Sem taxas ocultas ou surpresas.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer data-component="footer"></footer>
+
+  <!-- Success Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark border-success">
+        <div class="modal-header border-success">
+          <h5 class="modal-title text-success">
+            <i class="bi bi-check-circle-fill me-2"></i>Token Criado com Sucesso!
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="success-details">
+            <!-- Será preenchido dinamicamente -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="createAnother()">
+            Criar Outro Token
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  
+  <!-- Template Loader -->
+  <script src="js/template-loader.js"></script>
+  
+  <!-- Main Script -->
+  <script type="module" src="js/tk-index.js"></script>
+
+  <style>
+    /* Token Creator Specific Styles */
+    .creator-card {
+      background: rgba(13, 17, 23, 0.95) !important;
+      backdrop-filter: blur(10px);
+    }
+    
+    .bg-dark-secondary {
+      background-color: #1c2128 !important;
+    }
+    
+    .stat-card {
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: #8b949e;
+    }
+    
+    .price-card {
+      border: 2px solid transparent;
+      border-radius: 15px;
+      background: rgba(13, 17, 23, 0.8);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .price-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(33, 158, 188, 0.3);
+    }
+    
+    .price-card.selected {
+      border-color: #ffc107;
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+    }
+    
+    .premium-card {
+      position: relative;
+    }
+    
+    .popular-badge {
+      position: absolute;
+      top: -10px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    
+    .price-card-header {
+      padding: 1rem;
+      border-radius: 13px 13px 0 0;
+    }
+    
+    .price-card-body {
+      padding: 1.5rem;
+    }
+    
+    .price-amount {
+      margin: 1rem 0;
+    }
+    
+    .price-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ffc107;
+    }
+    
+    .price-currency {
+      font-size: 1.2rem;
+      color: #8b949e;
+      margin-left: 0.5rem;
+    }
+    
+    .price-features {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+    }
+    
+    .price-features li {
+      padding: 0.5rem 0;
+      font-size: 0.95rem;
+    }
+    
+    .price-radio {
+      margin-top: 1.5rem;
+    }
+    
+    .wallet-connect-card {
+      background: rgba(33, 158, 188, 0.1);
+      border: 1px solid rgba(33, 158, 188, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    
+    .wallet-input {
+      background: rgba(13, 17, 23, 0.8) !important;
+      border: 1px solid #30363d;
+      color: #f0f6fc !important;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .premium-section {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    
+    .summary-card {
+      background: rgba(40, 167, 69, 0.1);
+      border: 1px solid rgba(40, 167, 69, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 2rem 1.5rem;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .text-gradient {
+      background: linear-gradient(45deg, #219ebc, #ffc107);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .fade-in {
+      animation: fadeIn 1s ease-in;
+    }
+    
+    .logo-bounce {
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+    
+    /* Form Controls */
+    .form-control {
+      background: rgba(13, 17, 23, 0.8) !important;
+      border: 1px solid #30363d !important;
+      color: #f0f6fc !important;
+    }
+    
+    .form-control:focus {
+      border-color: #219ebc !important;
+      box-shadow: 0 0 0 0.2rem rgba(33, 158, 188, 0.25) !important;
+      background: rgba(13, 17, 23, 0.95) !important;
+    }
+    
+    .form-label {
+      color: #f0f6fc;
+      font-weight: 500;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .price-value {
+        font-size: 2rem;
+      }
+      
+      .feature-icon {
+        font-size: 2.5rem;
+      }
+      
+      .stat-number {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</body>
+</html>
