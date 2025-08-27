@@ -175,12 +175,16 @@ class ProgressiveFlow {
         const walletInfo = document.getElementById('wallet-connection-info');
         if (!walletInfo) return;
         
-        // Mostrar endereço completo da carteira
+        // Truncar endereço para exibição mas manter completo nos dados
+        const displayAddress = walletData.address.length > 10 
+            ? `${walletData.address.substring(0, 6)}...${walletData.address.substring(38)}`
+            : walletData.address;
+        
         walletInfo.innerHTML = `
             <div class="d-flex align-items-center">
                 <i class="bi bi-wallet2 text-success me-2"></i>
                 <div>
-                    <div class="fw-bold address-display">${walletData.address}</div>
+                    <div class="fw-bold address-display" title="${walletData.address}">${displayAddress}</div>
                     <div class="text-muted small network-name">${walletData.network}</div>
                 </div>
                 <i class="bi bi-check-circle-fill text-success ms-auto"></i>
@@ -266,6 +270,9 @@ class ProgressiveFlow {
         if (!deployInfo || !this.sectionData.wallet) return;
         
         const { network, address } = this.sectionData.wallet;
+        const displayAddress = address.length > 10 
+            ? `${address.substring(0, 6)}...${address.substring(38)}`
+            : address;
         
         deployInfo.innerHTML = `
             <div class="row">
@@ -273,7 +280,7 @@ class ProgressiveFlow {
                     <strong>Rede:</strong> ${network}
                 </div>
                 <div class="col-md-6">
-                    <strong>Carteira:</strong> ${address}
+                    <strong>Carteira:</strong> ${displayAddress}
                 </div>
             </div>
         `;
