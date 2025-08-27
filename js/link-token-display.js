@@ -1,4 +1,4 @@
-// js/link-token-display.js
+﻿// js/link-token-display.js
 // Reutiliza as funções existentes do link-index.js para exibir dados do token
 import { fetchAllNetworks } from './shared/token-link-utils.js';
 
@@ -90,7 +90,7 @@ async function detectWalletAndNetwork(tokenChainId = null, allNetworks = []) {
     }
 }
 
-// Código de inicialização após carregar a página
+// Código de inicializAção após carregar a página
 document.addEventListener('DOMContentLoaded', async function () {
     // Obter parâmetros da URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Configurar botão do explorer (reutilizar lógica existente)
+    // Configurar Botão do explorer (reutilizar lógica existente)
     const explorerBtn = document.getElementById('explorer-btn');
     if (explorerBtn && selectedNetwork && selectedNetwork.explorers) {
         explorerBtn.addEventListener('click', function() {
@@ -179,7 +179,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.log('✅ Configurando wallets com função existente');
             setupWalletButtons(address, symbol, decimals, name, chainId);
         } else {
-            console.error('❌ Função setupWalletButtons não encontrada');
+            console.error('❌ função setupWalletButtons não encontrada');
         }
     }, 1000);
 });
+

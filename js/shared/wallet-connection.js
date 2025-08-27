@@ -1,18 +1,18 @@
 ﻿/**
- * Módulo compartilhado para gerenciar conexão com a carteira
- * Este módulo pode ser importado por qualquer página que precise de conexão com MetaMask
+ * Módulo compartilhado para gerenciar Conexão com a carteira
+ * Este módulo pode ser importado por qualquer página que precise de Conexão com MetaMask
  */
 
 import { connectMetaMask, listenMetaMask } from '../add-metamask.js';
 import { detectCurrentNetwork, updateNetworkInfo } from '../network-manager.js';
 
-// Estado do provider e da conexão
+// Estado do provider e da Conexão
 let currentProvider = null;
 let isConnecting = false;
 
 /**
- * Atualiza a interface de conexão com o status atual
- * @param {string} status - Status da conexão ('connecting', 'connected', 'error', etc.)
+ * Atualiza a interface de Conexão com o status atual
+ * @param {string} status - Status da Conexão ('connecting', 'connected', 'error', etc.)
  */
 function updateConnectionInterface(status = '') {
     const connectionSection = document.querySelector('.connection-section');
@@ -22,7 +22,7 @@ function updateConnectionInterface(status = '') {
     const currentNetworkSpan = document.getElementById('current-network');
     const networkInfoSection = document.getElementById('network-info-section');
 
-    console.log('Atualizando interface de conexão com status:', status);
+    console.log('Atualizando interface de Conexão com status:', status);
 
     // Remove estado de carregamento
     if (connectionSection) {
@@ -36,7 +36,7 @@ function updateConnectionInterface(status = '') {
     if (networkInfoSection) {
         if (status === 'connected') {
             networkInfoSection.style.display = 'block';
-            console.log('Informações de rede mostradas após conexão');
+            console.log('Informações de rede mostradas após Conexão');
         } else {
             networkInfoSection.style.display = 'none';
             console.log('Informações de rede escondidas - não conectado');
@@ -60,7 +60,7 @@ function updateConnectionInterface(status = '') {
                 walletStatus.classList.add('wallet-status-connected');
                 break;
             case 'error':
-                walletStatus.value = 'Erro na conexão. Tente novamente.';
+                walletStatus.value = 'Erro na Conexão. Tente novamente.';
                 walletStatus.classList.remove('wallet-status-connected');
                 break;
             default:
@@ -78,13 +78,13 @@ function updateConnectionInterface(status = '') {
     // Atualiza o span da rede se disponível (só quando conectado)
     if (currentNetworkSpan && status === 'connected') {
     // A rede será atualizada pela função updateNetworkInfo do network-manager
-        console.log('… Preparado para atualizaá§á£o da rede via network-manager');
+        console.log('… Preparado para atualizAção da rede via network-manager');
     } else if (currentNetworkSpan && status !== 'connected') {
     // Limpa a rede quando não conectado
         currentNetworkSpan.textContent = '-';
     }
 
-    // Atualiza botão
+    // Atualiza Botão
     if (btnConectar) {
         if (status === 'connected') {
             btnConectar.innerHTML = '<i class="bi bi-check-circle"></i> CONECTADO';
@@ -104,40 +104,40 @@ function updateConnectionInterface(status = '') {
 }
 
 /**
- * Inicializa o componente de conexão da carteira
+ * Inicializa o componente de Conexão da carteira
  * Corrige o problema de speculation rule inserindo o HTML de forma segura
  */
 async function setupWalletConnection() {
     try {
-    console.log('Configurando conexão da carteira...');
+    console.log('Configurando Conexão da carteira...');
         
         // Procura pelo local onde o template deve ser injetado
         const connectionSection = document.querySelector('.connection-section');
         if (!connectionSection) {
-            console.warn('⚠️ Seção de conexão não encontrada na página');
+            console.warn('⚠️ Seção de Conexão não encontrada na página');
             return;
         }
 
-        console.log('… Seá§á£o de conexá£o encontrada');
+        console.log('… Seção de Conexão encontrada');
 
-        // Verifica se já¡ existe conteáºdo na seá§á£o (HTML já¡ presente na pá¡gina)
+        // Verifica se já existe conteúdo na seção (HTML já presente na página)
         const existingButton = document.getElementById('connect-metamask-btn');
         if (existingButton) {
-            console.log('… Interface de conexá£o já¡ presente, configurando botáµes...');
-            // Apenas configura o botá£o existente
+            console.log('… Interface de Conexão já presente, configurando botões...');
+            // Apenas configura o Botão existente
             existingButton.addEventListener('click', handleConnection);
-            console.log('… Botá£o de conexá£o configurado');
+            console.log('… Botão de Conexão configurado');
             
-            // Configura listeners globais para mudaná§as de conta
+            // Configura listeners globais para mudanças de conta
             setupGlobalListeners();
             return;
         }
 
-        // Se ná£o existe, tenta carregar template
+        // Se não existe, tenta carregar template
         console.log('“„ Carregando template wallet-connection...');
         const response = await fetch('./templates/wallet-connection.html');
         if (!response.ok) {
-            console.warn(`âš ï¸ Template ná£o encontrado (${response.status}), usando fallback`);
+            console.warn(`âš ï¸ Template não encontrado (${response.status}), usando fallback`);
             createFallbackInterface();
             setupGlobalListeners();
             return;
@@ -146,44 +146,44 @@ async function setupWalletConnection() {
         const template = await response.text();
         console.log('… Template carregado com sucesso');
         
-        // Má©todo seguro para inserir HTML sem causar speculation rule warning
-        // Cria um elemento temporá¡rio e move seus filhos para evitar problemas
+        // Método seguro para inserir HTML sem causar speculation rule warning
+        // Cria um elemento temporário e move seus filhos para evitar problemas
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = template;
         
-        // Remove todo o conteáºdo atual da seá§á£o
+        // Remove todo o conteúdo atual da seção
         connectionSection.innerHTML = '';
         
-        // Move cada elemento filho do template para a seá§á£o
+        // Move cada elemento filho do template para a seção
         while (tempDiv.firstChild) {
             connectionSection.appendChild(tempDiv.firstChild);
         }
         
-        // Configura o botá£o de conexá£o apá³s inserir o template
+        // Configura o Botão de Conexão após inserir o template
         const btnConectar = document.getElementById('connect-metamask-btn');
         if (btnConectar) {
             btnConectar.addEventListener('click', handleConnection);
-            console.log('… Botá£o de conexá£o configurado');
+            console.log('… Botão de Conexão configurado');
         } else {
-            console.warn('âš ï¸ Botá£o de conexá£o ná£o encontrado no template');
+            console.warn('âš ï¸ Botão de Conexão não encontrado no template');
         }
         
-        // Configura listeners globais para mudaná§as de conta
+        // Configura listeners globais para mudanças de conta
         setupGlobalListeners();
         
-        console.log('… Componente de conexá£o configurado com sucesso');
+        console.log('… Componente de Conexão configurado com sucesso');
         
     } catch (error) {
-        console.error('âŒ Erro ao configurar conexá£o da carteira:', error);
+        console.error('âŒ Erro ao configurar Conexão da carteira:', error);
         
-        // Fallback: cria interface bá¡sica se falhar
+        // Fallback: cria interface básica se falhar
         createFallbackInterface();
         setupGlobalListeners();
     }
 }
 
 /**
- * Cria uma interface bá¡sica de conexá£o se o template falhar
+ * Cria uma interface básica de Conexão se o template falhar
  */
 function createFallbackInterface() {
     const connectionSection = document.querySelector('.connection-section');
@@ -193,7 +193,7 @@ function createFallbackInterface() {
         <div class="card border-warning">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i class="bi bi-wallet2 text-warning me-2"></i>Conexá£o da Carteira
+                    <i class="bi bi-wallet2 text-warning me-2"></i>Conexão da Carteira
                 </h5>
                 <div class="d-flex gap-3 align-items-center">
                     <input type="text" class="form-control" id="wallet-status" 
@@ -216,7 +216,7 @@ function createFallbackInterface() {
         </div>
     `;
     
-    // Configura o botá£o
+    // Configura o Botão
     const btnConectar = document.getElementById('connect-metamask-btn');
     if (btnConectar) {
         btnConectar.addEventListener('click', handleConnection);
@@ -226,52 +226,52 @@ function createFallbackInterface() {
 }
 
 /**
- * Manipula o processo de conexá£o com a carteira
- * @param {Event} event - Evento do clique no botá£o
+ * Manipula o processo de Conexão com a carteira
+ * @param {Event} event - Evento do clique no Botão
  */
 async function handleConnection(event) {
     event.preventDefault();
     
     if (isConnecting) {
-        console.log('âš ï¸ Conexá£o já¡ em andamento, aguarde...');
+        console.log('âš ï¸ Conexão já em andamento, aguarde...');
         return;
     }
     
     if (!window.ethereum) {
-        alert('MetaMask ná£o encontrado! Por favor, instale a extensá£o MetaMask no seu navegador.');
+        alert('MetaMask não encontrado! Por favor, instale a extensão MetaMask no seu navegador.');
         return;
     }
 
     try {
         isConnecting = true;
-        console.log('”— Iniciando processo de conexá£o...');
+        console.log('”— Iniciando processo de Conexão...');
         updateConnectionInterface('connecting');
 
         // Conecta com MetaMask
         currentProvider = await connectMetaMask();
         console.log('… MetaMask conectado');
         
-        // Busca o endereá§o da carteira conectada
+        // Busca o endereço da carteira conectada
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
         if (accounts && accounts.length > 0) {
             const ownerInput = document.getElementById('ownerAddress');
             if (ownerInput) {
                 ownerInput.value = accounts[0];
-                console.log('… Endereá§o da carteira salvo:', accounts[0]);
+                console.log('… Endereço da carteira salvo:', accounts[0]);
             }
         }
         
         // Detecta a rede atual
         await detectCurrentNetwork();
         updateNetworkInfo();
-        console.log('… Rede detectada e informaá§áµes atualizadas');
+        console.log('… Rede detectada e informações atualizadas');
         
-        // Os listeners já¡ foram configurados no setupGlobalListeners()
-        console.log('… Listeners já¡ configurados globalmente');
+        // Os listeners já foram configurados no setupGlobalListeners()
+        console.log('… Listeners já configurados globalmente');
         
         // Atualiza interface para estado conectado
         updateConnectionInterface('connected');
-        console.log('… Conexá£o concluá­da com sucesso');
+        console.log('… Conexão concluída com sucesso');
 
     } catch (error) {
         console.error('âŒ Erro ao conectar com MetaMask:', error);
@@ -284,25 +284,25 @@ async function handleConnection(event) {
 
 /**
  * Retorna o provider atual da carteira conectada
- * @returns {Object|null} Provider do MetaMask ou null se ná£o conectado
+ * @returns {Object|null} Provider do MetaMask ou null se não conectado
  */
 function getCurrentProvider() {
     return currentProvider;
 }
 
 /**
- * Configura listeners globais para mudaná§as no MetaMask
+ * Configura listeners globais para mudanças no MetaMask
  */
 function setupGlobalListeners() {
     if (!window.ethereum) return;
     
     console.log('Ž§ Configurando listeners globais para MetaMask...');
     
-    // Remove listeners existentes para evitar duplicaá§á£o
+    // Remove listeners existentes para evitar duplicAção
     window.ethereum.removeAllListeners('accountsChanged');
     window.ethereum.removeAllListeners('chainChanged');
     
-    // Listener para mudaná§as de conta
+    // Listener para mudanças de conta
     window.ethereum.on('accountsChanged', async function (accounts) {
         console.log('”„ Evento accountsChanged:', accounts);
         
@@ -327,7 +327,7 @@ function setupGlobalListeners() {
                 console.log('… Campo ownerAddress atualizado:', accounts[0]);
             }
             
-            // Mantá©m botá£o como conectado
+            // Mantém Botão como conectado
             if (btnConectar) {
                 btnConectar.innerHTML = '<i class="bi bi-check-circle"></i> CONECTADO';
                 btnConectar.disabled = true;
@@ -351,12 +351,12 @@ function setupGlobalListeners() {
                 ownerInput.value = '';
             }
             
-            // Esconde informaá§áµes de rede
+            // Esconde informações de rede
             if (networkInfoSection) {
                 networkInfoSection.style.display = 'none';
             }
             
-            // Restaura botá£o para estado desconectado
+            // Restaura Botão para estado desconectado
             if (btnConectar) {
                 btnConectar.innerHTML = '<i class="bi bi-wallet2"></i> CONECTAR';
                 btnConectar.disabled = false;
@@ -368,11 +368,11 @@ function setupGlobalListeners() {
         }
     });
     
-    // Listener para mudaná§as de rede
+    // Listener para mudanças de rede
     window.ethereum.on('chainChanged', async function (chainId) {
         console.log('”„ Rede alterada:', chainId);
         
-        // Sá³ processa se houver carteira conectada
+        // Só processa se houver carteira conectada
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
         if (accounts && accounts.length > 0) {
             await detectCurrentNetwork();
@@ -380,18 +380,19 @@ function setupGlobalListeners() {
         }
     });
     
-    console.log('… Listeners globais configurados (sem duplicaá§á£o)');
+    console.log('… Listeners globais configurados (sem duplicAção)');
 }
 
 // ==================== EXPORTS GLOBAIS ====================
 
-// Torna as funá§áµes disponá­veis globalmente
+// Torna as funções disponíveis globalmente
 window.WalletConnection = {
     setupWalletConnection,
     getCurrentProvider
 };
 
-console.log('”— [WALLET-CONNECTION] Má³dulo carregado - Funá§áµes disponá­veis globalmente');
+console.log('”— [WALLET-CONNECTION] Módulo carregado - Funções disponíveis globalmente');
+
 
 
 

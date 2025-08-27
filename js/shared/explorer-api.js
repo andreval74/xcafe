@@ -1,14 +1,20 @@
 ﻿// Explorer API Manager
 
 /**
- * Busca informaá§áµes do contrato no explorer
- */
-async function fetchContractFromExplorer(address, chainId) {
+ * Busca informações do contrato no explorer        if (!explorerApi) thconsole.log('✅ [EXPLORER-API] Módulo carregado - Funções disponíveis globalmente');ow new Error('Explorer API não suportada para esta rede');
+        
+        const response = await fetch(`${explorerApi}/contract/${address}/source`);
+        if (!response.ok) throw new Error('Falha ao buscar código fonte');
+        
+        const data = await response.json();
+        return data.sourceCode;
+    } catch (error) {
+        console.error('❌ Erro ao buscar código fonte:', error);ync function fetchContractFromExplorer(address, chainId) {
     try {
         const explorerApi = getExplorerApiUrl(chainId);
-        if (!explorerApi) throw new Error('Explorer API ná£o suportada para esta rede');
+        if (!explorerApi) throw new Error('Explorer API não suportada para esta rede');
         
-        // Busca informaá§áµes do contrato
+        // Busca informações do contrato
         const response = await fetch(`${explorerApi}/contract/${address}`);
         if (!response.ok) throw new Error('Falha ao buscar dados do contrato');
         
@@ -50,7 +56,7 @@ function getExplorerApiUrl(chainId) {
 }
 
 /**
- * Verifica se um contrato está¡ verificado
+ * Verifica se um contrato está verificado
  */
 async function isContractVerified(address, chainId) {
     try {
@@ -69,34 +75,35 @@ async function isContractVerified(address, chainId) {
 }
 
 /**
- * Busca o cá³digo fonte do contrato
+ * Busca o código fonte do contrato
  */
 async function fetchContractSource(address, chainId) {
     try {
         const explorerApi = getExplorerApiUrl(chainId);
-        if (!explorerApi) throw new Error('Explorer API ná£o suportada para esta rede');
+        if (!explorerApi) throw new Error('Explorer API não suportada para esta rede');
         
         const response = await fetch(`${explorerApi}/contract/${address}/source`);
-        if (!response.ok) throw new Error('Falha ao buscar cá³digo fonte');
+        if (!response.ok) throw new Error('Falha ao buscar código fonte');
         
         const data = await response.json();
         return data.sourceCode;
     } catch (error) {
-        console.error('âŒ Erro ao buscar cá³digo fonte:', error);
+        console.error('âŒ Erro ao buscar código fonte:', error);
         throw error;
     }
 }
 
 // ==================== EXPORTS GLOBAIS ====================
 
-// Torna as funá§áµes disponá­veis globalmente
+// Torna as funções disponíveis globalmente
 window.ExplorerAPI = {
     fetchContractFromExplorer,
     isContractVerified,
     fetchContractSource
 };
 
-console.log('” [EXPLORER-API] Má³dulo carregado - Funá§áµes disponá­veis globalmente');
+console.log('” [EXPLORER-API] Módulo carregado - Funções disponíveis globalmente');
+
 
 
 

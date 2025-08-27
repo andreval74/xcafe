@@ -1,10 +1,10 @@
 ﻿/**
  * xcafe Embeddable Widget
  * Sistema de widgets embarcáveis para compra de tokens
- * Usando padrão CSS xcafe
+ * Usando Padrão CSS xcafe
  */
 
-// CSS PADRÃO xcafe INJETADO
+// CSS Padrão xcafe INJETADO
 function injectxcafeStyles() {
   if (document.getElementById('xcafe-widget-styles')) return;
   
@@ -237,7 +237,7 @@ function injectxcafeStyles() {
   document.head.appendChild(style);
 }
 
-// FUNÇÃO PRINCIPAL PARA CRIAR WIDGET
+// função PRINCIPAL PARA CRIAR WIDGET
 function createxcafeWidget(config) {
   // Injeta estilos CSS
   injectxcafeStyles();
@@ -248,7 +248,7 @@ function createxcafeWidget(config) {
     return;
   }
   
-  // Configuração padrão
+  // ConfigurAção Padrão
   const widgetConfig = {
     contractAddress: config.contractAddress || config.contract,
     tokenPrice: config.tokenPrice || config.price || '0.001',
@@ -308,7 +308,7 @@ function createxcafeWidget(config) {
           </div>
         </div>
 
-        <!-- BOTÃO DE COMPRA -->
+        <!-- Botão DE COMPRA -->
         <button class="xcafe-button" id="buy-btn-${widgetId}">
           <span id="buy-icon-${widgetId}">⚡</span>
           <span id="buy-text-${widgetId}">Conectar e Comprar</span>
@@ -334,7 +334,7 @@ function createxcafeWidget(config) {
   loadContractData(widgetId, widgetConfig);
 }
 
-// FUNÇÃO PARA CARREGAR DADOS DO CONTRATO
+// função PARA CARREGAR DADOS DO CONTRATO
 async function loadContractData(widgetId, config) {
   const priceEl = document.getElementById(`price-${widgetId}`);
   const availableEl = document.getElementById(`available-${widgetId}`);
@@ -416,7 +416,7 @@ async function loadContractData(widgetId, config) {
   }
 }
 
-// FUNÇÃO PARA ATUALIZAR INFO DO CONTRATO
+// função PARA ATUALIZAR INFO DO CONTRATO
 function updateContractInfo(widgetId, contractInfo, config) {
   const priceEl = document.getElementById(`price-${widgetId}`);
   const availableEl = document.getElementById(`available-${widgetId}`);
@@ -451,7 +451,7 @@ function updateContractInfo(widgetId, contractInfo, config) {
   calculateTotal(widgetId, config);
 }
 
-// FUNÇÃO PARA CALCULAR TOTAL
+// função PARA CALCULAR TOTAL
 function calculateTotal(widgetId, config) {
   const amountInput = document.getElementById(`amount-${widgetId}`);
   const totalInput = document.getElementById(`total-${widgetId}`);
@@ -464,7 +464,7 @@ function calculateTotal(widgetId, config) {
   totalInput.value = total.toFixed(6);
 }
 
-// FUNÇÃO DE COMPRA
+// função DE COMPRA
 async function buyTokens(widgetId, config) {
   const amountInput = document.getElementById(`amount-${widgetId}`);
   const totalInput = document.getElementById(`total-${widgetId}`);
@@ -478,7 +478,7 @@ async function buyTokens(widgetId, config) {
       throw new Error('MetaMask não encontrado! Instale o MetaMask para continuar.');
     }
 
-    // Desabilita botão
+    // Desabilita Botão
     buyBtn.disabled = true;
     buyIcon.innerHTML = '<span class="xcafe-spinner"></span>';
     buyText.textContent = 'Conectando...';
@@ -519,7 +519,7 @@ async function buyTokens(widgetId, config) {
     statusDiv.innerHTML = `
       <div class="xcafe-alert info">
         <span class="xcafe-spinner"></span>
-        Executando transação...
+        Executando transAção...
       </div>
     `;
 
@@ -539,11 +539,11 @@ async function buyTokens(widgetId, config) {
     statusDiv.innerHTML = `
       <div class="xcafe-alert info">
         <span class="xcafe-spinner"></span>
-        Aguardando confirmação na blockchain...
+        Aguardando confirmAção na blockchain...
       </div>
     `;
 
-    // Aguarda confirmação
+    // Aguarda confirmAção
     await tx.wait();
 
     // URL do explorer
@@ -569,7 +569,7 @@ async function buyTokens(widgetId, config) {
       </div>
     `;
   } finally {
-    // Restaura botão
+    // Restaura Botão
     buyBtn.disabled = false;
     buyIcon.innerHTML = '⚡';
     buyText.textContent = 'Conectar e Comprar';
@@ -578,6 +578,7 @@ async function buyTokens(widgetId, config) {
 
 // Expor função globalmente
 window.createxcafeWidget = createxcafeWidget;
+
 
 
 

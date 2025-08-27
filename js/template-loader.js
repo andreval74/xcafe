@@ -54,7 +54,7 @@ class TemplateLoader {
     }
 }
 
-// Inicializaá§á£o automá¡tica
+// InicializAção automática
 const templateLoader = new TemplateLoader();
 
 if (document.readyState === 'loading') {
@@ -64,6 +64,7 @@ if (document.readyState === 'loading') {
 }
 
 window.templateLoader = templateLoader;
+
 
 
 

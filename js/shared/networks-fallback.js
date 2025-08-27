@@ -1,4 +1,4 @@
-// Lista mínima de redes populares para fallback local
+﻿// Lista mínima de redes populares para fallback local
 export const fallbackNetworks = [
   {
     name: "BNB Smart Chain Mainnet",
@@ -29,3 +29,5 @@ export const fallbackNetworks = [
     nativeCurrency: { symbol: "MATIC", decimals: 18 }
   }
 ];
+
+

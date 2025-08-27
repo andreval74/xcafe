@@ -1,6 +1,6 @@
 ﻿/**
  * xcafe Token Creator - Main Script
- * Sistema de criação de tokens com steps
+ * Sistema de CriAção de tokens com steps
  */
 
 // Estado global
@@ -9,7 +9,7 @@ let walletConnected = false;
 let walletAddress = '';
 let networkData = {};
 
-// Inicialização
+// InicializAção
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 xcafe Token Creator iniciado');
     
@@ -69,13 +69,13 @@ function setupEventListeners() {
 async function connectWallet() {
     try {
         if (typeof window.ethereum === 'undefined') {
-            alert('MetaMask ná£o detectado! Por favor, instale a MetaMask.');
+            alert('MetaMask nÃo detectado! Por favor, instale a MetaMask.');
             return;
         }
         
         console.log('”— Conectando com MetaMask...');
         
-        // Solicita conexá£o
+        // Solicita Conexão
         const accounts = await window.ethereum.request({
             method: 'eth_requestAccounts'
         });
@@ -94,7 +94,7 @@ async function connectWallet() {
         }
         
     } catch (error) {
-        console.error('âŒ Erro ao conectar wallet:', error);
+        console.error('ÃŒ Erro ao conectar wallet:', error);
         alert('Erro ao conectar com a MetaMask: ' + error.message);
     }
 }
@@ -116,7 +116,7 @@ function updateWalletUI() {
             statusInput.classList.add('wallet-status-connected');
         }
         
-        // Botá£o conectar
+        // Botão conectar
         if (connectBtn) {
             connectBtn.innerHTML = '<i class="bi bi-check-circle"></i> CONECTADO';
             connectBtn.classList.add('btn-success');
@@ -124,7 +124,7 @@ function updateWalletUI() {
             connectBtn.disabled = true;
         }
         
-        // Endereá§o do owner
+        // Endereço do owner
         if (ownerInput) {
             ownerInput.value = walletAddress;
         }
@@ -134,7 +134,7 @@ function updateWalletUI() {
             networkSection.style.display = 'block';
         }
         
-        // Atualiza seá§á£o de conexá£o
+        // Atualiza seção de Conexão
         if (connectionSection) {
             connectionSection.classList.add('connected-state');
         }
@@ -177,12 +177,12 @@ async function detectNetwork() {
         console.log('Œ Rede detectada:', networkData);
         
     } catch (error) {
-        console.error('âŒ Erro ao detectar rede:', error);
+        console.error('ÃŒ Erro ao detectar rede:', error);
     }
 }
 
 /**
- * Obtá©m informaá§áµes da rede baseado no chainId
+ * Obtém informações da rede baseado no chainId
  */
 function getNetworkInfo(chainId) {
     const networks = {
@@ -201,7 +201,7 @@ function getNetworkInfo(chainId) {
 }
 
 /**
- * Verifica conexá£o da wallet
+ * Verifica Conexão da wallet
  */
 async function checkWalletConnection() {
     if (typeof window.ethereum !== 'undefined') {
@@ -217,13 +217,13 @@ async function checkWalletConnection() {
                 await detectNetwork();
             }
         } catch (error) {
-            console.log('Wallet ná£o conectada');
+            console.log('Wallet nÃo conectada');
         }
     }
 }
 
 /**
- * Navega para o prá³ximo step
+ * Navega para o próximo step
  */
 function nextStep() {
     if (currentStep < 3) {
@@ -245,7 +245,7 @@ function prevStep() {
 }
 
 /**
- * Mostra o step especá­fico
+ * Mostra o step específico
  */
 function showStep(stepNumber) {
     // Esconde todos os steps
@@ -302,12 +302,12 @@ function validateStep1() {
     }
     
     if (!tokenSymbol) {
-        alert('Por favor, preencha o sá­mbolo do token.');
+        alert('Por favor, preencha o símbolo do token.');
         return false;
     }
     
     if (!totalSupply || isNaN(totalSupply) || parseFloat(totalSupply) <= 0) {
-        alert('Por favor, preencha um supply total vá¡lido.');
+        alert('Por favor, preencha um supply total válido.');
         return false;
     }
     
@@ -318,18 +318,18 @@ function validateStep1() {
  * Valida step 2
  */
 function validateStep2() {
-    // Validaá§á£o bá¡sica - sempre passa por enquanto
+    // ValidAção básica - sempre passa por enquanto
     return true;
 }
 
 /**
- * Funá§áµes globais para compatibilidade
+ * Funções globais para compatibilidade
  */
 window.nextStep = nextStep;
 window.prevStep = prevStep;
 window.connectWallet = connectWallet;
 
-// Funá§áµes para o step 2 (personalizaá§á£o)
+// Funções para o step 2 (PersonalizAção)
 function toggleAddressCustomization() {
     const customizationSection = document.getElementById('customization-section');
     const personalizadoRadio = document.getElementById('contrato-personalizado');
@@ -342,20 +342,22 @@ function toggleAddressCustomization() {
 function buscarSalt() {
     console.log('” Iniciando busca de SALT...');
     // Implementar busca de SALT
-    alert('Funcionalidade de busca de SALT será¡ implementada.');
+    alert('Funcionalidade de busca de SALT será implementada.');
 }
 
 function pararBusca() {
-    console.log('â¹ï¸ Parando busca de SALT...');
+    console.log('Ã¹ï¸ Parando busca de SALT...');
     // Implementar parada da busca
 }
 
-// Exporta funá§áµes globais
+// Exporta funções globais
 window.toggleAddressCustomization = toggleAddressCustomization;
 window.buscarSalt = buscarSalt;
 window.pararBusca = pararBusca;
 
 console.log('… xcafe Token Creator carregado');
+
+
 
 
 

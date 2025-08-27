@@ -1,15 +1,15 @@
-/**
+﻿/**
  * xcafe Widget - Exemplo de Uso JavaScript
- * Inicialização e configuração do widget para demonstração
+ * InicializAção e ConfigurAção do widget para demonstrAção
  * Integrado com o design system xcafe
  */
 
-// Configuração do widget de exemplo
+// ConfigurAção do widget de exemplo
 const widgetConfig = {
     containerId: 'xcafe-widget-test',
     contract: '0x7Ab950357Bb80172718a70FD04783e6949193006',
     network: 97,
-    title: 'xcafe Token - Demonstração',
+    title: 'xcafe Token - DemonstrAção',
     theme: 'dark'
 };
 
@@ -21,7 +21,7 @@ let widgetStatus = {
     startTime: null
 };
 
-// Função para atualizar status visual com design xcafe
+// função para atualizar status visual com design xcafe
 function updateStatus(status, message) {
     const statusElement = document.getElementById('widget-status');
     if (!statusElement) return;
@@ -56,7 +56,7 @@ function updateStatus(status, message) {
     }
 }
 
-// Função para mostrar loading no container do widget
+// função para mostrar loading no container do widget
 function showWidgetLoading() {
     const container = document.getElementById(widgetConfig.containerId);
     if (!container) return;
@@ -73,7 +73,7 @@ function showWidgetLoading() {
     container.classList.add('loading-shimmer');
 }
 
-// Função para remover loading do container
+// função para remover loading do container
 function hideWidgetLoading() {
     const container = document.getElementById(widgetConfig.containerId);
     if (container) {
@@ -81,7 +81,7 @@ function hideWidgetLoading() {
     }
 }
 
-// Função para inicializar o widget
+// função para inicializar o widget
 function initializeWidget() {
     try {
         widgetStatus.startTime = Date.now();
@@ -115,7 +115,7 @@ function initializeWidget() {
             }, 800);
         } else {
             hideWidgetLoading();
-            throw new Error('Função createxcafeWidget não encontrada. Verifique se wg-widget.js foi carregado.');
+            throw new Error('função createxcafeWidget não encontrada. Verifique se wg-widget.js foi carregado.');
         }
     } catch (error) {
         hideWidgetLoading();
@@ -141,7 +141,7 @@ function initializeWidget() {
     }
 }
 
-// Função para recarregar o widget
+// função para recarregar o widget
 function reloadWidget() {
     console.log('🔄 Recarregando widget xcafe...');
     
@@ -162,7 +162,7 @@ function reloadWidget() {
     initializeWidget();
 }
 
-// Função para mostrar informações detalhadas de debug
+// função para mostrar informações detalhadas de debug
 function showDebugInfo() {
     const debugInfo = {
         status: widgetStatus,
@@ -205,3 +205,4 @@ window.xcafeWidgetDebug = {
     info: showDebugInfo,
     version: '1.0.0'
 };
+

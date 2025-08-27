@@ -1,4 +1,4 @@
-﻿// Funções globais para manipulação de tokens e contratos
+﻿// Funções globais para manipulAção de tokens e contratos
 
 /**
  * Fallback RPCs por rede
@@ -162,6 +162,7 @@ window.TokenGlobal = {
 };
 
 console.log('[TOKEN-GLOBAL] Módulo carregado - Funções disponíveis globalmente');
+
 
 
 

@@ -1,4 +1,4 @@
-// js/link-index.js
+﻿// js/link-index.js
 // Versão simplificada do gerador de link - apenas link compartilhável
 import { fetchAllNetworks, showAutocomplete, copyToClipboard, shareLink, showCopyAndShareButtons } from './shared/token-link-utils.js';
 import { fetchTokenData } from './shared/token-global.js';
@@ -262,7 +262,7 @@ function previewGeneratedLink() {
 	}
 }
 
-// Inicialização
+// InicializAção
 document.addEventListener('DOMContentLoaded', async () => {
 	console.log('🚀 Inicializando sistema...');
 	allNetworks = await fetchAllNetworks();
@@ -295,3 +295,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 	
 	console.log('✅ Sistema inicializado com sucesso!');
 });
+

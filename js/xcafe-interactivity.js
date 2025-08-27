@@ -1,4 +1,4 @@
-/**
+﻿/**
  * XCAFE - SISTEMA DE INTERATIVIDADE AVANÇADA
  * Sistema completo de animações, efeitos e funcionalidades interativas
  */
@@ -19,7 +19,7 @@ class XcafeInteractivity {
         this.setupTypewriterEffect();
         this.setupProgressBars();
         this.setupLazyLoading();
-        // Removido: this.setupParallaxEffects(); - efeito estava atrapalhando a visualização
+        // Removido: this.setupParallaxEffects(); - efeito estava atrapalhando a visualizAção
     }
 
     // Animações no Scroll
@@ -34,7 +34,7 @@ class XcafeInteractivity {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                     
-                    // Animação staggered para filhos
+                    // AnimAção staggered para filhos
                     if (entry.target.classList.contains('stagger-parent')) {
                         const children = entry.target.children;
                         Array.from(children).forEach((child, index) => {
@@ -59,7 +59,7 @@ class XcafeInteractivity {
         });
     }
 
-    // Efeitos Parallax - DESABILITADO (estava atrapalhando a visualização)
+    // Efeitos Parallax - DESABILITADO (estava atrapalhando a visualizAção)
     /*
     setupParallaxEffects() {
         let ticking = false;
@@ -174,7 +174,7 @@ class XcafeInteractivity {
             </div>
         `;
 
-        // Aplicar loading em botões de ação
+        // Aplicar loading em botões de Ação
         document.querySelectorAll('[data-loading]').forEach(button => {
             button.addEventListener('click', (e) => {
                 if (!button.classList.contains('loading')) {
@@ -194,7 +194,7 @@ class XcafeInteractivity {
         });
     }
 
-    // Validação de Formulários
+    // ValidAção de Formulários
     setupFormValidation() {
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', (e) => {
@@ -214,7 +214,7 @@ class XcafeInteractivity {
                         this.hideFieldError(input);
                     }
 
-                    // Validação de email
+                    // ValidAção de email
                     if (input.type === 'email' && input.value) {
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (!emailRegex.test(input.value)) {
@@ -530,3 +530,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Exportar para uso global
 window.XcafeInteractivity = XcafeInteractivity;
+

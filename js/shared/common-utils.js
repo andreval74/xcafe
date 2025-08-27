@@ -2,26 +2,26 @@
  * › ï¸ COMMON UTILITIES - Má“DULO COMPARTILHADO
  * 
  * “ RESPONSABILIDADES:
- * - Funá§áµes utilitá¡rias reutilizá¡veis entre má³dulos
- * - Helpers para formataá§á£o e validaá§á£o
- * - Funá§áµes de UI/UX comuns
+ * - Funções utilitárias reutilizáveis entre módulos
+ * - Helpers para formatAção e validAção
+ * - Funções de UI/UX comuns
  * - Gerenciamento de toast/alertas
  * 
  * ”— USADO POR:
- * - Todos os má³dulos da aplicaá§á£o
- * - Especialmente: validaá§áµes, formataá§áµes, notificaá§áµes
+ * - Todos os módulos da aplicAção
+ * - Especialmente: validações, formatações, notificações
  * 
  * “¤ EXPORTS:
- * - Funá§áµes de validaá§á£o (validaá§áµes)
- * - Funá§áµes de formataá§á£o (formatNumber, formatAddress, etc)
- * - Funá§áµes de UI (showToast, showModal, etc)
- * - Utilitá¡rios gerais (sleep, debounce, etc)
+ * - Funções de validAção (validações)
+ * - Funções de formatAção (formatNumber, formatAddress, etc)
+ * - Funções de UI (showToast, showModal, etc)
+ * - Utilitários gerais (sleep, debounce, etc)
  */
 
 // ==================== SISTEMA DE LOGGING ====================
 
 /**
- * Sistema centralizado de logging para utilitá¡rios
+ * Sistema centralizado de logging para utilitários
  */
 const CommonUtils = {
   config: {
@@ -52,35 +52,35 @@ const CommonUtils = {
 // ==================== VALIDAá‡á•ES ====================
 
 /**
- * Funá§áµes de validaá§á£o reutilizá¡veis
+ * Funções de validAção reutilizáveis
  */
 const Validators = {
   
   /**
-   * Valida endereá§o Ethereum/BSC
+   * Valida endereço Ethereum/BSC
    */
   isValidAddress(address) {
     if (!address || typeof address !== 'string') return false;
     
-    // Verificar formato bá¡sico
+    // Verificar formato básico
     const addressRegex = /^0x[a-fA-F0-9]{40}$/;
     const isValid = addressRegex.test(address);
     
-    CommonUtils.log(`Validando endereá§o ${address}: ${isValid ? 'vá¡lido' : 'invá¡lido'}`, 'debug');
+    CommonUtils.log(`Validando endereço ${address}: ${isValid ? 'válido' : 'inválido'}`, 'debug');
     return isValid;
   },
   
   /**
-   * Valida sá­mbolo de token
+   * Valida símbolo de token
    */
   isValidTokenSymbol(symbol) {
     if (!symbol || typeof symbol !== 'string') return false;
     
-    // 3-8 caracteres, apenas letras e náºmeros
+    // 3-8 caracteres, apenas letras e números
     const symbolRegex = /^[A-Z0-9]{3,8}$/;
     const isValid = symbolRegex.test(symbol.toUpperCase());
     
-    CommonUtils.log(`Validando sá­mbolo ${symbol}: ${isValid ? 'vá¡lido' : 'invá¡lido'}`, 'debug');
+    CommonUtils.log(`Validando símbolo ${symbol}: ${isValid ? 'válido' : 'inválido'}`, 'debug');
     return isValid;
   },
   
@@ -90,11 +90,11 @@ const Validators = {
   isValidTokenName(name) {
     if (!name || typeof name !== 'string') return false;
     
-    // 3-50 caracteres, letras, náºmeros, espaá§os e alguns sá­mbolos
+    // 3-50 caracteres, letras, números, espaços e alguns símbolos
     const nameRegex = /^[a-zA-Z0-9\s\-_.]{3,50}$/;
     const isValid = nameRegex.test(name);
     
-    CommonUtils.log(`Validando nome ${name}: ${isValid ? 'vá¡lido' : 'invá¡lido'}`, 'debug');
+    CommonUtils.log(`Validando nome ${name}: ${isValid ? 'válido' : 'inválido'}`, 'debug');
     return isValid;
   },
   
@@ -107,7 +107,7 @@ const Validators = {
     const numericSupply = parseFloat(supply.toString().replace(/,/g, ''));
     const isValid = !isNaN(numericSupply) && numericSupply > 0 && numericSupply <= 1e18;
     
-    CommonUtils.log(`Validando supply ${supply}: ${isValid ? 'vá¡lido' : 'invá¡lido'}`, 'debug');
+    CommonUtils.log(`Validando supply ${supply}: ${isValid ? 'válido' : 'inválido'}`, 'debug');
     return isValid;
   },
   
@@ -118,7 +118,7 @@ const Validators = {
     const numDecimals = parseInt(decimals);
     const isValid = !isNaN(numDecimals) && numDecimals >= 0 && numDecimals <= 18;
     
-    CommonUtils.log(`Validando decimais ${decimals}: ${isValid ? 'vá¡lido' : 'invá¡lido'}`, 'debug');
+    CommonUtils.log(`Validando decimais ${decimals}: ${isValid ? 'válido' : 'inválido'}`, 'debug');
     return isValid;
   },
   
@@ -140,11 +140,11 @@ const Validators = {
       
       const isValid = hasValidProtocol && hasValidExtension;
       
-      CommonUtils.log(`Validando URL imagem ${url}: ${isValid ? 'vá¡lida' : 'invá¡lida'}`, 'debug');
+      CommonUtils.log(`Validando URL imagem ${url}: ${isValid ? 'válida' : 'inválida'}`, 'debug');
       return isValid;
       
     } catch (error) {
-      CommonUtils.log(`URL imagem invá¡lida ${url}: ${error.message}`, 'debug');
+      CommonUtils.log(`URL imagem inválida ${url}: ${error.message}`, 'debug');
       return false;
     }
   },
@@ -156,31 +156,31 @@ const Validators = {
     const errors = [];
     
     if (!this.isValidTokenName(data.name)) {
-      errors.push('Nome do token invá¡lido (3-50 caracteres)');
+      errors.push('Nome do token inválido (3-50 caracteres)');
     }
     
     if (!this.isValidTokenSymbol(data.symbol)) {
-      errors.push('Sá­mbolo do token invá¡lido (3-8 caracteres maiáºsculos)');
+      errors.push('Símbolo do token inválido (3-8 caracteres maiúsculos)');
     }
     
     if (!this.isValidSupply(data.supply)) {
-      errors.push('Total supply invá¡lido');
+      errors.push('Total supply inválido');
     }
     
     if (!this.isValidDecimals(data.decimals)) {
-      errors.push('Decimais invá¡lidos (0-18)');
+      errors.push('Decimais inválidos (0-18)');
     }
     
     if (!this.isValidAddress(data.owner)) {
-      errors.push('Endereá§o do proprietá¡rio invá¡lido');
+      errors.push('Endereço do proprietário inválido');
     }
     
     if (data.image && !this.isValidImageUrl(data.image)) {
-      errors.push('URL da imagem invá¡lida');
+      errors.push('URL da imagem inválida');
     }
     
     const isValid = errors.length === 0;
-    CommonUtils.log(`Validaá§á£o completa: ${isValid ? 'aprovada' : `${errors.length} erros`}`, 
+    CommonUtils.log(`ValidAção completa: ${isValid ? 'aprovada' : `${errors.length} erros`}`, 
       isValid ? 'info' : 'warning');
     
     return {
@@ -193,12 +193,12 @@ const Validators = {
 // ==================== FORMATAá‡áƒO ====================
 
 /**
- * Funá§áµes de formataá§á£o de dados
+ * Funções de formatAção de dados
  */
 const Formatters = {
   
   /**
-   * Formata náºmeros para exibiá§á£o
+   * Formata números para exibição
    */
   formatNumber(number, options = {}) {
     if (!number && number !== 0) return '';
@@ -217,33 +217,33 @@ const Formatters = {
         maximumFractionDigits: config.maximumFractionDigits
       });
       
-      CommonUtils.log(`Formatando náºmero ${number} -> ${formatted}`, 'debug');
+      CommonUtils.log(`Formatando número ${number} -> ${formatted}`, 'debug');
       return formatted;
       
     } catch (error) {
-      CommonUtils.log(`Erro ao formatar náºmero ${number}: ${error.message}`, 'error');
+      CommonUtils.log(`Erro ao formatar número ${number}: ${error.message}`, 'error');
       return number.toString();
     }
   },
   
   /**
-   * Formata endereá§o para exibiá§á£o
+   * Formata endereço para exibição
    */
   formatAddress(address, startChars = 8, endChars = 6) {
     if (!address || !Validators.isValidAddress(address)) return '';
     
     if (address.length <= startChars + endChars + 2) {
-      return address; // Endereá§o muito curto para truncar
+      return address; // Endereço muito curto para truncar
     }
     
     const formatted = `${address.substring(0, startChars)}...${address.substring(address.length - endChars)}`;
-    CommonUtils.log(`Formatando endereá§o ${address} -> ${formatted}`, 'debug');
+    CommonUtils.log(`Formatando endereço ${address} -> ${formatted}`, 'debug');
     
     return formatted;
   },
   
   /**
-   * Formata hash de transaá§á£o
+   * Formata hash de transAção
    */
   formatTxHash(hash, startChars = 10, endChars = 8) {
     return this.formatAddress(hash, startChars, endChars);
@@ -281,7 +281,7 @@ const Formatters = {
   },
   
   /**
-   * Formata bytes para tamanho legá­vel
+   * Formata bytes para tamanho legível
    */
   formatBytes(bytes, decimals = 2) {
     if (!bytes || bytes === 0) return '0 Bytes';
@@ -297,7 +297,7 @@ const Formatters = {
   },
   
   /**
-   * Formata tempo de duraá§á£o
+   * Formata tempo de durAção
    */
   formatDuration(milliseconds) {
     if (!milliseconds || milliseconds < 0) return '0s';
@@ -319,12 +319,12 @@ const Formatters = {
 // ==================== UTILITáRIOS DE UI ====================
 
 /**
- * Funá§áµes para interface do usuá¡rio
+ * Funções para interface do usuário
  */
 const UIUtils = {
   
   /**
-   * Mostra toast de notificaá§á£o
+   * Mostra toast de notificAção
    */
   showToast(message, type = 'info', duration = 5000) {
     CommonUtils.log(`Mostrando toast: ${type} - ${message}`, 'debug', 'UI');
@@ -347,7 +347,7 @@ const UIUtils = {
     const toastClass = typeClasses[type] || typeClasses.info;
     const iconClass = icons[type] || icons.info;
     
-    // Criar container de toasts se ná£o existir
+    // Criar container de toasts se não existir
     let toastContainer = document.getElementById('toast-container');
     if (!toastContainer) {
       toastContainer = document.createElement('div');
@@ -384,7 +384,7 @@ const UIUtils = {
   },
   
   /**
-   * Mostra modal de confirmaá§á£o
+   * Mostra modal de confirmAção
    */
   showConfirmModal(title, message, confirmText = 'Confirmar', cancelText = 'Cancelar') {
     return new Promise((resolve) => {
@@ -438,7 +438,7 @@ const UIUtils = {
         modal.remove();
       });
       
-      CommonUtils.log(`Modal de confirmaá§á£o criado: ${title}`, 'debug', 'UI');
+      CommonUtils.log(`Modal de confirmAção criado: ${title}`, 'debug', 'UI');
     });
   },
   
@@ -513,7 +513,7 @@ const UIUtils = {
       await navigator.clipboard.writeText(text);
       
       if (showFeedback) {
-        this.showToast('Copiado para á¡rea de transferáªncia!', 'success', 2000);
+        this.showToast('Copiado para área de transferáªncia!', 'success', 2000);
       }
       
       CommonUtils.log(`Texto copiado: ${text.substring(0, 20)}...`, 'debug', 'UI');
@@ -534,19 +534,19 @@ const UIUtils = {
 // ==================== UTILITáRIOS GERAIS ====================
 
 /**
- * Funá§áµes utilitá¡rias gerais
+ * Funções utilitárias gerais
  */
 const GeneralUtils = {
   
   /**
-   * Pausa execuá§á£o por tempo especificado
+   * Pausa execução por tempo especificado
    */
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   },
   
   /**
-   * Debounce - executa funá§á£o apenas apá³s perá­odo de inatividade
+   * Debounce - executa função apenas após período de inatividade
    */
   debounce(func, wait) {
     let timeout;
@@ -561,7 +561,7 @@ const GeneralUtils = {
   },
   
   /**
-   * Throttle - limita execuá§áµes de funá§á£o por perá­odo
+   * Throttle - limita execuções de função por período
    */
   throttle(func, limit) {
     let inThrottle;
@@ -575,7 +575,7 @@ const GeneralUtils = {
   },
   
   /**
-   * Gera ID áºnico
+   * Gera ID único
    */
   generateId(prefix = 'id') {
     const timestamp = Date.now();
@@ -610,7 +610,7 @@ const GeneralUtils = {
   },
   
   /**
-   * Verifica se objeto está¡ vazio
+   * Verifica se objeto está vazio
    */
   isEmpty(obj) {
     if (obj == null) return true;
@@ -669,7 +669,7 @@ document.addEventListener('DOMContentLoaded', function() {
     CommonUtils.log(`Promise rejeitada: ${event.reason}`, 'error');
   });
   
-  // Adicionar CSS para toasts se ná£o existir
+  // Adicionar CSS para toasts se não existir
   if (!document.getElementById('toast-styles')) {
     const style = document.createElement('style');
     style.id = 'toast-styles';
@@ -692,14 +692,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==================== EXPORTS GLOBAIS ====================
 
-// Disponibilizar má³dulos globalmente
+// Disponibilizar módulos globalmente
 window.CommonUtils = CommonUtils;
 window.Validators = Validators;
 window.Formatters = Formatters;
 window.UIUtils = UIUtils;
 window.GeneralUtils = GeneralUtils;
 
-// Funá§áµes de conveniáªncia globais
+// Funções de conveniáªncia globais
 window.showToast = UIUtils.showToast.bind(UIUtils);
 window.showConfirmModal = UIUtils.showConfirmModal.bind(UIUtils);
 window.copyToClipboard = UIUtils.copyToClipboard.bind(UIUtils);
@@ -708,6 +708,7 @@ window.formatAddress = Formatters.formatAddress.bind(Formatters);
 window.validateTokenData = Validators.validateTokenData.bind(Validators);
 
 CommonUtils.log('Common Utilities inicializado e exportado', 'success');
+
 
 
 

@@ -3,10 +3,10 @@
  * 
  * “ RESPONSABILIDADES:
  * - Interface diná¢mica para compra de tokens via MetaMask
- * - Verificaá§á£o de conexá£o e habilitaá§á£o de campos
+ * - VerificaçÃo de conexÃo e habilitaçÃo de campos
  * - Leitura diná¢mica de contratos da blockchain
- * - Verificaá§á£o de compatibilidade para compra direta
- * - Cá¡lculo diná¢mico de preá§os e execuá§á£o de transaá§áµes
+ * - VerificaçÃo de compatibilidade para compra direta
+ * - Cálculo diná¢mico de preços e execuçÃo de transações
  * 
  * ”— DEPENDáŠNCIAS:
  * - ethers.js v5.7.2
@@ -16,19 +16,19 @@
  * 
  * “¤ EXPORTS:
  * - DynamicTokenPurchase: Classe principal
- * - Funá§áµes utilitá¡rias especá­ficas de compra diná¢mica
+ * - Funções utilitárias específicas de compra diná¢mica
  */
 
 // ==================== CONFIGURAá‡á•ES ====================
 
 const CONFIG = {
-    // Configuraá§áµes diná¢micas (sem contrato fixo)
-    defaultTokenPrice: "0.001", // BNB por token (padrá£o)
+    // Configurações diná¢micas (sem contrato fixo)
+    defaultTokenPrice: "0.001", // BNB por token (padrÃo)
     supportedChains: [56, 97], // BSC Mainnet e Testnet
     
-    // ABI estendido para verificaá§á£o completa e diagná³stico
+    // ABI estendido para verificaçÃo completa e diagnóstico
     tokenABI: [
-        // Funá§áµes bá¡sicas ERC-20
+        // Funções básicas ERC-20
         "function balanceOf(address owner) view returns (uint256)",
         "function totalSupply() view returns (uint256)",
         "function name() view returns (string)",
@@ -36,7 +36,7 @@ const CONFIG = {
         "function decimals() view returns (uint8)",
         "function transfer(address to, uint256 amount) returns (bool)",
         
-        // Funá§áµes para verificar compra direta (expandido)
+        // Funções para verificar compra direta (expandido)
         "function buy() payable",
         "function buy(uint256 amount) payable",
         "function buyTokens() payable",
@@ -44,7 +44,7 @@ const CONFIG = {
         "function purchase() payable",
         "function purchase(uint256 amount) payable",
         
-        // Funá§áµes para detectar preá§o (expandido)
+        // Funções para detectar preço (expandido)
         "function tokenPrice() view returns (uint256)",
         "function price() view returns (uint256)",
         "function getPrice() view returns (uint256)",
@@ -54,7 +54,7 @@ const CONFIG = {
         "function salePrice() view returns (uint256)",
         "function pricePerToken() view returns (uint256)",
         
-        // Funá§áµes para diagná³stico avaná§ado
+        // Funções para diagnóstico avançado
         "function owner() view returns (address)",
         "function paused() view returns (bool)",
         "function saleActive() view returns (bool)",
@@ -67,7 +67,7 @@ const CONFIG = {
         "function purchaseLimit(address) view returns (uint256)",
         "function hasPurchased(address) view returns (bool)",
         
-        // Funá§áµes de cá¡lculo especá­ficas
+        // Funções de cálculo específicas
         "function calculateTokensForEth(uint256 ethAmount) view returns (uint256)",
         "function calculateEthForTokens(uint256 tokenAmount) view returns (uint256)",
         "function getTokensForEth(uint256 ethAmount) view returns (uint256)",
@@ -76,7 +76,7 @@ const CONFIG = {
     
     // ABI para contratos de venda (sale contracts)
     saleContractABI: [
-        // Funá§áµes para detectar token
+        // Funções para detectar token
         "function token() view returns (address)",
         "function tokenAddress() view returns (address)",
         "function getToken() view returns (address)",
@@ -86,7 +86,7 @@ const CONFIG = {
         "function purchaseToken() view returns (address)",
         "function sellToken() view returns (address)",
         
-        // Funá§áµes de compra em contratos de venda
+        // Funções de compra em contratos de venda
         "function buyTokens() payable",
         "function buyTokens(uint256) payable",
         "function buy() payable",
@@ -94,7 +94,7 @@ const CONFIG = {
         "function purchase() payable",
         "function purchase(uint256) payable",
         
-        // Funá§áµes de informaá§á£o do contrato de venda
+        // Funções de informaçÃo do contrato de venda
         "function tokenPrice() view returns (uint256)",
         "function price() view returns (uint256)",
         "function getPrice() view returns (uint256)",
@@ -105,7 +105,7 @@ const CONFIG = {
         "function saleEnabled() view returns (bool)"
     ],
     
-    // Configuraá§áµes de gas
+    // Configurações de gas
     gasLimit: 200000,
     gasPrice: "5000000000" // 5 gwei
 };
@@ -122,7 +122,7 @@ let currentSaleContract = null;
 let selectedTokenIndex = null;
 let tokenInfo = {};
 
-// Variá¡veis de controle para evitar execuá§áµes máºltiplas
+// Variáveis de controle para evitar execuções múltiplas
 let walletBalanceLoaded = false;
 let providerInitialized = false;
 let balanceUpdateInProgress = false;
@@ -131,12 +131,12 @@ let buyFunctionName = null;
 // ==================== INICIALIZAá‡áƒO ====================
 
 /**
- * Inicializaá§á£o principal
+ * InicializaçÃo principal
  */
 document.addEventListener('DOMContentLoaded', function() {
     console.log('›’ Sistema de Compra Diná¢mica iniciado');
     
-    // ”’ GARANTIA: Seá§á£o de compra inicia OCULTA atá© validaá§á£o completa
+    // ”’ GARANTIA: SeçÃo de compra inicia OCULTA até validaçÃo completa
     ensurePurchaseSectionHidden();
     
     initializeWalletConnection();
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Garante que a seá§á£o de compra inicie oculta
+ * Garante que a seçÃo de compra inicie oculta
  */
 function ensurePurchaseSectionHidden() {
     const section = document.getElementById('purchase-section');
@@ -173,7 +173,7 @@ function ensurePurchaseSectionHidden() {
 async function checkInitialWalletState() {
     if (typeof window.ethereum !== 'undefined') {
         try {
-            // Apenas verifica se já¡ está¡ conectado, sem solicitar
+            // Apenas verifica se já está conectado, sem solicitar
             const accounts = await window.ethereum.request({
                 method: 'eth_accounts'
             });
@@ -183,7 +183,7 @@ async function checkInitialWalletState() {
                 walletConnected = true;
                 await detectNetwork();
                 updateWalletUI();
-                // Carregar saldo inicial se já¡ conectado (apenas uma vez)
+                // Carregar saldo inicial se já conectado (apenas uma vez)
                 if (!walletBalanceLoaded) {
                     setTimeout(() => {
                         updateWalletBalance();
@@ -192,7 +192,7 @@ async function checkInitialWalletState() {
                 }
             }
         } catch (error) {
-            console.log('Wallet ná£o conectada previamente');
+            console.log('Wallet nÃo conectada previamente');
         }
     }
 }
@@ -201,19 +201,19 @@ async function checkInitialWalletState() {
  * Configura event listeners
  */
 function setupEventListeners() {
-    // Conexá£o MetaMask
+    // ConexÃo MetaMask
     const connectBtn = document.getElementById('connect-metamask-btn');
     if (connectBtn) {
         connectBtn.addEventListener('click', connectWallet);
     }
     
-    // Verificaá§á£o de contrato
+    // VerificaçÃo de contrato
     const verifyBtn = document.getElementById('verify-contract-btn');
     if (verifyBtn) {
         verifyBtn.addEventListener('click', verifyContract);
     }
     
-    // Campo de endereá§o do contrato
+    // Campo de endereço do contrato
     const contractInput = document.getElementById('contract-address');
     if (contractInput) {
         contractInput.addEventListener('input', validateContractAddress);
@@ -226,18 +226,18 @@ function setupEventListeners() {
         quantityInput.addEventListener('input', calculateTotal);
     }
     
-    // PREá‡O á‰ READ-ONLY - removido listener pois á© detectado do contrato
-    // O campo de preá§o ná£o deve ser editá¡vel pelo usuá¡rio
+    // PREá‡O á‰ READ-ONLY - removido listener pois é detectado do contrato
+    // O campo de preço nÃo deve ser editável pelo usuário
     
-    // Botá£o de compra
+    // BotÃo de compra
     const purchaseBtn = document.getElementById('execute-purchase-btn');
     if (purchaseBtn) {
         purchaseBtn.addEventListener('click', executePurchase);
     } else {
-        console.error('âŒ Botá£o de compra ná£o encontrado ao configurar listeners');
+        console.error('ÃŒ BotÃo de compra nÃo encontrado ao configurar listeners');
     }
     
-    // Botá£o de limpar dados - SIMPLIFICADO: apenas recarrega a pá¡gina e vai ao topo
+    // BotÃo de limpar dados - SIMPLIFICADO: apenas recarrega a página e vai ao topo
     const clearAllBtn = document.getElementById('clear-all-btn');
     if (clearAllBtn) {
         clearAllBtn.addEventListener('click', () => {
@@ -246,7 +246,7 @@ function setupEventListeners() {
         });
     }
     
-    // Botá£o de atualizar saldo
+    // BotÃo de atualizar saldo
     const refreshBalanceBtn = document.getElementById('refresh-balance-btn');
     if (refreshBalanceBtn) {
         refreshBalanceBtn.addEventListener('click', () => {
@@ -258,7 +258,7 @@ function setupEventListeners() {
 // ==================== INDICADORES DE CARREGAMENTO ====================
 
 /**
- * Mostra indicador de carregamento em um botá£o
+ * Mostra indicador de carregamento em um botÃo
  */
 function showButtonLoading(buttonId, loadingText = 'Carregando...') {
     const button = document.getElementById(buttonId);
@@ -270,7 +270,7 @@ function showButtonLoading(buttonId, loadingText = 'Carregando...') {
 }
 
 /**
- * Remove indicador de carregamento de um botá£o
+ * Remove indicador de carregamento de um botÃo
  */
 function hideButtonLoading(buttonId, newText = null) {
     const button = document.getElementById(buttonId);
@@ -308,7 +308,7 @@ function showLoadingMessage(containerId, message = 'Processando...') {
 async function connectWallet() {
     try {
         if (typeof window.ethereum === 'undefined') {
-            alert('MetaMask ná£o detectado! Por favor, instale a MetaMask.');
+            alert('MetaMask nÃo detectado! Por favor, instale a MetaMask.');
             return;
         }
         
@@ -317,7 +317,7 @@ async function connectWallet() {
         // Mostra loading
         showButtonLoading('connect-metamask-btn', 'Conectando...');
         
-        // Solicita conexá£o
+        // Solicita conexÃo
         const accounts = await window.ethereum.request({
             method: 'eth_requestAccounts'
         });
@@ -330,7 +330,7 @@ async function connectWallet() {
             await detectNetwork();
             updateWalletUI();
             
-            // Carregar saldo apá³s conectar (apenas uma vez)
+            // Carregar saldo após conectar (apenas uma vez)
             setTimeout(() => {
                 updateWalletBalance();
             }, 800);
@@ -339,20 +339,20 @@ async function connectWallet() {
         }
         
     } catch (error) {
-        console.error('âŒ Erro ao conectar wallet:', error);
+        console.error('ÃŒ Erro ao conectar wallet:', error);
         alert('Erro ao conectar com a MetaMask: ' + error.message);
-        // Restaura botá£o em caso de erro
+        // Restaura botÃo em caso de erro
         hideButtonLoading('connect-metamask-btn', '<i class="bi bi-wallet2 me-2"></i>CONECTAR');
     }
 }
 
 /**
- * Atualiza saldo da carteira (com controle de execuá§áµes máºltiplas)
+ * Atualiza saldo da carteira (com controle de execuções múltiplas)
  */
 async function updateWalletBalance() {
-    // Evitar execuá§áµes máºltiplas simultá¢neas
+    // Evitar execuções múltiplas simultá¢neas
     if (balanceUpdateInProgress) {
-        console.log('â³ Atualizaá§á£o de saldo já¡ em progresso, ignorando...');
+        console.log('Ã³ AtualizaçÃo de saldo já em progresso, ignorando...');
         return;
     }
     
@@ -360,7 +360,7 @@ async function updateWalletBalance() {
     const balanceContainer = document.getElementById('wallet-balance-info');
     
     if (!walletConnected || !walletAddress) {
-        // Esconder seá§á£o se ná£o conectado
+        // Esconder seçÃo se nÃo conectado
         if (balanceContainer) {
             balanceContainer.style.display = 'none';
         }
@@ -368,7 +368,7 @@ async function updateWalletBalance() {
     }
     
     if (!balanceElement) {
-        console.error('âŒ Elemento wallet-balance-display ná£o encontrado');
+        console.error('ÃŒ Elemento wallet-balance-display nÃo encontrado');
         return;
     }
     
@@ -383,12 +383,12 @@ async function updateWalletBalance() {
         // Usar provider atual ou inicializar um novo
         let provider = currentProvider;
         if (!provider) {
-            // Provider ná£o encontrado, inicializando...
+            // Provider nÃo encontrado, inicializando...
             provider = await initializeProviderWithFallback();
         }
         
         if (!provider) {
-            throw new Error('Ná£o foi possá­vel inicializar provider');
+            throw new Error('NÃo foi possível inicializar provider');
         }
         
         // Buscar saldo
@@ -396,26 +396,26 @@ async function updateWalletBalance() {
         
         const balanceInBNB = ethers.utils.formatEther(balance);
         
-        // Formatar para exibiá§á£o
+        // Formatar para exibiçÃo
         const formattedBalance = formatNumber(balanceInBNB);
         
         balanceElement.textContent = formattedBalance;
         
-        // Mostrar seá§á£o do saldo
+        // Mostrar seçÃo do saldo
         if (balanceContainer) {
             balanceContainer.style.display = 'block';
         }
         
     } catch (error) {
-        console.error('âŒ Erro ao buscar saldo da carteira:', error);
+        console.error('ÃŒ Erro ao buscar saldo da carteira:', error);
         balanceElement.textContent = 'Erro ao carregar';
         
-        // Mostrar seá§á£o mesmo com erro
+        // Mostrar seçÃo mesmo com erro
         if (balanceContainer) {
             balanceContainer.style.display = 'block';
         }
     } finally {
-        // Libera controle de execuá§á£o máºltipla
+        // Libera controle de execuçÃo múltipla
         balanceUpdateInProgress = false;
     }
 }
@@ -429,13 +429,13 @@ function updateWalletUI() {
     const networkSection = document.getElementById('network-info-section');
     
     if (walletConnected && walletAddress) {
-        // Status da wallet - mostrar endereá§o completo
+        // Status da wallet - mostrar endereço completo
         if (statusInput) {
             statusInput.value = walletAddress;
             statusInput.classList.add('text-success');
         }
         
-        // Botá£o conectar
+        // BotÃo conectar
         if (connectBtn) {
             connectBtn.innerHTML = '<i class="bi bi-check-circle"></i> CONECTADO';
             connectBtn.classList.remove('btn-warning');
@@ -451,7 +451,7 @@ function updateWalletUI() {
         // Atualiza saldo da carteira (apenas uma vez)
         updateWalletBalance();
         
-        // Habilita seá§á£o de contrato apenas apá³s conexá£o
+        // Habilita seçÃo de contrato apenas após conexÃo
         enableContractSection();
     }
 }
@@ -479,7 +479,7 @@ async function detectNetwork() {
             chainIdSpan.textContent = networkData.chainId;
         }
         
-        // Se carteira já¡ conectada, atualiza saldo ao detectar rede
+        // Se carteira já conectada, atualiza saldo ao detectar rede
         if (walletConnected && walletAddress) {
             setTimeout(() => {
                 updateWalletBalance();
@@ -487,12 +487,12 @@ async function detectNetwork() {
         }
         
     } catch (error) {
-        console.error('âŒ Erro ao detectar rede:', error);
+        console.error('ÃŒ Erro ao detectar rede:', error);
     }
 }
 
 /**
- * Obtá©m informaá§áµes da rede baseado no chainId
+ * Obtém informações da rede baseado no chainId
  */
 function getNetworkInfo(chainId) {
     const networks = {
@@ -512,15 +512,15 @@ function getNetworkInfo(chainId) {
 // ==================== GERENCIAMENTO DE CONTRATO ====================
 
 /**
- * Habilita seá§á£o de contrato apá³s conexá£o
+ * Habilita seçÃo de contrato após conexÃo
  */
 function enableContractSection() {
-    // Mostra a seá§á£o de contrato
+    // Mostra a seçÃo de contrato
     const contractSection = document.getElementById('contract-section');
     if (contractSection) {
         contractSection.style.display = 'block';
         
-        // Adiciona animaá§á£o de slide down
+        // Adiciona animaçÃo de slide down
         contractSection.style.opacity = '0';
         contractSection.style.transform = 'translateY(-20px)';
         
@@ -547,7 +547,7 @@ function enableContractSection() {
 }
 
 /**
- * Valida endereá§o do contrato
+ * Valida endereço do contrato
  */
 function validateContractAddress() {
     const contractInput = document.getElementById('contract-address');
@@ -556,7 +556,7 @@ function validateContractAddress() {
     if (contractInput && verifyBtn) {
         const address = contractInput.value.trim();
         
-        // Verifica se á© um endereá§o vá¡lido (42 caracteres, comeá§ando com 0x)
+        // Verifica se é um endereço válido (42 caracteres, começando com 0x)
         const isValid = address.length === 42 && address.startsWith('0x');
         
         if (isValid) {
@@ -578,26 +578,26 @@ function validateContractAddress() {
 // ==================== DETECá‡áƒO DE CONTRATOS DE VENDA ====================
 
 /**
- * Verifica se o contrato tem máºltiplos tokens/sales para escolha
+ * Verifica se o contrato tem múltiplos tokens/sales para escolha
  */
 async function checkForMultipleContracts(contractAddress) {
-    console.log('” Verificando contratos máºltiplos...');
+    console.log('” Verificando contratos múltiplos...');
     
     try {
-        // Funá§áµes comuns para arrays de contratos
+        // Funções comuns para arrays de contratos
         const arrayFunctions = [
             'tokens',          // Array de tokens
             'saleTokens',      // Array de tokens em venda
-            'availableTokens', // Array de tokens disponá­veis
+            'availableTokens', // Array de tokens disponíveis
             'tokenList',       // Lista de tokens
             'contracts',       // Array de contratos
             'saleContracts',   // Array de contratos de venda
-            'getTokens',       // Funá§á£o que retorna tokens
-            'getAllTokens',    // Funá§á£o que retorna todos os tokens
+            'getTokens',       // FunçÃo que retorna tokens
+            'getAllTokens',    // FunçÃo que retorna todos os tokens
             'tokenCount'       // Contador de tokens (para iterar)
         ];
         
-        // ABI para contratos máºltiplos
+        // ABI para contratos múltiplos
         const multiContractABI = [
             "function tokens() view returns (address[])",
             "function saleTokens() view returns (address[])",
@@ -611,7 +611,7 @@ async function checkForMultipleContracts(contractAddress) {
             "function getTokenAt(uint256) view returns (address)",
             "function tokenAt(uint256) view returns (address)",
             "function saleAt(uint256) view returns (address)",
-            // Funá§áµes para obter informaá§áµes dos tokens
+            // Funções para obter informações dos tokens
             "function getTokenInfo(address) view returns (string, string, uint8)",
             "function getTokenPrice(address) view returns (uint256)",
             "function isTokenActive(address) view returns (bool)"
@@ -619,11 +619,11 @@ async function checkForMultipleContracts(contractAddress) {
         
         const multiContract = new ethers.Contract(contractAddress, multiContractABI, currentProvider);
         
-        // Testa funá§áµes que retornam arrays
+        // Testa funções que retornam arrays
         for (const funcName of arrayFunctions) {
             try {
                 if (funcName === 'tokenCount') {
-                    // Funá§á£o especial que retorna count
+                    // FunçÃo especial que retorna count
                     const count = await multiContract[funcName]();
                     const tokenCount = parseInt(count.toString());
                     
@@ -636,7 +636,7 @@ async function checkForMultipleContracts(contractAddress) {
                         
                         for (const indexFunc of indexFunctions) {
                             try {
-                                for (let i = 0; i < Math.min(tokenCount, 10); i++) { // Limite de 10 por seguraná§a
+                                for (let i = 0; i < Math.min(tokenCount, 10); i++) { // Limite de 10 por segurança
                                     const tokenAddress = await multiContract[indexFunc](i);
                                     if (tokenAddress && ethers.utils.isAddress(tokenAddress)) {
                                         tokens.push(tokenAddress);
@@ -644,7 +644,7 @@ async function checkForMultipleContracts(contractAddress) {
                                 }
                                 if (tokens.length > 0) break;
                             } catch (e) {
-                                // Funá§á£o ná£o existe, tenta prá³xima
+                                // FunçÃo nÃo existe, tenta próxima
                             }
                         }
                         
@@ -653,7 +653,7 @@ async function checkForMultipleContracts(contractAddress) {
                         }
                     }
                 } else {
-                    // Funá§áµes que retornam arrays direto
+                    // Funções que retornam arrays direto
                     const result = await multiContract[funcName]();
                     
                     if (Array.isArray(result) && result.length > 1) {
@@ -668,37 +668,37 @@ async function checkForMultipleContracts(contractAddress) {
                     }
                 }
             } catch (error) {
-                // Funá§á£o ná£o existe ou falhou, continua
-                console.log(`âŒ Funá§á£o ${funcName}() ná£o disponá­vel`);
+                // FunçÃo nÃo existe ou falhou, continua
+                console.log(`ÃŒ FunçÃo ${funcName}() nÃo disponível`);
             }
         }
         
-        // â„¹ï¸ Ná£o á© um contrato de máºltiplos tokens
+        // Ã„¹ï¸ NÃo é um contrato de múltiplos tokens
         return { isMultiContract: false };
         
     } catch (error) {
-        console.error('âŒ Erro ao verificar contratos máºltiplos:', error);
+        console.error('ÃŒ Erro ao verificar contratos múltiplos:', error);
         return { isMultiContract: false };
     }
 }
 
 /**
- * Processa máºltiplos tokens encontrados e busca suas informaá§áµes
+ * Processa múltiplos tokens encontrados e busca suas informações
  */
 async function processMultipleTokens(saleContractAddress, tokenAddresses, detectionMethod) {
     console.log(`” Processando ${tokenAddresses.length} tokens encontrados...`);
     
     const tokenOptions = [];
     
-    for (let i = 0; i < tokenAddresses.length && i < 5; i++) { // Limite de 5 opá§áµes
+    for (let i = 0; i < tokenAddresses.length && i < 5; i++) { // Limite de 5 opções
         const tokenAddress = tokenAddresses[i];
         
         try {
-            // Verifica se á© um contrato vá¡lido
+            // Verifica se é um contrato válido
             const code = await currentProvider.getCode(tokenAddress);
             if (code === '0x') continue;
             
-            // Tenta buscar informaá§áµes bá¡sicas do token
+            // Tenta buscar informações básicas do token
             const tokenContract = new ethers.Contract(tokenAddress, CONFIG.tokenABI, currentProvider);
             
             let tokenInfo = {
@@ -720,10 +720,10 @@ async function processMultipleTokens(saleContractAddress, tokenAddresses, detect
                 tokenInfo.symbol = symbol;
                 tokenInfo.decimals = parseInt(decimals);
             } catch (e) {
-                // âš ï¸ Ná£o foi possá­vel obter info completa do token ${i + 1}
+                // Ãš ï¸ NÃo foi possível obter info completa do token ${i + 1}
             }
             
-            // Tenta obter preá§o se o contrato principal tiver funá§á£o
+            // Tenta obter preço se o contrato principal tiver funçÃo
             try {
                 const multiContract = new ethers.Contract(saleContractAddress, [
                     "function getTokenPrice(address) view returns (uint256)"
@@ -739,14 +739,14 @@ async function processMultipleTokens(saleContractAddress, tokenAddresses, detect
             // Token ${i + 1}: ${tokenInfo.name} (${tokenInfo.symbol}) - ${tokenAddress.slice(0,6)}...${tokenAddress.slice(-4)}
             
         } catch (error) {
-            console.log(`âŒ Erro ao processar token ${i + 1}: ${error.message}`);
+            console.log(`ÃŒ Erro ao processar token ${i + 1}: ${error.message}`);
         }
     }
     
     if (tokenOptions.length > 1) {
         return {
             isMultiContract: true,
-            isSaleContract: false, // Será¡ definido apá³s seleá§á£o
+            isSaleContract: false, // Será definido após seleçÃo
             saleContractAddress: saleContractAddress,
             tokenOptions: tokenOptions,
             detectionMethod: detectionMethod
@@ -757,7 +757,7 @@ async function processMultipleTokens(saleContractAddress, tokenAddresses, detect
 }
 
 /**
- * Mostra interface para seleá§á£o de token em contratos máºltiplos
+ * Mostra interface para seleçÃo de token em contratos múltiplos
  */
 async function showTokenSelector(multiContractInfo) {
     const contractMessages = document.getElementById('contract-messages');
@@ -770,7 +770,7 @@ async function showTokenSelector(multiContractInfo) {
                 <strong>Selecione o Token para Compra</strong>
             </h6>
             <p class="small mb-3">
-                Este contrato oferece máºltiplos tokens. Escolha qual vocáª deseja comprar:
+                Este contrato oferece múltiplos tokens. Escolha qual vocáª deseja comprar:
             </p>
     `;
     
@@ -788,7 +788,7 @@ async function showTokenSelector(multiContractInfo) {
                     </div>
                     <div class="col-md-4 text-end">
                         <div class="small text-info">
-                            ${token.price !== 'N/A' ? `’° ${token.price} BNB` : '’° Preá§o: A definir'}
+                            ${token.price !== 'N/A' ? `’° ${token.price} BNB` : '’° Preço: A definir'}
                         </div>
                         <button class="btn btn-sm btn-outline-primary mt-1">
                             <i class="bi bi-check-circle me-1"></i>Selecionar
@@ -812,7 +812,7 @@ async function showTokenSelector(multiContractInfo) {
     
     contractMessages.innerHTML = selectorHTML;
     
-    // Oculta botá£o de verificar atá© seleá§á£o
+    // Oculta botÃo de verificar até seleçÃo
     const verifyBtn = document.getElementById('verify-contract-btn');
     if (verifyBtn) {
         verifyBtn.style.display = 'none';
@@ -820,10 +820,10 @@ async function showTokenSelector(multiContractInfo) {
 }
 
 /**
- * Funá§á£o global para seleá§á£o de token (chamada pelo onclick)
+ * FunçÃo global para seleçÃo de token (chamada pelo onclick)
  */
 window.selectToken = async function(tokenAddress, tokenIndex, saleContractAddress) {
-    // Token selecionado: ${tokenAddress} (á­ndice ${tokenIndex})
+    // Token selecionado: ${tokenAddress} (índice ${tokenIndex})
     
     // Mostra loading
     showLoadingMessage('contract-messages', 'Carregando token selecionado');
@@ -842,7 +842,7 @@ window.selectToken = async function(tokenAddress, tokenIndex, saleContractAddres
         addContractMessage(`… Token selecionado: ${tokenAddress.slice(0,8)}...${tokenAddress.slice(-6)}`, 'success');
         addContractMessage('”„ Verificando token selecionado...', 'info');
         
-        // Continua verificaá§á£o normal
+        // Continua verificaçÃo normal
         await verifyERC20Functions();
         await verifyBuyFunctions();
         await loadTokenInfo();
@@ -850,40 +850,40 @@ window.selectToken = async function(tokenAddress, tokenIndex, saleContractAddres
         
         addContractMessage('Ž‰ Token verificado e pronto para compra!', 'success');
         
-        // Restaura botá£o de verificar
+        // Restaura botÃo de verificar
         const verifyBtn = document.getElementById('verify-contract-btn');
         if (verifyBtn) {
             verifyBtn.style.display = 'block';
         }
         
     } catch (error) {
-        console.error('âŒ Erro ao processar token selecionado:', error);
-        addContractMessage(`âŒ Erro ao carregar token: ${error.message}`, 'error');
+        console.error('ÃŒ Erro ao processar token selecionado:', error);
+        addContractMessage(`ÃŒ Erro ao carregar token: ${error.message}`, 'error');
     } finally {
         hideButtonLoading('verify-contract-btn', 'VERIFICAR CONTRATO');
     }
 };
 
 /**
- * Verifica se o contrato informado á© um contrato de venda que aponta para outro token
+ * Verifica se o contrato informado é um contrato de venda que aponta para outro token
  */
 async function checkIfSaleContract(contractAddress) {
-    console.log('” Verificando se á© contrato de venda...');
+    console.log('” Verificando se é contrato de venda...');
     
     try {
-        // Lista de funá§áµes comuns em contratos de venda para detectar o token
+        // Lista de funções comuns em contratos de venda para detectar o token
         const tokenFunctions = [
             'token',           // Mais comum
             'tokenAddress',    // Comum
             'getToken',        // Alternativa
             'tokenContract',   // Alternativa
-            'saleToken',       // Especá­fico para sales
-            'targetToken',     // Especá­fico
-            'purchaseToken',   // Especá­fico
-            'sellToken'        // Especá­fico
+            'saleToken',       // Específico para sales
+            'targetToken',     // Específico
+            'purchaseToken',   // Específico
+            'sellToken'        // Específico
         ];
         
-        // ABI bá¡sico para contratos de venda
+        // ABI básico para contratos de venda
         const saleContractABI = [
             "function token() view returns (address)",
             "function tokenAddress() view returns (address)",
@@ -893,7 +893,7 @@ async function checkIfSaleContract(contractAddress) {
             "function targetToken() view returns (address)",
             "function purchaseToken() view returns (address)",
             "function sellToken() view returns (address)",
-            // Funá§áµes de compra comuns em contratos de venda
+            // Funções de compra comuns em contratos de venda
             "function buyTokens() payable",
             "function buyTokens(uint256) payable",
             "function buy() payable",
@@ -904,7 +904,7 @@ async function checkIfSaleContract(contractAddress) {
         
         const saleContract = new ethers.Contract(contractAddress, CONFIG.saleContractABI, currentProvider);
         
-        // Tenta encontrar o endereá§o do token atravá©s das funá§áµes comuns
+        // Tenta encontrar o endereço do token através das funções comuns
         for (const funcName of tokenFunctions) {
             try {
                 const tokenAddress = await saleContract[funcName]();
@@ -912,9 +912,9 @@ async function checkIfSaleContract(contractAddress) {
                 if (tokenAddress && ethers.utils.isAddress(tokenAddress) && tokenAddress !== '0x0000000000000000000000000000000000000000') {
                     // Token encontrado via ${funcName}(): ${tokenAddress}
                     
-                    // Verifica se o endereá§o do token á© diferente do contrato de venda
+                    // Verifica se o endereço do token é diferente do contrato de venda
                     if (tokenAddress.toLowerCase() !== contractAddress.toLowerCase()) {
-                        // Verifica se o endereá§o do token realmente tem um contrato
+                        // Verifica se o endereço do token realmente tem um contrato
                         const tokenCode = await currentProvider.getCode(tokenAddress);
                         if (tokenCode !== '0x') {
                             // Contrato de venda confirmado! Token real: ${tokenAddress}
@@ -928,11 +928,11 @@ async function checkIfSaleContract(contractAddress) {
                     }
                 }
             } catch (error) {
-                // Funá§á£o ná£o existe ou falhou, continua tentando
+                // FunçÃo nÃo existe ou falhou, continua tentando
             }
         }
         
-        // â„¹ï¸ Ná£o á© um contrato de venda - á© o prá³prio token
+        // Ã„¹ï¸ NÃo é um contrato de venda - é o próprio token
         return {
             isSaleContract: false,
             tokenAddress: contractAddress,
@@ -941,7 +941,7 @@ async function checkIfSaleContract(contractAddress) {
         };
         
     } catch (error) {
-        console.error('âŒ Erro ao verificar contrato de venda:', error);
+        console.error('ÃŒ Erro ao verificar contrato de venda:', error);
         return {
             isSaleContract: false,
             tokenAddress: contractAddress,
@@ -959,12 +959,12 @@ async function verifyContract() {
     const contractAddress = contractInput.value.trim();
     
     if (!contractAddress) {
-        alert('Por favor, digite o endereá§o do contrato');
+        alert('Por favor, digite o endereço do contrato');
         return;
     }
     
     if (!ethers.utils.isAddress(contractAddress)) {
-        alert('Endereá§o do contrato invá¡lido. Verifique o formato.');
+        alert('Endereço do contrato inválido. Verifique o formato.');
         return;
     }
     
@@ -978,37 +978,37 @@ async function verifyContract() {
         showLoadingMessage('contract-messages', 'Verificando contrato inteligente');
         
         // Inicializa provider com fallback para resolver problemas de RPC
-        addContractMessage('âš™ï¸ Inicializando conexá£o blockchain...', 'info');
+        addContractMessage('Ãš™ï¸ Inicializando conexÃo blockchain...', 'info');
         currentProvider = await initializeProviderWithFallback();
         currentSigner = currentProvider.getSigner();
         
-        // **MELHORIA 1: Verificaá§á£o robusta se contrato existe**
-        addContractMessage('” Verificando se á© um smart contract...', 'info');
+        // **MELHORIA 1: VerificaçÃo robusta se contrato existe**
+        addContractMessage('” Verificando se é um smart contract...', 'info');
         const code = await currentProvider.getCode(contractAddress);
         if (code === '0x') {
             // Log do erro para suporte
             window.contractLogger.logContractError(contractAddress, 'CONTRACT_NOT_FOUND', {
-                message: 'Nenhum cá³digo encontrado no endereá§o',
+                message: 'Nenhum código encontrado no endereço',
                 code: code,
                 network: networkData.chainId || 'desconhecida'
             });
             window.contractLogger.showDownloadButton();
             
-            throw new Error('Contrato ná£o existe neste endereá§o. Verifique se foi deployado corretamente.');
+            throw new Error('Contrato nÃo existe neste endereço. Verifique se foi deployado corretamente.');
         }
         
-        addContractMessage(`… Contrato detectado no endereá§o: ${contractAddress.slice(0,6)}...${contractAddress.slice(-4)}`, 'success');
+        addContractMessage(`… Contrato detectado no endereço: ${contractAddress.slice(0,6)}...${contractAddress.slice(-4)}`, 'success');
         
-        // **NOVA FUNCIONALIDADE: Verificar se á© um contrato de venda**
+        // **NOVA FUNCIONALIDADE: Verificar se é um contrato de venda**
         const saleContractInfo = await checkIfSaleContract(contractAddress);
         
         if (saleContractInfo.isSaleContract) {
             addContractMessage('Ž¯ Contrato de venda detectado!', 'info');
             addContractMessage(`“ Token real: ${saleContractInfo.tokenAddress.slice(0,6)}...${saleContractInfo.tokenAddress.slice(-4)}`, 'info');
             
-            // Usar o endereá§o do token real para as prá³ximas verificaá§áµes
+            // Usar o endereço do token real para as próximas verificações
             CONFIG.contractAddress = saleContractInfo.tokenAddress;
-            CONFIG.saleContractAddress = contractAddress; // Guardar endereá§o do contrato de venda
+            CONFIG.saleContractAddress = contractAddress; // Guardar endereço do contrato de venda
             
             // Criar instá¢ncia do token real
             currentContract = new ethers.Contract(saleContractInfo.tokenAddress, CONFIG.tokenABI, currentProvider);
@@ -1017,19 +1017,19 @@ async function verifyContract() {
             
             addContractMessage('”„ Verificando token real do contrato de venda...', 'info');
         } else {
-            // Armazena endereá§o validado
+            // Armazena endereço validado
             CONFIG.contractAddress = contractAddress;
             // **MELHORIA 2: Criar instá¢ncia do contrato**
             currentContract = new ethers.Contract(contractAddress, CONFIG.tokenABI, currentProvider);
         }
         
-        // **MELHORIA 3: Verificar funá§áµes bá¡sicas ERC-20 com melhor tratamento de erro**
+        // **MELHORIA 3: Verificar funções básicas ERC-20 com melhor tratamento de erro**
         await verifyERC20Functions();
         
-        // Verifica funá§áµes de compra
+        // Verifica funções de compra
         await verifyBuyFunctions();
         
-        // Mostra informaá§áµes do token
+        // Mostra informações do token
         await loadTokenInfo();
         showTokenInfo();
         
@@ -1037,9 +1037,9 @@ async function verifyContract() {
     }     
     
     catch (error) {
-        console.error('âŒ Erro ao verificar contrato:', error);
+        console.error('ÃŒ Erro ao verificar contrato:', error);
         
-        // Log geral de erro de verificaá§á£o para suporte
+        // Log geral de erro de verificaçÃo para suporte
         window.contractLogger.logContractError(contractAddress, 'VERIFICATION_FAILED', {
             error: error.message,
             stack: error.stack,
@@ -1052,16 +1052,16 @@ async function verifyContract() {
         
         // Se for erro de RPC, oferece alternativa
         if (error.message?.includes('JSON-RPC') || error.code === -32603) {
-            addContractMessage('âš ï¸ Problema de conectividade detectado', 'warning');
+            addContractMessage('Ãš ï¸ Problema de conectividade detectado', 'warning');
             addContractMessage('”„ Tentando com provider alternativo...', 'info');
             
             try {
                 await retryWithFallbackProvider(contractAddress);
             } catch (fallbackError) {
-                addContractMessage(`âŒ Erro mesmo com provider alternativo: ${fallbackError.message}`, 'error');
+                addContractMessage(`ÃŒ Erro mesmo com provider alternativo: ${fallbackError.message}`, 'error');
             }
         } else {
-            addContractMessage(`âŒ Erro: ${error.message}`, 'error');
+            addContractMessage(`ÃŒ Erro: ${error.message}`, 'error');
         }
     } finally {
         hideButtonLoading('verify-contract-btn', 'VERIFICAR CONTRATO');
@@ -1070,19 +1070,19 @@ async function verifyContract() {
 }
 
 /**
- * Verifica funá§áµes bá¡sicas ERC-20 com melhor diagná³stico
+ * Verifica funções básicas ERC-20 com melhor diagnóstico
  */
 async function verifyERC20Functions() {
     addContractMessage('“ Verificando ERC-20...', 'info');
     
     try {
-        // **MELHORIA: Verificar cada funá§á£o individualmente para melhor diagná³stico**
+        // **MELHORIA: Verificar cada funçÃo individualmente para melhor diagnóstico**
         const name = await currentContract.name();
         const symbol = await currentContract.symbol(); 
         const decimals = await currentContract.decimals();
         const totalSupply = await currentContract.totalSupply();
         
-        // Armazenar informaá§áµes do token
+        // Armazenar informações do token
         tokenInfo = {
             name,
             symbol,
@@ -1091,10 +1091,10 @@ async function verifyERC20Functions() {
         };
         
         updateCompatibilityStatus('erc20Status', '… Suportado', 'success');
-        updateCompatibilityStatus('transferStatus', '… Disponá­vel', 'success');
+        updateCompatibilityStatus('transferStatus', '… Disponível', 'success');
         addContractMessage(`… Token: ${name} (${symbol})`, 'success');
         
-        // Log de sucesso da validaá§á£o
+        // Log de sucesso da validaçÃo
         window.contractLogger.logContractValidation(currentContract.address, {
             isERC20: true,
             tokenInfo: { name, symbol, decimals: parseInt(decimals) },
@@ -1102,9 +1102,9 @@ async function verifyERC20Functions() {
         });
         
     } catch (error) {
-        updateCompatibilityStatus('erc20Status', 'âŒ Ná£o suportado', 'error');
-        updateCompatibilityStatus('transferStatus', 'âŒ Indisponá­vel', 'error');
-        addContractMessage(`âŒ Token ná£o suportado`, 'error');
+        updateCompatibilityStatus('erc20Status', 'ÃŒ NÃo suportado', 'error');
+        updateCompatibilityStatus('transferStatus', 'ÃŒ Indisponível', 'error');
+        addContractMessage(`ÃŒ Token nÃo suportado`, 'error');
         
         // Log do erro ERC-20 para suporte
         window.contractLogger.logContractError(currentContract.address, 'ERC20_VALIDATION_FAILED', {
@@ -1114,42 +1114,42 @@ async function verifyERC20Functions() {
         });
         window.contractLogger.showDownloadButton();
         
-        throw new Error('Contrato ná£o á© ERC-20 compatá­vel');
+        throw new Error('Contrato nÃo é ERC-20 compatível');
     }
 }
 
 /**
- * ” DIAGNá“STICO PROFUNDO: Identifica exatamente por que o contrato rejeita transaá§áµes
+ * ” DIAGNá“STICO PROFUNDO: Identifica exatamente por que o contrato rejeita transações
  */
 async function performDeepContractAnalysis(contractAddress, buyFunctionName) {
     console.log('”¬ INICIANDO DIAGNá“STICO PROFUNDO DO CONTRATO...');
     
     try {
-        // 1. Verificaá§áµes bá¡sicas do estado do contrato
+        // 1. Verificações básicas do estado do contrato
         const basicChecks = await performBasicContractChecks();
         
-        // 2. Testa diferentes cená¡rios de chamada
+        // 2. Testa diferentes cenários de chamada
         const callTests = await performCallTests(buyFunctionName);
         
-        // 3. Analisa condiá§áµes especá­ficas
+        // 3. Analisa condições específicas
         const conditions = await analyzeContractConditions();
         
-        // 4. Gera relatá³rio final
+        // 4. Gera relatório final
         const isReady = generateReadinessReport(basicChecks, callTests, conditions);
         
         return isReady;
         
     } catch (error) {
-        console.log('âŒ Erro no diagná³stico profundo:', error.message);
+        console.log('ÃŒ Erro no diagnóstico profundo:', error.message);
         return false;
     }
 }
 
 /**
- * 1ï¸âƒ£ Verificaá§áµes bá¡sicas do estado do contrato
+ * 1ï¸Ãƒ£ Verificações básicas do estado do contrato
  */
 async function performBasicContractChecks() {
-    // 1ï¸âƒ£ Verificaá§áµes bá¡sicas do estado...
+    // 1ï¸Ãƒ£ Verificações básicas do estado...
     
     const checks = {
         contractExists: false,
@@ -1173,18 +1173,18 @@ async function performBasicContractChecks() {
             checks.hasTokens = tokens > 0;
             console.log(`“‹ Tokens no contrato: ${tokens} (${checks.hasTokens ? 'OK' : 'ZERO'})`);
         } catch (e) {
-            // “‹ Ná£o foi possá­vel verificar tokens no contrato
+            // “‹ NÃo foi possível verificar tokens no contrato
         }
         
-        // Verifica se está¡ pausado
+        // Verifica se está pausado
         try {
             checks.isPaused = await currentContract.paused();
             console.log(`“‹ Contrato pausado: ${checks.isPaused}`);
         } catch (e) {
-            console.log('“‹ Funá§á£o paused() ná£o disponá­vel');
+            console.log('“‹ FunçÃo paused() nÃo disponível');
         }
         
-        // Verifica se venda está¡ ativa
+        // Verifica se venda está ativa
         const saleChecks = ['saleActive', 'saleEnabled', 'isActive', 'enabled'];
         for (const funcName of saleChecks) {
             try {
@@ -1192,7 +1192,7 @@ async function performBasicContractChecks() {
                 console.log(`“‹ ${funcName}(): ${checks.saleActive}`);
                 break;
             } catch (e) {
-                // Funá§á£o ná£o existe
+                // FunçÃo nÃo existe
             }
         }
         
@@ -1201,22 +1201,22 @@ async function performBasicContractChecks() {
             checks.owner = await currentContract.owner();
             console.log(`“‹ Owner: ${checks.owner}`);
         } catch (e) {
-            console.log('“‹ Funá§á£o owner() ná£o disponá­vel');
+            console.log('“‹ FunçÃo owner() nÃo disponível');
         }
         
         return checks;
         
     } catch (error) {
-        console.log('âŒ Erro nas verificaá§áµes bá¡sicas:', error.message);
+        console.log('ÃŒ Erro nas verificações básicas:', error.message);
         return checks;
     }
 }
 
 /**
- * 2ï¸âƒ£ Testa diferentes cená¡rios de chamada
+ * 2ï¸Ãƒ£ Testa diferentes cenários de chamada
  */
 async function performCallTests(buyFunctionName) {
-    // 2ï¸âƒ£ Testando cená¡rios de chamada...
+    // 2ï¸Ãƒ£ Testando cenários de chamada...
     
     const tests = {
         withoutValue: false,
@@ -1227,13 +1227,13 @@ async function performCallTests(buyFunctionName) {
     };
     
     try {
-        // Teste 1: Sem valor (para verificar se funá§á£o á© realmente payable)
+        // Teste 1: Sem valor (para verificar se funçÃo é realmente payable)
         try {
             await currentContract.callStatic[buyFunctionName]();
             tests.withoutValue = true;
-            // Teste sem valor: PASSOU (funá§á£o pode ná£o ser payable)
+            // Teste sem valor: PASSOU (funçÃo pode nÃo ser payable)
         } catch (e) {
-            console.log(`âŒ Sem valor: ${e.reason || e.message}`);
+            console.log(`ÃŒ Sem valor: ${e.reason || e.message}`);
         }
         
         // Teste 2: Com valor pequeno
@@ -1242,7 +1242,7 @@ async function performCallTests(buyFunctionName) {
             tests.withSmallValue = true;
             // Teste valor pequeno: PASSOU
         } catch (e) {
-            console.log(`âŒ Valor pequeno: ${e.reason || e.message}`);
+            console.log(`ÃŒ Valor pequeno: ${e.reason || e.message}`);
         }
         
         // Teste 3: Tentativa de estimativa de gas
@@ -1250,22 +1250,22 @@ async function performCallTests(buyFunctionName) {
             tests.gasEstimation = await currentContract.estimateGas[buyFunctionName]({ value: ethers.utils.parseEther('0.001') });
             console.log(`“‹ Estimativa de gas: ${tests.gasEstimation.toString()}`);
         } catch (e) {
-            console.log(`âŒ Estimativa de gas: ${e.reason || e.message}`);
+            console.log(`ÃŒ Estimativa de gas: ${e.reason || e.message}`);
         }
         
         return tests;
         
     } catch (error) {
-        console.log('âŒ Erro nos testes de chamada:', error.message);
+        console.log('ÃŒ Erro nos testes de chamada:', error.message);
         return tests;
     }
 }
 
 /**
- * 3ï¸âƒ£ Analisa condiá§áµes especá­ficas do contrato
+ * 3ï¸Ãƒ£ Analisa condições específicas do contrato
  */
 async function analyzeContractConditions() {
-    console.log('” 3ï¸âƒ£ Analisando condiá§áµes especá­ficas...');
+    console.log('” 3ï¸Ãƒ£ Analisando condições específicas...');
     
     const conditions = {
         hasWhitelist: false,
@@ -1281,7 +1281,7 @@ async function analyzeContractConditions() {
             conditions.hasWhitelist = true;
             console.log('“‹ Contrato usa whitelist');
         } catch (e) {
-            console.log('“‹ Contrato ná£o usa whitelist');
+            console.log('“‹ Contrato nÃo usa whitelist');
         }
         
         // Verifica limites
@@ -1294,36 +1294,36 @@ async function analyzeContractConditions() {
                     console.log(`“‹ ${func}: ${ethers.utils.formatEther(limit)} BNB`);
                 }
             } catch (e) {
-                // Funá§á£o ná£o existe
+                // FunçÃo nÃo existe
             }
         }
         
         return conditions;
         
     } catch (error) {
-        console.log('âŒ Erro na aná¡lise de condiá§áµes:', error.message);
+        console.log('ÃŒ Erro na análise de condições:', error.message);
         return conditions;
     }
 }
 
 /**
- * 4ï¸âƒ£ Gera relatá³rio final de prontidá£o
+ * 4ï¸Ãƒ£ Gera relatório final de prontidÃo
  */
 function generateReadinessReport(basicChecks, callTests, conditions) {
-    // 4ï¸âƒ£ Gerando relatá³rio de prontidá£o...
+    // 4ï¸Ãƒ£ Gerando relatório de prontidÃo...
     
     let score = 0;
     let maxScore = 0;
     const issues = [];
     
-    // Avaliaá§á£o bá¡sica
+    // AvaliaçÃo básica
     maxScore += 10;
     if (basicChecks.contractExists) score += 10;
-    else issues.push('âŒ CRáTICO: Contrato ná£o existe no endereá§o informado');
+    else issues.push('ÃŒ CRáTICO: Contrato nÃo existe no endereço informado');
     
-    // Avaliaá§á£o de estado
+    // AvaliaçÃo de estado
     if (basicChecks.isPaused === true) {
-        issues.push('âš ï¸ BLOQUEADOR: Contrato está¡ PAUSADO');
+        issues.push('Ãš ï¸ BLOQUEADOR: Contrato está PAUSADO');
     } else if (basicChecks.isPaused === false) {
         score += 5;
     }
@@ -1332,31 +1332,31 @@ function generateReadinessReport(basicChecks, callTests, conditions) {
     if (basicChecks.saleActive === true) {
         score += 5;
     } else if (basicChecks.saleActive === false) {
-        issues.push('âš ï¸ BLOQUEADOR: Venda ná£o está¡ ATIVA');
+        issues.push('Ãš ï¸ BLOQUEADOR: Venda nÃo está ATIVA');
     }
     maxScore += 5;
     
-    // Avaliaá§á£o de tokens
+    // AvaliaçÃo de tokens
     if (basicChecks.hasTokens) {
         score += 3;
     } else {
-        issues.push('âš ï¸ AVISO: Contrato ná£o tem tokens (pode usar mint)');
+        issues.push('Ãš ï¸ AVISO: Contrato nÃo tem tokens (pode usar mint)');
     }
     maxScore += 3;
     
-    // Avaliaá§á£o de testes
+    // AvaliaçÃo de testes
     if (callTests.withoutValue || callTests.withSmallValue) {
         score += 7;
     } else {
-        issues.push('âŒ CRáTICO: Funá§á£o ná£o aceita chamadas de teste');
+        issues.push('ÃŒ CRáTICO: FunçÃo nÃo aceita chamadas de teste');
     }
     maxScore += 7;
     
     const readinessPercent = Math.round((score / maxScore) * 100);
-    const isReady = score >= (maxScore * 0.7); // 70% de prontidá£o má­nima
+    const isReady = score >= (maxScore * 0.7); // 70% de prontidÃo mínima
     
     console.log(`“Š RELATá“RIO DE PRONTIDáƒO: ${readinessPercent}% (${score}/${maxScore})`);
-    console.log(`Ž¯ Status: ${isReady ? '… PRONTO PARA NEGOCIAá‡áƒO' : 'âŒ NáƒO PRONTO'}`);
+    console.log(`Ž¯ Status: ${isReady ? '… PRONTO PARA NEGOCIAá‡áƒO' : 'ÃŒ NáƒO PRONTO'}`);
     
     if (issues.length > 0) {
         console.log('š¨ PROBLEMAS IDENTIFICADOS:');
@@ -1370,13 +1370,13 @@ function generateReadinessReport(basicChecks, callTests, conditions) {
 }
 
 /**
- * Ž¯ Atualiza UI com resultado da aná¡lise de prontidá£o
+ * Ž¯ Atualiza UI com resultado da análise de prontidÃo
  */
 function updateReadinessUI(readinessPercent, isReady, issues) {
-    // Cria ou atualiza seá§á£o de status de prontidá£o
+    // Cria ou atualiza seçÃo de status de prontidÃo
     let readinessSection = document.getElementById('readiness-status');
     if (!readinessSection) {
-        // Cria seá§á£o se ná£o existe
+        // Cria seçÃo se nÃo existe
         const contractSection = document.querySelector('#contract-section .card-body');
         if (contractSection) {
             readinessSection = document.createElement('div');
@@ -1388,13 +1388,13 @@ function updateReadinessUI(readinessPercent, isReady, issues) {
     
     if (readinessSection) {
         const statusColor = isReady ? 'success' : 'danger';
-        const statusIcon = isReady ? '…' : 'âŒ';
+        const statusIcon = isReady ? '…' : 'ÃŒ';
         const statusText = isReady ? 'PRONTO PARA NEGOCIAá‡áƒO' : 'PROBLEMAS IDENTIFICADOS';
         
         readinessSection.innerHTML = `
             <div class="d-flex align-items-center mb-2">
                 <div class="flex-grow-1">
-                    <h6 class="text-${statusColor} mb-0">${statusIcon} Status de Prontidá£o: ${readinessPercent}%</h6>
+                    <h6 class="text-${statusColor} mb-0">${statusIcon} Status de ProntidÃo: ${readinessPercent}%</h6>
                     <small class="text-${statusColor}">${statusText}</small>
                 </div>
                 <div class="progress" style="width: 120px; height: 8px;">
@@ -1416,7 +1416,7 @@ function updateReadinessUI(readinessPercent, isReady, issues) {
 }
 
 async function testActualPayableFunctions() {
-    // TESTE DIRETO: Validando funá§áµes PAYABLE do ABI...
+    // TESTE DIRETO: Validando funções PAYABLE do ABI...
     
     let contractReady = false;
     
@@ -1424,29 +1424,29 @@ async function testActualPayableFunctions() {
         const contractInterface = currentContract.interface;
         const allFunctions = Object.keys(contractInterface.functions);
         
-        // Filtra apenas funá§áµes PAYABLE que existem no ABI
+        // Filtra apenas funções PAYABLE que existem no ABI
         const payableFunctions = allFunctions.filter(funcName => {
             const fragment = contractInterface.functions[funcName];
             return fragment.payable;
         });
         
-        console.log(`’° Encontradas ${payableFunctions.length} funá§áµes PAYABLE no ABI:`);
+        console.log(`’° Encontradas ${payableFunctions.length} funções PAYABLE no ABI:`);
         // payableFunctions.forEach(func => console.log(`   ’¡ ${func}`));
         
         if (payableFunctions.length === 0) {
-            console.log('âŒ Nenhuma funá§á£o PAYABLE encontrada no ABI!');
+            console.log('ÃŒ Nenhuma funçÃo PAYABLE encontrada no ABI!');
             return false;
         }
         
-        // Testa cada funá§á£o PAYABLE com estimateGas
+        // Testa cada funçÃo PAYABLE com estimateGas
         for (const funcName of payableFunctions) {
             try {
-                // Testando funá§á£o PAYABLE: ${funcName}()
+                // Testando funçÃo PAYABLE: ${funcName}()
                 
                 const fragment = contractInterface.functions[funcName];
                 const testValue = ethers.utils.parseEther('0.001');
                 
-                // Monta pará¢metros baseado nos inputs da funá§á£o
+                // Monta pará¢metros baseado nos inputs da funçÃo
                 const testParams = fragment.inputs.map(input => {
                     switch(input.type) {
                         case 'uint256': return '1000'; // Quantidade de teste
@@ -1456,44 +1456,44 @@ async function testActualPayableFunctions() {
                     }
                 });
                 
-                // Se ná£o tem pará¢metros, usa sá³ o value
+                // Se nÃo tem pará¢metros, usa só o value
                 if (testParams.length === 0) {
                     await currentContract.estimateGas[funcName]({ value: testValue });
                 } else {
                     await currentContract.estimateGas[funcName](...testParams, { value: testValue });
                 }
                 
-                // SUCESSO! Funá§á£o ${funcName}() á© vá¡lida e funcional!
+                // SUCESSO! FunçÃo ${funcName}() é válida e funcional!
                 
-                // **VALIDAá‡áƒO EXTRA: Testa callStatic tambá©m**
+                // **VALIDAá‡áƒO EXTRA: Testa callStatic também**
                 try {
                     if (testParams.length === 0) {
                         await currentContract.callStatic[funcName]({ value: testValue });
                     } else {
                         await currentContract.callStatic[funcName](...testParams, { value: testValue });
                     }
-                    // CONFIRMADO! ${funcName}() passou tambá©m no callStatic!
+                    // CONFIRMADO! ${funcName}() passou também no callStatic!
                 } catch (staticError) {
                     if (staticError.message.includes('revert') || staticError.message.includes('execution reverted')) {
-                        console.log(`âš ï¸ ${funcName}() Funá§á£o de reverte com pará¢metros existe!`);
+                        console.log(`Ãš ï¸ ${funcName}() FunçÃo de reverte com pará¢metros existe!`);
                     } else {
-                        console.log(`âŒ ${funcName}() falhou no callStatic: ${staticError.message}`);
-                        continue; // Pula esta funá§á£o
+                        console.log(`ÃŒ ${funcName}() falhou no callStatic: ${staticError.message}`);
+                        continue; // Pula esta funçÃo
                     }
                 }
                 
                 buyFunctionName = funcName;
                 contractReady = true;
-                updateCompatibilityStatus('buyStatus', '… Disponá­vel', 'success');
-                addContractMessage(`… Funá§á£o de compra totalmente validada`, 'success');
+                updateCompatibilityStatus('buyStatus', '… Disponível', 'success');
+                addContractMessage(`… FunçÃo de compra totalmente validada`, 'success');
                 
-                // Habilita seá§á£o de compra diretamente
+                // Habilita seçÃo de compra diretamente
                 enablePurchaseSection();
                 
                 return contractReady;
                 
             } catch (error) {
-                // **MUDANá‡A CRáTICA: Considerar REVERT como funá§á£o VáLIDA**
+                // **MUDANá‡A CRáTICA: Considerar REVERT como funçÃo VáLIDA**
                 if (error.code === 'UNPREDICTABLE_GAS_LIMIT' || 
                     error.message.includes('execution reverted') || 
                     error.message.includes('revert')) {
@@ -1501,31 +1501,31 @@ async function testActualPayableFunctions() {
                     console.log(`… FUNá‡áƒO VáLIDA! ${funcName}() existe e reverte (comportamento esperado)`);
                     console.log(`“ Motivo do revert: ${error.reason || error.message}`);
                     
-                    // Funá§á£o existe, apenas reverte com pará¢metros de teste
+                    // FunçÃo existe, apenas reverte com pará¢metros de teste
                     buyFunctionName = funcName;
-                    updateCompatibilityStatus('buyStatus', '… Disponá­vel', 'success');
-                    addContractMessage(`… Funá§á£o de compra detectada`, 'success');
+                    updateCompatibilityStatus('buyStatus', '… Disponível', 'success');
+                    addContractMessage(`… FunçÃo de compra detectada`, 'success');
                     
-                    // Habilita seá§á£o de compra diretamente
+                    // Habilita seçÃo de compra diretamente
                     enablePurchaseSection();
                     return true;
                 } else {
-                    console.log(`âŒ Funá§á£o ${funcName}() falhou: ${error.message}`);
+                    console.log(`ÃŒ FunçÃo ${funcName}() falhou: ${error.message}`);
                 }
             }
         }
         
-        console.log('âŒ Nenhuma funá§á£o PAYABLE funcionou corretamente');
+        console.log('ÃŒ Nenhuma funçÃo PAYABLE funcionou corretamente');
         return false;
         
     } catch (error) {
-        console.log('âŒ Erro ao testar funá§áµes PAYABLE:', error.message);
+        console.log('ÃŒ Erro ao testar funções PAYABLE:', error.message);
         return false;
     }
 }
 
 /**
- * Investigaá§á£o adicional: consulta ABI via Etherscan para contrato ná£o-padrá£o
+ * InvestigaçÃo adicional: consulta ABI via Etherscan para contrato nÃo-padrÃo
  */
 async function investigateContractViaEtherscan(contractAddress) {
     try {
@@ -1544,27 +1544,27 @@ async function investigateContractViaEtherscan(contractAddress) {
             const abi = JSON.parse(data.result);
             console.log('“‹ ABI completo obtido do Etherscan:');
             
-            // Filtra apenas funá§áµes
+            // Filtra apenas funções
             const functions = abi.filter(item => item.type === 'function');
             const payableFunctions = functions.filter(func => func.stateMutability === 'payable');
             
-            console.log(`“Š Estatá­sticas do contrato:`);
-            console.log(`   “Œ Total de funá§áµes: ${functions.length}`);
-            console.log(`   ’° Funá§áµes payable: ${payableFunctions.length}`);
+            console.log(`“Š Estatísticas do contrato:`);
+            console.log(`   “Œ Total de funções: ${functions.length}`);
+            console.log(`   ’° Funções payable: ${payableFunctions.length}`);
             
             if (payableFunctions.length > 0) {
-                console.log('’° Funá§áµes PAYABLE encontradas (possá­veis compras):');
+                console.log('’° Funções PAYABLE encontradas (possíveis compras):');
                 // payableFunctions.forEach(func => {
                 //     const inputs = func.inputs.map(i => `${i.type} ${i.name}`).join(', ');
                 //     console.log(`   Ž¯ ${func.name}(${inputs})`);
                 // });
                 
-                // Testa a primeira funá§á£o payable
+                // Testa a primeira funçÃo payable
                 const firstPayable = payableFunctions[0];
-                // Testando primeira funá§á£o payable: ${firstPayable.name}()
+                // Testando primeira funçÃo payable: ${firstPayable.name}()
                 
                 try {
-                    // Monta pará¢metros bá¡sicos baseado nos inputs esperados
+                    // Monta pará¢metros básicos baseado nos inputs esperados
                     const testParams = firstPayable.inputs.map(input => {
                         switch(input.type) {
                             case 'uint256': return '1000';
@@ -1574,35 +1574,35 @@ async function investigateContractViaEtherscan(contractAddress) {
                         }
                     });
                     
-                    // Se a funá§á£o á© payable, adiciona value
+                    // Se a funçÃo é payable, adiciona value
                     const callOptions = { value: ethers.utils.parseEther('0.001') };
                     
                     await currentContract.estimateGas[firstPayable.name](...testParams, callOptions);
                     
-                    console.log(`… SUCESSO! Funá§á£o ${firstPayable.name}() funciona!`);
+                    console.log(`… SUCESSO! FunçÃo ${firstPayable.name}() funciona!`);
                     buyFunctionName = firstPayable.name;
-                    updateCompatibilityStatus('buyStatus', '… Disponá­vel', 'success');
-                    addContractMessage(`… Funá§á£o de compra "${firstPayable.name}" encontrada via Etherscan`, 'success');
+                    updateCompatibilityStatus('buyStatus', '… Disponível', 'success');
+                    addContractMessage(`… FunçÃo de compra "${firstPayable.name}" encontrada via Etherscan`, 'success');
                     return true;
                     
                 } catch (testError) {
-                    console.log(`âŒ Funá§á£o ${firstPayable.name}() rejeitou teste:`, testError.message);
+                    console.log(`ÃŒ FunçÃo ${firstPayable.name}() rejeitou teste:`, testError.message);
                 }
             }
         }
         
     } catch (error) {
-        console.log('âŒ Erro na investigaá§á£o via Etherscan:', error.message);
+        console.log('ÃŒ Erro na investigaçÃo via Etherscan:', error.message);
     }
     
     return false;
 }
 
 /**
- * Verifica funá§áµes de compra disponá­veis
+ * Verifica funções de compra disponíveis
  */
 async function verifyBuyFunctions() {
-    let priceFunctionName = null; // Adicionar declaraá§á£o da variá¡vel
+    let priceFunctionName = null; // Adicionar declaraçÃo da variável
     
     const buyFunctions = [
         'buy', 'buyTokens', 'purchase', 
@@ -1610,20 +1610,20 @@ async function verifyBuyFunctions() {
         'exchange', 'buyToken'
     ];
     
-    addContractMessage('ï¿½ Funá§á£o de compra...', 'info');
+    addContractMessage('ï¿½ FunçÃo de compra...', 'info');
     
     for (const funcName of buyFunctions) {
         try {
             // **MELHORIA: Usar valor baseado nos limites detectados, como no teste**
-            let testValue = ethers.utils.parseEther('0.001'); // Valor padrá£o
+            let testValue = ethers.utils.parseEther('0.001'); // Valor padrÃo
             
-            // Se temos limites detectados, usar o valor má­nimo + margem
+            // Se temos limites detectados, usar o valor mínimo + margem
             if (tokenInfo.limits && tokenInfo.limits.minPurchase && tokenInfo.limits.minPurchase.gt(0)) {
                 testValue = tokenInfo.limits.minPurchase;
-                console.log(`“ Usando valor má­nimo do contrato: ${ethers.utils.formatEther(testValue)} BNB`);
+                console.log(`“ Usando valor mínimo do contrato: ${ethers.utils.formatEther(testValue)} BNB`);
             }
             
-            // Prepara pará¢metros baseado no tipo da funá§á£o
+            // Prepara pará¢metros baseado no tipo da funçÃo
             let gasEstimateParams;
             switch(funcName) {
                 case 'mint':
@@ -1631,19 +1631,19 @@ async function verifyBuyFunctions() {
                     gasEstimateParams = [walletAddress, '1000'];
                     break;
                 case 'swap':
-                    // Para swap, testa troca bá¡sica
+                    // Para swap, testa troca básica
                     gasEstimateParams = ['0x0000000000000000000000000000000000000000', '1000'];
                     break;
                 default:
-                    // Para funá§áµes de compra normais, usa value
+                    // Para funções de compra normais, usa value
                     gasEstimateParams = [{ value: testValue }];
             }
             
             // **MELHORIA: Tenta estimar gas primeiro**
             const gasEstimate = await currentContract.estimateGas[funcName](...gasEstimateParams);
             
-            // Se chegou aqui, a funá§á£o existe e á© vá¡lida
-            console.log(`… Funá§á£o de compra: Detectada e funcional (Gas: ${gasEstimate})`);
+            // Se chegou aqui, a funçÃo existe e é válida
+            console.log(`… FunçÃo de compra: Detectada e funcional (Gas: ${gasEstimate})`);
             
             // **MELHORIA: Teste callStatic adicional como no teste**
             try {
@@ -1656,47 +1656,47 @@ async function verifyBuyFunctions() {
                     console.log(`… CallStatic com revert (normal): ${callError.reason || callError.message}`);
                     addContractMessage('… CallStatic: Revert detectado (comportamento normal)', 'success');
                 } else {
-                    console.log(`âš ï¸ CallStatic falhou: ${callError.message}`);
-                    addContractMessage(`âš ï¸ CallStatic: ${callError.message}`, 'warning');
+                    console.log(`Ãš ï¸ CallStatic falhou: ${callError.message}`);
+                    addContractMessage(`Ãš ï¸ CallStatic: ${callError.message}`, 'warning');
                 }
             }
             
             buyFunctionName = funcName;
-            updateCompatibilityStatus('buyStatus', '… Disponá­vel', 'success');
-            addContractMessage(`… Funá§á£o de compra totalmente validada`, 'success');
+            updateCompatibilityStatus('buyStatus', '… Disponível', 'success');
+            addContractMessage(`… FunçÃo de compra totalmente validada`, 'success');
             return;
             
         } catch (error) {
             if (error.message.includes('is not a function')) {
-                // Funá§á£o ná£o existe - continua testando outras
+                // FunçÃo nÃo existe - continua testando outras
             } else if (error.code === 'UNPREDICTABLE_GAS_LIMIT' || 
                        error.message.includes('revert') || 
                        error.message.includes('execution reverted')) {
                 // **MELHORIA: Melhor tratamento de revert - incluir motivo**
-                const reason = error.reason || error.message.split(':')[1] || 'Motivo ná£o especificado';
-                console.log(`âš ï¸ Funá§á£o de compra: Detectada mas reverte (${reason})`);
+                const reason = error.reason || error.message.split(':')[1] || 'Motivo nÃo especificado';
+                console.log(`Ãš ï¸ FunçÃo de compra: Detectada mas reverte (${reason})`);
                 buyFunctionName = funcName;
-                updateCompatibilityStatus('buyStatus', '… Disponá­vel', 'success');
-                addContractMessage(`… Funá§á£o de compra detectada (reverte com pará¢metros normal)`, 'success');
+                updateCompatibilityStatus('buyStatus', '… Disponível', 'success');
+                addContractMessage(`… FunçÃo de compra detectada (reverte com pará¢metros normal)`, 'success');
                 return;
             } else {
-                console.log(`âŒ Funá§á£o ${funcName}() erro: ${error.message}`);
+                console.log(`ÃŒ FunçÃo ${funcName}() erro: ${error.message}`);
             }
         }
     }
     
-    // Se ná£o encontrou nenhuma funá§á£o vá¡lida
-    console.log('âŒ Nenhuma funá§á£o de compra vá¡lida encontrada no contrato');
+    // Se nÃo encontrou nenhuma funçÃo válida
+    console.log('ÃŒ Nenhuma funçÃo de compra válida encontrada no contrato');
     
-    // **INVESTIGAá‡áƒO ADICIONAL: Listar todas as funá§áµes disponá­veis no contrato**
-    console.log('” INVESTIGANDO - Funá§áµes disponá­veis no contrato:');
+    // **INVESTIGAá‡áƒO ADICIONAL: Listar todas as funções disponíveis no contrato**
+    console.log('” INVESTIGANDO - Funções disponíveis no contrato:');
     let possibleBuyFunctions = [];
     
     try {
         const contractInterface = currentContract.interface;
         const allFunctions = Object.keys(contractInterface.functions);
         
-        console.log(`“‹ Contrato possui ${allFunctions.length} funá§áµes disponá­veis`);
+        console.log(`“‹ Contrato possui ${allFunctions.length} funções disponíveis`);
         // allFunctions.forEach(func => {
         //     const fragment = contractInterface.functions[func];
         //     const isPayable = fragment.payable;
@@ -1704,7 +1704,7 @@ async function verifyBuyFunctions() {
         //     console.log(`   “Œ ${func}(${inputs}) ${isPayable ? '[PAYABLE]' : ''}`);
         // });
         
-        // Procura por funá§áµes que possam ser de compra baseado no nome
+        // Procura por funções que possam ser de compra baseado no nome
         possibleBuyFunctions = allFunctions.filter(func => 
             func.toLowerCase().includes('buy') || 
             func.toLowerCase().includes('purchase') ||
@@ -1714,27 +1714,27 @@ async function verifyBuyFunctions() {
         );
         
         if (possibleBuyFunctions.length > 0) {
-            console.log('Ž¯ Funá§áµes suspeitas de compra encontradas:');
+            console.log('Ž¯ Funções suspeitas de compra encontradas:');
             // possibleBuyFunctions.forEach(func => console.log(`   ’¡ ${func}`));
-            // Ná£o mostra mensagem para o usuá¡rio - apenas no console para debug
+            // NÃo mostra mensagem para o usuário - apenas no console para debug
         }
         
     } catch (e) {
-        console.log('âŒ Erro ao listar funá§áµes do contrato:', e.message);
+        console.log('ÃŒ Erro ao listar funções do contrato:', e.message);
     }
     
-    // **TESTE FINAL: Validaá§á£o das funá§áµes PAYABLE reais do ABI**
-    // Teste final: Validando funá§áµes PAYABLE do ABI...
+    // **TESTE FINAL: ValidaçÃo das funções PAYABLE reais do ABI**
+    // Teste final: Validando funções PAYABLE do ABI...
     const found = await testActualPayableFunctions();
     
     if (!found) {
         buyFunctionName = null;
-        updateCompatibilityStatus('buyStatus', 'âŒ Ná£o disponá­vel', 'error');
-        addContractMessage('âŒ Este token ná£o permite compra automá¡tica', 'error');
+        updateCompatibilityStatus('buyStatus', 'ÃŒ NÃo disponível', 'error');
+        addContractMessage('ÃŒ Este token nÃo permite compra automática', 'error');
         
         // Log detalhado do erro para suporte
         window.contractLogger.logContractError(currentContract.address, 'NO_BUY_FUNCTION', {
-            message: 'Nenhuma funá§á£o de compra detectada',
+            message: 'Nenhuma funçÃo de compra detectada',
             availableFunctions: Object.keys(currentContract.functions || {}),
             possibleBuyFunctions: possibleBuyFunctions || [],
             contractABI: CONFIG.tokenABI.map(f => typeof f === 'string' ? f : f.name).filter(Boolean),
@@ -1745,14 +1745,14 @@ async function verifyBuyFunctions() {
         });
         window.contractLogger.showDownloadButton();
         
-        // š¨ IMPORTANTE: Garantir que a seá§á£o de compra permaneá§a OCULTA
+        // š¨ IMPORTANTE: Garantir que a seçÃo de compra permaneça OCULTA
         hidePurchaseSection();
-        console.log('”’ Seá§á£o de compra mantida OCULTA - Contrato incompatá­vel');
+        console.log('”’ SeçÃo de compra mantida OCULTA - Contrato incompatível');
     }
 }
 
 /**
- * Carrega informaá§áµes do token
+ * Carrega informações do token
  */
 async function loadTokenInfo() {
     try {
@@ -1764,21 +1764,21 @@ async function loadTokenInfo() {
             contractBalance: await currentProvider.getBalance(currentContract.address)
         };
         
-        // Verificar tokens disponá­veis para venda no contrato
+        // Verificar tokens disponíveis para venda no contrato
         try {
-            console.log('” Verificando tokens disponá­veis para venda...');
+            console.log('” Verificando tokens disponíveis para venda...');
             const tokensBalance = await currentContract.balanceOf(currentContract.address);
             const tokensForSale = parseFloat(ethers.utils.formatUnits(tokensBalance, tokenInfo.decimals));
             tokenInfo.tokensForSale = tokensBalance;
             tokenInfo.tokensForSaleFormatted = tokensForSale;
-            console.log(`’° Tokens disponá­veis para venda: ${tokensForSale.toLocaleString()} ${tokenInfo.symbol}`);
+            console.log(`’° Tokens disponíveis para venda: ${tokensForSale.toLocaleString()} ${tokenInfo.symbol}`);
         } catch (error) {
-            // âš ï¸ Ná£o foi possá­vel verificar tokens para venda: ${error.message}
+            // Ãš ï¸ NÃo foi possível verificar tokens para venda: ${error.message}
             tokenInfo.tokensForSale = ethers.BigNumber.from(0);
             tokenInfo.tokensForSaleFormatted = 0;
         }
         
-        // Tenta detectar preá§o do contrato
+        // Tenta detectar preço do contrato
         try {
             let price = null;
             const priceFunctions = [
@@ -1786,48 +1786,48 @@ async function loadTokenInfo() {
                 'tokenCost', 'cost', 'salePrice', 'pricePerToken'
             ];
             
-            console.log('’° Verificando preá§o...');
+            console.log('’° Verificando preço...');
             
             for (const priceFunc of priceFunctions) {
                 try {
-                    console.log(`” Tentando funá§á£o: ${priceFunc}()`);
+                    console.log(`” Tentando funçÃo: ${priceFunc}()`);
                     price = await currentContract[priceFunc]();
-                    console.log(`… Preá§o encontrado via ${priceFunc}(): ${price.toString()}`);
+                    console.log(`… Preço encontrado via ${priceFunc}(): ${price.toString()}`);
                     break;
                 } catch (e) {
-                    console.log(`âŒ Funá§á£o ${priceFunc}() ná£o disponá­vel`);
+                    console.log(`ÃŒ FunçÃo ${priceFunc}() nÃo disponível`);
                 }
             }
             
             if (price) {
                 tokenInfo.price = ethers.utils.formatEther(price);
-                console.log(`… Preá§o: ${tokenInfo.price} BNB por token`);
+                console.log(`… Preço: ${tokenInfo.price} BNB por token`);
             } else {
-                // Tentar calcular preá§o usando funá§á£o calculateEthForTokens
+                // Tentar calcular preço usando funçÃo calculateEthForTokens
                 try {
-                    console.log('§® Tentando calcular preá§o via calculateEthForTokens...');
+                    console.log('§® Tentando calcular preço via calculateEthForTokens...');
                     const oneToken = ethers.utils.parseUnits('1', tokenInfo.decimals);
                     const ethCost = await currentContract.calculateEthForTokens(oneToken);
                     tokenInfo.price = ethers.utils.formatEther(ethCost);
-                    console.log(`… Preá§o calculado: ${tokenInfo.price} BNB por token`);
+                    console.log(`… Preço calculado: ${tokenInfo.price} BNB por token`);
                 } catch (calcError) {
-                    // Tentar funá§á£o inversa calculateTokensForEth com 1 ETH
+                    // Tentar funçÃo inversa calculateTokensForEth com 1 ETH
                     try {
-                        console.log('§® Tentando calcular preá§o via calculateTokensForEth...');
+                        console.log('§® Tentando calcular preço via calculateTokensForEth...');
                         const oneEth = ethers.utils.parseEther('1');
                         const tokensForOneEth = await currentContract.calculateTokensForEth(oneEth);
                         const tokensFormatted = ethers.utils.formatUnits(tokensForOneEth, tokenInfo.decimals);
                         tokenInfo.price = (1 / parseFloat(tokensFormatted)).toString();
-                        console.log(`… Preá§o calculado (inverso): ${tokenInfo.price} BNB por token`);
+                        console.log(`… Preço calculado (inverso): ${tokenInfo.price} BNB por token`);
                     } catch (invError) {
                         tokenInfo.price = CONFIG.defaultTokenPrice;
-                        console.log(`âš ï¸ Preá§o ná£o detectado, usando padrá£o: ${CONFIG.defaultTokenPrice} BNB`);
+                        console.log(`Ãš ï¸ Preço nÃo detectado, usando padrÃo: ${CONFIG.defaultTokenPrice} BNB`);
                     }
                 }
             }
         } catch (error) {
             tokenInfo.price = CONFIG.defaultTokenPrice;
-            console.log(`âŒ Erro no preá§o: ${error.message}`);
+            console.log(`ÃŒ Erro no preço: ${error.message}`);
         }
 
         // **MELHORIA: Verificar limites de compra como no teste**
@@ -1835,24 +1835,24 @@ async function loadTokenInfo() {
         
         updateTokenInfoUI();
         
-        // âš ï¸ NáƒO habilita seá§á£o de compra automaticamente
-        // A seá§á£o sá³ será¡ habilitada SE uma funá§á£o de compra vá¡lida for encontrada
-        console.log('â„¹ï¸ Informaá§áµes do token carregadas - Aguardando validaá§á£o de funá§áµes de compra');
+        // Ãš ï¸ NáƒO habilita seçÃo de compra automaticamente
+        // A seçÃo só será habilitada SE uma funçÃo de compra válida for encontrada
+        console.log('Ã„¹ï¸ Informações do token carregadas - Aguardando validaçÃo de funções de compra');
         
     } catch (error) {
-        throw new Error(`Erro ao carregar informaá§áµes do token: ${error.message}`);
+        throw new Error(`Erro ao carregar informações do token: ${error.message}`);
     }
 }
 
 /**
- * Atualiza UI com informaá§áµes do token
+ * Atualiza UI com informações do token
  */
 function updateTokenInfoUI() {
     document.getElementById('tokenName').textContent = tokenInfo.name || '-';
     document.getElementById('tokenSymbol').textContent = tokenInfo.symbol || '-';
     document.getElementById('tokenDecimals').textContent = tokenInfo.decimals || '-';
     
-    // Formata total supply (sem sá­mbolo do token)
+    // Formata total supply (sem símbolo do token)
     const totalSupply = ethers.utils.formatUnits(tokenInfo.totalSupply, tokenInfo.decimals);
     document.getElementById('tokenTotalSupply').textContent = formatNumber(totalSupply);
     
@@ -1860,20 +1860,20 @@ function updateTokenInfoUI() {
     const contractBalance = ethers.utils.formatEther(tokenInfo.contractBalance);
     document.getElementById('contractBalance').textContent = `${formatNumber(contractBalance)} BNB`;
     
-    // Formata tokens disponá­veis para venda (sem sá­mbolo do token)
+    // Formata tokens disponíveis para venda (sem símbolo do token)
     const tokensForSaleElement = document.getElementById('tokensForSale');
     if (tokensForSaleElement) {
         const tokensAvailable = tokenInfo.tokensForSaleFormatted || 0;
         if (tokensAvailable > 0) {
             tokensForSaleElement.textContent = formatNumber(tokensAvailable);
-            tokensForSaleElement.className = 'fw-bold text-success mb-2'; // Verde se há¡ tokens
+            tokensForSaleElement.className = 'fw-bold text-success mb-2'; // Verde se há tokens
         } else {
             tokensForSaleElement.textContent = '0';
-            tokensForSaleElement.className = 'fw-bold text-danger mb-2'; // Vermelho se ná£o há¡ tokens
+            tokensForSaleElement.className = 'fw-bold text-danger mb-2'; // Vermelho se nÃo há tokens
         }
     }
     
-    // Atualiza informaá§á£o de disponibilidade na á¡rea de compra (sem sá­mbolo do token)
+    // Atualiza informaçÃo de disponibilidade na área de compra (sem símbolo do token)
     const availabilityInfo = document.getElementById('tokens-availability');
     const availableDisplay = document.getElementById('available-tokens-display');
     if (availabilityInfo && availableDisplay && tokenInfo.tokensForSaleFormatted !== undefined) {
@@ -1886,11 +1886,11 @@ function updateTokenInfoUI() {
         } else {
             availabilityInfo.className = 'alert alert-warning border-0 mb-3 py-2';
             availabilityInfo.style.display = 'block';
-            availableDisplay.innerHTML = `<span class="text-warning">Nenhum token disponá­vel</span>`;
+            availableDisplay.innerHTML = `<span class="text-warning">Nenhum token disponível</span>`;
         }
     }
     
-    // Define preá§o como READ-ONLY (detectado do contrato)
+    // Define preço como READ-ONLY (detectado do contrato)
     const priceInput = document.getElementById('token-price');
     if (priceInput) {
         priceInput.value = tokenInfo.price;
@@ -1899,16 +1899,16 @@ function updateTokenInfoUI() {
         priceInput.style.backgroundColor = '#2d3748'; // Cor de fundo diferenciada
         priceInput.style.cursor = 'not-allowed'; // Cursor indicativo
         
-        // Verifica se preá§o foi detectado automaticamente ou á© padrá£o
+        // Verifica se preço foi detectado automaticamente ou é padrÃo
         if (tokenInfo.price === CONFIG.defaultTokenPrice) {
-            priceInput.title = 'Preá§o padrá£o (ná£o detectado no contrato) - verifique manualmente';
-            priceInput.style.borderColor = '#fbbf24'; // Cor amarela para atená§á£o
+            priceInput.title = 'Preço padrÃo (nÃo detectado no contrato) - verifique manualmente';
+            priceInput.style.borderColor = '#fbbf24'; // Cor amarela para atençÃo
         } else {
-            priceInput.title = '… Preá§o detectado automaticamente do contrato';
+            priceInput.title = '… Preço detectado automaticamente do contrato';
             priceInput.style.borderColor = '#10b981'; // Cor verde para sucesso
         }
         
-        console.log(`’° Preá§o detectado: ${tokenInfo.price} BNB por token`);
+        console.log(`’° Preço detectado: ${tokenInfo.price} BNB por token`);
     }
     
     // **MELHORIA: Mostrar limites de compra na interface**
@@ -1936,31 +1936,31 @@ async function checkPurchaseLimits() {
         
         // Tenta detectar limites de forma mais robusta
         try {
-            // Primeiro tenta as funá§áµes bá¡sicas
+            // Primeiro tenta as funções básicas
             try {
                 minPurchase = await currentContract.minPurchase();
-                console.log(`… Limite má­nimo: ${ethers.utils.formatEther(minPurchase)} BNB`);
+                console.log(`… Limite mínimo: ${ethers.utils.formatEther(minPurchase)} BNB`);
             } catch (e) {
-                console.log('âŒ Funá§á£o minPurchase() ná£o disponá­vel');
+                console.log('ÃŒ FunçÃo minPurchase() nÃo disponível');
             }
             
             try {
                 maxPurchase = await currentContract.maxPurchase();
-                console.log(`… Limite má¡ximo: ${ethers.utils.formatEther(maxPurchase)} BNB`);
+                console.log(`… Limite máximo: ${ethers.utils.formatEther(maxPurchase)} BNB`);
             } catch (e) {
-                console.log('âŒ Funá§á£o maxPurchase() ná£o disponá­vel');
+                console.log('ÃŒ FunçÃo maxPurchase() nÃo disponível');
             }
             
-            // Se ná£o encontrou limites, tenta verificar purchaseLimit para o usuá¡rio
+            // Se nÃo encontrou limites, tenta verificar purchaseLimit para o usuário
             if (!minPurchase && !maxPurchase && walletAddress) {
                 try {
                     const userLimit = await currentContract.purchaseLimit(walletAddress);
                     if (userLimit && !userLimit.isZero()) {
                         maxPurchase = userLimit;
-                        console.log(`… Limite do usuá¡rio: ${ethers.utils.formatEther(userLimit)} BNB`);
+                        console.log(`… Limite do usuário: ${ethers.utils.formatEther(userLimit)} BNB`);
                     }
                 } catch (e) {
-                    console.log('âŒ Funá§á£o purchaseLimit() ná£o disponá­vel para o usuá¡rio');
+                    console.log('ÃŒ FunçÃo purchaseLimit() nÃo disponível para o usuário');
                 }
             }
             
@@ -1971,37 +1971,37 @@ async function checkPurchaseLimits() {
             tokenInfo.maxPurchase = maxFormatted;
             
             console.log(`… Limites: ${minFormatted} - ${maxFormatted} BNB`);
-            addContractMessage(`… Compra má­nima: ${minFormatted} BNB, má¡xima: ${maxFormatted} BNB`, 'success');
+            addContractMessage(`… Compra mínima: ${minFormatted} BNB, máxima: ${maxFormatted} BNB`, 'success');
             
         } catch (e) {
-            // âš ï¸ Limites: Ná£o foi possá­vel verificar - ${e.message}
-            addContractMessage('âš ï¸ Limites de compra ná£o detectados (pode ná£o ter)', 'warning');
+            // Ãš ï¸ Limites: NÃo foi possível verificar - ${e.message}
+            addContractMessage('Ãš ï¸ Limites de compra nÃo detectados (pode nÃo ter)', 'warning');
         }
         
         // Armazenar para uso posterior
         tokenInfo.limits = { minPurchase, maxPurchase };
         
     } catch (error) {
-        console.log(`âŒ Erro na verificaá§á£o de limites: ${error.message}`);
+        console.log(`ÃŒ Erro na verificaçÃo de limites: ${error.message}`);
     }
 }
 
 // ==================== GERENCIAMENTO DE COMPRA ====================
 
 /**
- * Habilita seá§á£o de compra - APENAS quando funá§á£o vá¡lida á© confirmada E seá§á£o de informaá§áµes está¡ visá­vel
+ * Habilita seçÃo de compra - APENAS quando funçÃo válida é confirmada E seçÃo de informações está visível
  */
 function enablePurchaseSection() {
-    // ›¡ï¸ PROTEá‡áƒO: Sá³ executa se realmente há¡ uma funá§á£o de compra vá¡lida
+    // ›¡ï¸ PROTEá‡áƒO: Só executa se realmente há uma funçÃo de compra válida
     if (!buyFunctionName) {
-        console.log('âŒ enablePurchaseSection() chamada sem funá§á£o de compra vá¡lida - IGNORANDO');
+        console.log('ÃŒ enablePurchaseSection() chamada sem funçÃo de compra válida - IGNORANDO');
         return;
     }
     
-    // ›¡ï¸ PROTEá‡áƒO: Verifica se a seá§á£o de informaá§áµes está¡ visá­vel primeiro
+    // ›¡ï¸ PROTEá‡áƒO: Verifica se a seçÃo de informações está visível primeiro
     const infoSection = document.getElementById('token-info-section');
     if (!infoSection || infoSection.style.display === 'none') {
-        // Sistema: Aguardando exibiá§á£o da seá§á£o de informaá§áµes antes de habilitar compra
+        // Sistema: Aguardando exibiçÃo da seçÃo de informações antes de habilitar compra
         return;
     }
     
@@ -2010,43 +2010,43 @@ function enablePurchaseSection() {
     const quantityInput = document.getElementById('token-quantity');
     const purchaseBtn = document.getElementById('execute-purchase-btn');
     
-    console.log('Ž‰ HABILITANDO SEá‡áƒO DE COMPRA - Funá§á£o validada:', buyFunctionName);
-    console.log('“ Seá§á£o encontrada:', section ? 'SIM' : 'NáƒO');
+    console.log('Ž‰ HABILITANDO SEá‡áƒO DE COMPRA - FunçÃo validada:', buyFunctionName);
+    console.log('“ SeçÃo encontrada:', section ? 'SIM' : 'NáƒO');
     console.log('“ Campo quantidade encontrado:', quantityInput ? 'SIM' : 'NáƒO');
-    console.log('“ Botá£o compra encontrado:', purchaseBtn ? 'SIM' : 'NáƒO');
+    console.log('“ BotÃo compra encontrado:', purchaseBtn ? 'SIM' : 'NáƒO');
     
     if (section) {
         section.style.display = 'block';
-        // Adiciona uma animaá§á£o de slide para mostrar que a seá§á£o foi liberada
+        // Adiciona uma animaçÃo de slide para mostrar que a seçÃo foi liberada
         section.classList.add('animate__animated', 'animate__slideInUp');
-        console.log('… Seá§á£o de compra LIBERADA e exibida');
+        console.log('… SeçÃo de compra LIBERADA e exibida');
         
         // Adiciona uma mensagem visual de sucesso
-        addContractMessage('Ž‰ Seá§á£o de compra liberada - Contrato suporta compras!', 'success');
+        addContractMessage('Ž‰ SeçÃo de compra liberada - Contrato suporta compras!', 'success');
     }
     
-    // Campo de preá§o permanece READ-ONLY (já¡ configurado em updateTokenInfoUI)
-    // Ná£o habilitamos ediá§á£o do preá§o pois á© detectado do contrato
+    // Campo de preço permanece READ-ONLY (já configurado em updateTokenInfoUI)
+    // NÃo habilitamos ediçÃo do preço pois é detectado do contrato
     
     if (quantityInput) {
         quantityInput.disabled = false;
         console.log('… Campo quantidade habilitado');
     }
     
-    // HABILITA o botá£o com funá§á£o validada
+    // HABILITA o botÃo com funçÃo validada
     if (purchaseBtn) {
         purchaseBtn.disabled = false;
         purchaseBtn.style.opacity = '1';
         purchaseBtn.style.cursor = 'pointer';
         purchaseBtn.style.backgroundColor = '#28a745'; // Verde para indicar liberado
-        console.log(`… Botá£o LIBERADO - Funá§á£o confirmada: ${buyFunctionName}()`);
+        console.log(`… BotÃo LIBERADO - FunçÃo confirmada: ${buyFunctionName}()`);
     } else {
-        console.error('âŒ Botá£o de compra ná£o encontrado no DOM!');
+        console.error('ÃŒ BotÃo de compra nÃo encontrado no DOM!');
     }
     
-    console.log('›’ Seá§á£o de compra TOTALMENTE habilitada - Contrato validado para compras');
-    console.log(`“Š STATUS FINAL: ${tokenInfo.name} (${tokenInfo.symbol}) - Preá§o: ${tokenInfo.price} BNB - Tokens disponá­veis: ${formatNumber(tokenInfo.tokensForSaleFormatted || 0)}`);
-    console.log('Ž‰ SISTEMA PRONTO! Vocáª pode agora comprar tokens com seguraná§a.');
+    console.log('›’ SeçÃo de compra TOTALMENTE habilitada - Contrato validado para compras');
+    console.log(`“Š STATUS FINAL: ${tokenInfo.name} (${tokenInfo.symbol}) - Preço: ${tokenInfo.price} BNB - Tokens disponíveis: ${formatNumber(tokenInfo.tokensForSaleFormatted || 0)}`);
+    console.log('Ž‰ SISTEMA PRONTO! Vocáª pode agora comprar tokens com segurança.');
     
     // Adiciona mensagem de sucesso na interface
     const systemMessages = document.getElementById('system-messages');
@@ -2054,15 +2054,15 @@ function enablePurchaseSection() {
         systemMessages.innerHTML = `
             <div class="alert alert-success border-0 mb-3">
                 <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>Sistema Validado!</strong> Contrato aprovado e pronto para negociaá§á£o.
-                <br><small class="text-muted">Funá§á£o de compra: ${buyFunctionName}() | Tokens disponá­veis: ${formatNumber(tokenInfo.tokensForSaleFormatted || 0)}</small>
+                <strong>Sistema Validado!</strong> Contrato aprovado e pronto para negociaçÃo.
+                <br><small class="text-muted">FunçÃo de compra: ${buyFunctionName}() | Tokens disponíveis: ${formatNumber(tokenInfo.tokensForSaleFormatted || 0)}</small>
             </div>
         `;
     }
 }
 
 /**
- * Mantá©m seá§á£o de compra oculta quando contrato ná£o suporta compras
+ * Mantém seçÃo de compra oculta quando contrato nÃo suporta compras
  */
 function hidePurchaseSection() {
     const section = document.getElementById('purchase-section');
@@ -2070,29 +2070,29 @@ function hidePurchaseSection() {
     
     if (section) {
         section.style.display = 'none';
-        console.log('”’ Seá§á£o de compra mantida OCULTA');
+        console.log('”’ SeçÃo de compra mantida OCULTA');
     }
     
     if (purchaseBtn) {
         purchaseBtn.disabled = true;
         purchaseBtn.style.opacity = '0.3';
         purchaseBtn.style.cursor = 'not-allowed';
-        purchaseBtn.style.backgroundColor = '#dc3545'; // Vermelho para indicar indisponá­vel
-        console.log('”’ Botá£o de compra desabilitado');
+        purchaseBtn.style.backgroundColor = '#dc3545'; // Vermelho para indicar indisponível
+        console.log('”’ BotÃo de compra desabilitado');
     }
     
-    // Adiciona uma mensagem explicativa para o usuá¡rio
-    addContractMessage('”’ Compra ná£o disponá­vel - Este token ná£o permite compra automá¡tica', 'warning');
-    console.log('”’ Seá§á£o de compra permanece oculta - Contrato incompatá­vel');
+    // Adiciona uma mensagem explicativa para o usuário
+    addContractMessage('”’ Compra nÃo disponível - Este token nÃo permite compra automática', 'warning');
+    console.log('”’ SeçÃo de compra permanece oculta - Contrato incompatível');
 }
 
 /**
- * Debug do estado do botá£o de compra - funá§á£o global para console
+ * Debug do estado do botÃo de compra - funçÃo global para console
  */
 function debugPurchaseButton() {
     const btn = document.getElementById('execute-purchase-btn');
     // DEBUG BOTáƒO DE COMPRA:
-    console.log('“ Botá£o encontrado:', btn ? 'SIM' : 'NáƒO');
+    console.log('“ BotÃo encontrado:', btn ? 'SIM' : 'NáƒO');
     if (btn) {
         console.log('“ Disabled:', btn.disabled);
         console.log('“ Style opacity:', btn.style.opacity);
@@ -2103,7 +2103,7 @@ function debugPurchaseButton() {
     console.log('“ buyFunctionName:', buyFunctionName);
 }
 
-// Torna disponá­vel no console para debug
+// Torna disponível no console para debug
 window.debugPurchaseButton = debugPurchaseButton;
 
 /**
@@ -2130,30 +2130,30 @@ function calculateTotal() {
  */
 async function executePurchase() {
     if (!buyFunctionName) {
-        alert('Este token ná£o permite compra automá¡tica');
+        alert('Este token nÃo permite compra automática');
         return;
     }
     
-    // Verifica se a funá§á£o existe no contrato antes de executar
+    // Verifica se a funçÃo existe no contrato antes de executar
     if (!buyFunctionName) {
-        alert('âŒ Este token ná£o permite compra direta');
+        alert('ÃŒ Este token nÃo permite compra direta');
         return;
     }
     
-    // **VALIDAá‡áƒO CRáTICA: Verifica se a funá§á£o realmente existe no contrato**
+    // **VALIDAá‡áƒO CRáTICA: Verifica se a funçÃo realmente existe no contrato**
     if (!currentContract[buyFunctionName]) {
-        console.error(`âŒ ERRO CRáTICO: Funá§á£o ${buyFunctionName}() ná£o existe no contrato!`);
-        alert('âŒ Erro: Sistema de compra ná£o está¡ disponá­vel');
+        console.error(`ÃŒ ERRO CRáTICO: FunçÃo ${buyFunctionName}() nÃo existe no contrato!`);
+        alert('ÃŒ Erro: Sistema de compra nÃo está disponível');
         
-        // Reseta a detecá§á£o
+        // Reseta a detecçÃo
         buyFunctionName = null;
-        updateCompatibilityStatus('buyStatus', 'âŒ Erro interno', 'error');
+        updateCompatibilityStatus('buyStatus', 'ÃŒ Erro interno', 'error');
         return;
     }
     
-    console.log(`… Funá§á£o ${buyFunctionName}() confirmada no contrato`);
+    console.log(`… FunçÃo ${buyFunctionName}() confirmada no contrato`);
     
-    // Verifica se MetaMask está¡ conectado
+    // Verifica se MetaMask está conectado
     if (!walletConnected || !walletAddress) {
         alert('Por favor, conecte sua carteira MetaMask primeiro');
         return;
@@ -2166,12 +2166,12 @@ async function executePurchase() {
     const price = parseFloat(priceInput.value);
     
     if (!quantity || quantity <= 0) {
-        alert('Por favor, digite uma quantidade vá¡lida');
+        alert('Por favor, digite uma quantidade válida');
         return;
     }
 
     if (!price || price <= 0) {
-        alert('Por favor, digite um preá§o vá¡lido');
+        alert('Por favor, digite um preço válido');
         return;
     }
 
@@ -2182,22 +2182,22 @@ async function executePurchase() {
         const { minPurchase, maxPurchase } = tokenInfo.limits;
         
         if (minPurchase && totalValue < parseFloat(tokenInfo.minPurchase)) {
-            alert(`Valor abaixo do má­nimo permitido pelo contrato (${tokenInfo.minPurchase} BNB)`);
+            alert(`Valor abaixo do mínimo permitido pelo contrato (${tokenInfo.minPurchase} BNB)`);
             return;
         }
         
         if (maxPurchase && totalValue > parseFloat(tokenInfo.maxPurchase)) {
-            alert(`Valor acima do má¡ximo permitido pelo contrato (${tokenInfo.maxPurchase} BNB)`);
+            alert(`Valor acima do máximo permitido pelo contrato (${tokenInfo.maxPurchase} BNB)`);
             return;
         }
         
-        console.log(`… Valor ${totalValue} BNB está¡ dentro dos limites do contrato`);
+        console.log(`… Valor ${totalValue} BNB está dentro dos limites do contrato`);
     }
 
     try {
         // Mostra loading
         showButtonLoading('execute-purchase-btn', 'Processando...');
-        showLoadingMessage('system-messages', 'Preparando transaá§á£o');
+        showLoadingMessage('system-messages', 'Preparando transaçÃo');
         
         const totalValueStr = totalValue.toString();
         const valueInWei = ethers.utils.parseEther(totalValueStr);
@@ -2205,7 +2205,7 @@ async function executePurchase() {
         clearPurchaseMessages();
         addPurchaseMessage('š€ Processando compra...', 'info');
         
-        // IMPORTANTE: Sempre usar MetaMask para transaá§áµes (ná£o RPC páºblico)
+        // IMPORTANTE: Sempre usar MetaMask para transações (nÃo RPC público)
         const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = web3Provider.getSigner();
         
@@ -2217,178 +2217,178 @@ async function executePurchase() {
         );
         
         console.log(`’° Executando compra: ${quantity} tokens por ${totalValueStr} BNB`);
-        console.log(`“ Funá§á£o: ${buyFunctionName}()`);
+        console.log(`“ FunçÃo: ${buyFunctionName}()`);
         console.log(`’Ž Valor: ${valueInWei.toString()} wei`);
         console.log(`“ Contrato: ${currentContract.address}`);
         console.log(`‘¤ Comprador: ${walletAddress}`);
         
         // DIAGNá“STICO AVANá‡ADO DO CONTRATO
-        addPurchaseMessage('” Verificando condiá§áµes da compra...', 'info');
+        addPurchaseMessage('” Verificando condições da compra...', 'info');
         try {
-            // Usa RPC páºblico para diagná³stico (ná£o MetaMask que está¡ falhando)
+            // Usa RPC público para diagnóstico (nÃo MetaMask que está falhando)
             const publicProvider = await initializeProviderWithFallback();
             
             const contractBalance = await publicProvider.getBalance(currentContract.address);
             const userBalance = await publicProvider.getBalance(walletAddress);
             
             console.log(`’° Saldo do contrato: ${ethers.utils.formatEther(contractBalance)} BNB`);
-            console.log(`’° Saldo do usuá¡rio: ${ethers.utils.formatEther(userBalance)} BNB`);
+            console.log(`’° Saldo do usuário: ${ethers.utils.formatEther(userBalance)} BNB`);
             
-            // Verifica se usuá¡rio tem saldo suficiente
+            // Verifica se usuário tem saldo suficiente
             const totalCostWei = ethers.utils.parseEther(totalValue.toString());
             if (userBalance.lt(totalCostWei)) {
                 throw new Error(`Saldo insuficiente. Vocáª tem ${ethers.utils.formatEther(userBalance)} BNB, mas precisa de ${totalValue} BNB`);
             }
             
             // Verifica se o contrato tem tokens suficientes
-            // âš ï¸ NOTA: Nem todos os contratos armazenam tokens no endereá§o do contrato
+            // Ãš ï¸ NOTA: Nem todos os contratos armazenam tokens no endereço do contrato
             try {
                 if (tokenInfo.totalSupply) {
                     const contractTokenBalance = await currentContract.balanceOf(currentContract.address);
                     const contractTokens = parseFloat(ethers.utils.formatUnits(contractTokenBalance, tokenInfo.decimals));
                     
-                    console.log(`ª™ Tokens no endereá§o do contrato: ${contractTokens} ${tokenInfo.symbol}`);
+                    console.log(`ª™ Tokens no endereço do contrato: ${contractTokens} ${tokenInfo.symbol}`);
                     
                     if (contractTokens === 0) {
-                        console.log('âš ï¸ Contrato ná£o tem tokens em seu endereá§o - pode usar mint ou reserva externa');
-                        // Ná£o mostra mensagem - apenas no log
+                        console.log('Ãš ï¸ Contrato nÃo tem tokens em seu endereço - pode usar mint ou reserva externa');
+                        // NÃo mostra mensagem - apenas no log
                     } else if (contractTokens < quantity) {
-                        console.log(`âš ï¸ Contrato tem poucos tokens (${contractTokens}), mas pode ter outras fontes`);
-                        // Ná£o mostra mensagem - apenas no log
+                        console.log(`Ãš ï¸ Contrato tem poucos tokens (${contractTokens}), mas pode ter outras fontes`);
+                        // NÃo mostra mensagem - apenas no log
                     } else {
                         console.log(`… Contrato tem tokens suficientes: ${contractTokens} >= ${quantity}`);
-                        // Ná£o mostra mensagem - apenas no log
+                        // NÃo mostra mensagem - apenas no log
                     }
                 }
             } catch (tokenCheckError) {
-                // âš ï¸ Ná£o foi possá­vel verificar tokens do contrato: ${tokenCheckError.message}
-                // Ná£o mostra mensagem - apenas no log
+                // Ãš ï¸ NÃo foi possível verificar tokens do contrato: ${tokenCheckError.message}
+                // NÃo mostra mensagem - apenas no log
             }
             
             // ” VERIFICAá‡áƒO ADICIONAL: Tenta detectar se contrato usa mint ou tem reservas
             try {
                 console.log('” Verificando capacidade de fornecimento de tokens...');
                 
-                // Tenta verificar se há¡ funá§á£o de tokens disponá­veis
+                // Tenta verificar se há funçÃo de tokens disponíveis
                 const availabilityFunctions = ['tokensAvailable', 'tokensForSale', 'remainingTokens', 'maxSupply'];
                 
                 for (const funcName of availabilityFunctions) {
                     try {
                         const available = await currentContract[funcName]();
                         const availableTokens = parseFloat(ethers.utils.formatUnits(available, tokenInfo.decimals));
-                        console.log(`’° ${funcName}(): ${availableTokens} tokens disponá­veis`);
+                        console.log(`’° ${funcName}(): ${availableTokens} tokens disponíveis`);
                         
                         if (availableTokens >= quantity) {
-                            console.log(`… Tokens disponá­veis confirmados via ${funcName}(): ${availableTokens}`);
-                            // Ná£o mostra mensagem - apenas no log
+                            console.log(`… Tokens disponíveis confirmados via ${funcName}(): ${availableTokens}`);
+                            // NÃo mostra mensagem - apenas no log
                             break;
                         }
                     } catch (e) {
-                        // Funá§á£o ná£o existe ou falhou, continua
+                        // FunçÃo nÃo existe ou falhou, continua
                     }
                 }
                 
-                // Verifica se contrato tem funá§á£o de mint (indicativo de criaá§á£o diná¢mica)
+                // Verifica se contrato tem funçÃo de mint (indicativo de criaçÃo diná¢mica)
                 const contractInterface = currentContract.interface;
                 const hasMintFunction = Object.keys(contractInterface.functions).some(func => 
                     func.toLowerCase().includes('mint')
                 );
                 
                 if (hasMintFunction) {
-                    console.log('… Contrato tem funá§á£o de mint - pode criar tokens dinamicamente');
-                    // Ná£o mostra mensagem - apenas no log
+                    console.log('… Contrato tem funçÃo de mint - pode criar tokens dinamicamente');
+                    // NÃo mostra mensagem - apenas no log
                 }
                 
             } catch (availabilityError) {
-                console.log('â„¹ï¸ Verificaá§á£o de disponibilidade ignorada:', availabilityError.message);
+                console.log('Ã„¹ï¸ VerificaçÃo de disponibilidade ignorada:', availabilityError.message);
             }
             
-            // DIAGNá“STICO AVANá‡ADO - Verifica condiá§áµes especiais do contrato
+            // DIAGNá“STICO AVANá‡ADO - Verifica condições especiais do contrato
             await performAdvancedContractDiagnostics(publicProvider);
             
-            // Ná£o mostra mensagem de aprovaá§á£o - apenas processa
+            // NÃo mostra mensagem de aprovaçÃo - apenas processa
             
         } catch (diagError) {
-            console.warn('âš ï¸ Erro no diagná³stico:', diagError.message);
-            addPurchaseMessage(`âš ï¸ Aviso: ${diagError.message}`, 'warning');
+            console.warn('Ãš ï¸ Erro no diagnóstico:', diagError.message);
+            addPurchaseMessage(`Ãš ï¸ Aviso: ${diagError.message}`, 'warning');
             
-            // Se o erro á© crá­tico, para por aqui
-            if (diagError.message.includes('Saldo insuficiente') || diagError.message.includes('ná£o tem tokens suficientes')) {
-                addPurchaseMessage('âŒ Compra cancelada devido a verificaá§á£o falhada', 'error');
+            // Se o erro é crítico, para por aqui
+            if (diagError.message.includes('Saldo insuficiente') || diagError.message.includes('nÃo tem tokens suficientes')) {
+                addPurchaseMessage('ÃŒ Compra cancelada devido a verificaçÃo falhada', 'error');
                 return;
             }
         }
         
         // SIMULAá‡áƒO COM DIFERENTES VALORES PARA ENCONTRAR O PROBLEMA
         try {
-            // Cria provider MetaMask apenas para simulaá§á£o
+            // Cria provider MetaMask apenas para simulaçÃo
             const metamaskProvider = new ethers.providers.Web3Provider(window.ethereum);
             const metamaskSigner = metamaskProvider.getSigner();
             const contractForSim = new ethers.Contract(currentContract.address, CONFIG.tokenABI, metamaskSigner);
             
-            // Teste 1: Simulaá§á£o com valor exato
-            // Teste 1: Simulaá§á£o com valor exato
+            // Teste 1: SimulaçÃo com valor exato
+            // Teste 1: SimulaçÃo com valor exato
             try {
-                // **VALIDAá‡áƒO: Verifica se a funá§á£o existe antes de usar**
+                // **VALIDAá‡áƒO: Verifica se a funçÃo existe antes de usar**
                 if (!contractForSim[buyFunctionName]) {
-                    throw new Error(`Funá§á£o ${buyFunctionName}() ná£o existe no contrato`);
+                    throw new Error(`FunçÃo ${buyFunctionName}() nÃo existe no contrato`);
                 }
                 
                 await contractForSim.callStatic[buyFunctionName]({
                     value: valueInWei,
                     from: walletAddress
                 });
-                console.log('… Simulaá§á£o com valor exato: SUCESSO');
+                console.log('… SimulaçÃo com valor exato: SUCESSO');
             } catch (simError1) {
-                console.log('âŒ Simulaá§á£o com valor exato: FALHOU');
-                console.log('” Razá£o:', simError1.reason || simError1.message);
+                console.log('ÃŒ SimulaçÃo com valor exato: FALHOU');
+                console.log('” RazÃo:', simError1.reason || simError1.message);
                 
-                // Log apenas no console - ná£o mostra erro para usuá¡rio na simulaá§á£o
-                // A simulaá§á£o pode falhar mas a transaá§á£o real pode funcionar
+                // Log apenas no console - nÃo mostra erro para usuário na simulaçÃo
+                // A simulaçÃo pode falhar mas a transaçÃo real pode funcionar
             }
             
         } catch (simError) {
-            console.warn('âš ï¸ Erro na simulaá§á£o geral:', simError.message);
+            console.warn('Ãš ï¸ Erro na simulaçÃo geral:', simError.message);
             
-            // Aná¡lise do erro de simulaá§á£o
+            // Análise do erro de simulaçÃo
             if (simError.message.includes('missing trie node')) {
-                addPurchaseMessage('âš ï¸ Problema de sincronizaá§á£o da rede - tentando mesmo assim', 'warning');
+                addPurchaseMessage('Ãš ï¸ Problema de sincronizaçÃo da rede - tentando mesmo assim', 'warning');
             } else if (simError.message.includes('revert')) {
-                // Ná£o mostra erro de revert na simulaá§á£o - pode funcionar na transaá§á£o real
-                console.log('” Simulaá§á£o falhou com revert - mas transaá§á£o real pode funcionar');
+                // NÃo mostra erro de revert na simulaçÃo - pode funcionar na transaçÃo real
+                console.log('” SimulaçÃo falhou com revert - mas transaçÃo real pode funcionar');
             } else {
-                addPurchaseMessage(`âš ï¸ Simulaá§á£o falhou: ${simError.message}`, 'warning');
+                addPurchaseMessage(`Ãš ï¸ SimulaçÃo falhou: ${simError.message}`, 'warning');
             }
             
-            addPurchaseMessage('š€ Prosseguindo com a transaá§á£o real...', 'info');
+            addPurchaseMessage('š€ Prosseguindo com a transaçÃo real...', 'info');
         }
         
-        // **VALIDAá‡áƒO FINAL: Verifica se a funá§á£o existe no contrato assinado**
+        // **VALIDAá‡áƒO FINAL: Verifica se a funçÃo existe no contrato assinado**
         if (!contractWithSigner[buyFunctionName]) {
-            throw new Error(`Funá§á£o ${buyFunctionName}() ná£o existe no contrato`);
+            throw new Error(`FunçÃo ${buyFunctionName}() nÃo existe no contrato`);
         }
         
-        // Executa a transaá§á£o
+        // Executa a transaçÃo
         const tx = await contractWithSigner[buyFunctionName]({
             value: valueInWei,
             gasLimit: CONFIG.gasLimit
         });
         
         addPurchaseMessage(`… Compra confirmada!`, 'success');
-        addPurchaseMessage('â³ Aguardando confirmaá§á£o...', 'info');
+        addPurchaseMessage('Ã³ Aguardando confirmaçÃo...', 'info');
         
-        // Aguarda confirmaá§á£o
+        // Aguarda confirmaçÃo
         const receipt = await tx.wait();
         
-        addPurchaseMessage('Ž‰ Transaá§á£o confirmada!', 'success');
+        addPurchaseMessage('Ž‰ TransaçÃo confirmada!', 'success');
         
-        // Mostra detalhes da transaá§á£o
+        // Mostra detalhes da transaçÃo
         showTransactionDetails(receipt, quantity, totalValue);
         
     } catch (error) {
-        console.error('âŒ Erro na compra:', error);
+        console.error('ÃŒ Erro na compra:', error);
         
-        // Log detalhado do erro de transaá§á£o para suporte
+        // Log detalhado do erro de transaçÃo para suporte
         window.contractLogger.logTransactionError(error.receipt ? error.receipt.transactionHash : 'unknown', {
             code: error.code,
             message: error.message,
@@ -2408,101 +2408,101 @@ async function executePurchase() {
         if (error.code === 'INSUFFICIENT_FUNDS') {
             errorMessage = 'Saldo insuficiente na carteira';
         } else if (error.code === 'USER_REJECTED') {
-            errorMessage = 'Transaá§á£o cancelada pelo usuá¡rio';
+            errorMessage = 'TransaçÃo cancelada pelo usuário';
         } else if (error.code === 4001) {
-            errorMessage = 'Transaá§á£o rejeitada pelo usuá¡rio';
+            errorMessage = 'TransaçÃo rejeitada pelo usuário';
         } else if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
-            errorMessage = 'Ná£o foi possá­vel estimar o gá¡s necessá¡rio. O contrato pode ter rejeitado a transaá§á£o.';
+            errorMessage = 'NÃo foi possível estimar o gás necessário. O contrato pode ter rejeitado a transaçÃo.';
         } else if (error.code === 'CALL_EXCEPTION') {
-            errorMessage = 'Erro na execuá§á£o do contrato';
+            errorMessage = 'Erro na execuçÃo do contrato';
             
-            // Aná¡lise especá­fica do CALL_EXCEPTION
+            // Análise específica do CALL_EXCEPTION
             if (error.receipt) {
                 technicalDetails = `Hash: ${error.receipt.transactionHash}\n`;
                 technicalDetails += `Gas usado: ${error.receipt.gasUsed}\n`;
                 technicalDetails += `Status: ${error.receipt.status === 0 ? 'FALHOU' : 'SUCESSO'}\n`;
                 
-                console.log('“‹ Detalhes da transaá§á£o falhada:');
+                console.log('“‹ Detalhes da transaçÃo falhada:');
                 console.log('”— Hash:', error.receipt.transactionHash);
-                console.log('â›½ Gas usado:', error.receipt.gasUsed.toString());
+                console.log('Ã›½ Gas usado:', error.receipt.gasUsed.toString());
                 console.log('“Š Status:', error.receipt.status === 0 ? 'FALHOU' : 'SUCESSO');
                 
-                // Aná¡lise especá­fica baseada no gas usado
+                // Análise específica baseada no gas usado
                 const gasUsed = error.receipt.gasUsed.toNumber();
                 if (gasUsed === 21307 || gasUsed < 25000) {
-                    console.log('” ANáLISE: Gas muito baixo - funá§á£o falha no iná­cio');
-                    console.log('’¡ Isso indica que o contrato rejeitou a transaá§á£o imediatamente');
-                    console.log('’¡ Possá­veis causas especá­ficas:');
-                    console.log('   - require() falhando logo no iná­cio da funá§á£o');
-                    console.log('   - Funá§á£o payable recebendo valor quando ná£o deveria');
+                    console.log('” ANáLISE: Gas muito baixo - funçÃo falha no início');
+                    console.log('’¡ Isso indica que o contrato rejeitou a transaçÃo imediatamente');
+                    console.log('’¡ Possíveis causas específicas:');
+                    console.log('   - require() falhando logo no início da funçÃo');
+                    console.log('   - FunçÃo payable recebendo valor quando nÃo deveria');
                     console.log('   - Modificadores (onlyOwner, whenNotPaused, etc.) rejeitando');
-                    console.log('   - Funá§á£o ná£o existe ou tem assinatura diferente');
+                    console.log('   - FunçÃo nÃo existe ou tem assinatura diferente');
                     
                     errorMessage += '\n\n” ANáLISE Tá‰CNICA:';
-                    errorMessage += '\nGas muito baixo (21307) indica que o contrato rejeitou a transaá§á£o imediatamente.';
-                    errorMessage += '\n\nCausas mais prová¡veis:';
-                    errorMessage += '\nâ€¢ Contrato está¡ pausado ou com restriá§áµes';
-                    errorMessage += '\nâ€¢ Funá§á£o de compra tem condiá§áµes especá­ficas ná£o atendidas';
-                    errorMessage += '\nâ€¢ Valor enviado ná£o está¡ correto para este contrato';
-                    errorMessage += '\nâ€¢ Contrato requer whitelist ou aprovaá§á£o prá©via';
+                    errorMessage += '\nGas muito baixo (21307) indica que o contrato rejeitou a transaçÃo imediatamente.';
+                    errorMessage += '\n\nCausas mais prováveis:';
+                    errorMessage += '\nÃ€¢ Contrato está pausado ou com restrições';
+                    errorMessage += '\nÃ€¢ FunçÃo de compra tem condições específicas nÃo atendidas';
+                    errorMessage += '\nÃ€¢ Valor enviado nÃo está correto para este contrato';
+                    errorMessage += '\nÃ€¢ Contrato requer whitelist ou aprovaçÃo prévia';
                     
                 } else {
-                    console.log('” ANáLISE: Gas normal - erro durante execuá§á£o');
+                    console.log('” ANáLISE: Gas normal - erro durante execuçÃo');
                 }
                 
-                // Possá­veis causas do erro
-                console.log('” Possá­veis causas:');
+                // Possíveis causas do erro
+                console.log('” Possíveis causas:');
                 console.log('1. Contrato sem tokens suficientes para vender');
                 console.log('2. Valor enviado incorreto (muito alto/baixo)');
-                console.log('3. Contrato pausado ou com restriá§áµes');
-                console.log('4. Funá§á£o de compra com lá³gica especá­fica ná£o atendida');
-                console.log('5. Problema de aprovaá§á£o ou allowance');
+                console.log('3. Contrato pausado ou com restrições');
+                console.log('4. FunçÃo de compra com lógica específica nÃo atendida');
+                console.log('5. Problema de aprovaçÃo ou allowance');
                 
-                errorMessage += '\n\nPossá­veis causas:\n';
-                errorMessage += 'â€¢ Contrato sem tokens para vender\n';
-                errorMessage += 'â€¢ Valor enviado incorreto\n';
-                errorMessage += 'â€¢ Contrato pausado ou restrito\n';
-                errorMessage += 'â€¢ Lá³gica especá­fica do contrato ná£o atendida';
+                errorMessage += '\n\nPossíveis causas:\n';
+                errorMessage += 'Ã€¢ Contrato sem tokens para vender\n';
+                errorMessage += 'Ã€¢ Valor enviado incorreto\n';
+                errorMessage += 'Ã€¢ Contrato pausado ou restrito\n';
+                errorMessage += 'Ã€¢ Lógica específica do contrato nÃo atendida';
             }
         } else if (error.message.includes('revert')) {
-            errorMessage = 'Transaá§á£o rejeitada pelo contrato';
+            errorMessage = 'TransaçÃo rejeitada pelo contrato';
             
-            // Tenta extrair razá£o do revert
+            // Tenta extrair razÃo do revert
             if (error.reason) {
-                errorMessage += `\nRazá£o: ${error.reason}`;
-                console.log(`” Razá£o especá­fica do revert: ${error.reason}`);
+                errorMessage += `\nRazÃo: ${error.reason}`;
+                console.log(`” RazÃo específica do revert: ${error.reason}`);
             } else {
                 // Tenta extrair da mensagem
                 const revertMatch = error.message.match(/revert (.+)/i);
                 if (revertMatch) {
-                    errorMessage += `\nRazá£o: ${revertMatch[1]}`;
-                    console.log(`” Razá£o extraá­da: ${revertMatch[1]}`);
+                    errorMessage += `\nRazÃo: ${revertMatch[1]}`;
+                    console.log(`” RazÃo extraída: ${revertMatch[1]}`);
                 }
             }
             
-            // Aná¡lise de reverts comuns
+            // Análise de reverts comuns
             const errorMsg = error.message.toLowerCase();
-            if (errorMsg.includes('execution reverted') || errorMsg.includes('execuá§á£o revertida')) {
-                errorMessage += '\n\n’¡ O contrato executou mas rejeitou a transaá§á£o.';
-                errorMessage += '\nIsso indica que alguma condiá§á£o interna ná£o foi atendida.';
+            if (errorMsg.includes('execution reverted') || errorMsg.includes('execuçÃo revertida')) {
+                errorMessage += '\n\n’¡ O contrato executou mas rejeitou a transaçÃo.';
+                errorMessage += '\nIsso indica que alguma condiçÃo interna nÃo foi atendida.';
                 
-                // Sugestáµes baseadas no gas baixo (21307)
+                // Sugestões baseadas no gas baixo (21307)
                 if (error.receipt && error.receipt.gasUsed.toNumber() < 25000) {
-                    errorMessage += '\n\n” Sugestáµes especá­ficas (gas baixo):';
-                    errorMessage += '\nâ€¢ Verifique se o contrato aceita pagamentos em BNB';
-                    errorMessage += '\nâ€¢ Confirme se a quantidade está¡ dentro dos limites';
-                    errorMessage += '\nâ€¢ Verifique se sua conta está¡ autorizada';
-                    errorMessage += '\nâ€¢ Contrato pode estar pausado temporariamente';
+                    errorMessage += '\n\n” Sugestões específicas (gas baixo):';
+                    errorMessage += '\nÃ€¢ Verifique se o contrato aceita pagamentos em BNB';
+                    errorMessage += '\nÃ€¢ Confirme se a quantidade está dentro dos limites';
+                    errorMessage += '\nÃ€¢ Verifique se sua conta está autorizada';
+                    errorMessage += '\nÃ€¢ Contrato pode estar pausado temporariamente';
                 }
             }
         } else {
             errorMessage = error.message;
         }
         
-        addPurchaseMessage(`âŒ Erro: ${errorMessage}`, 'error');
+        addPurchaseMessage(`ÃŒ Erro: ${errorMessage}`, 'error');
         
         if (technicalDetails) {
-            addPurchaseMessage(`”§ Detalhes tá©cnicos:\n${technicalDetails}`, 'warning');
+            addPurchaseMessage(`”§ Detalhes técnicos:\n${technicalDetails}`, 'warning');
         }
         
         // Remove loading em caso de erro
@@ -2511,18 +2511,18 @@ async function executePurchase() {
 }
 
 /**
- * Diagná³stico avaná§ado do contrato para identificar problemas especá­ficos
+ * Diagnóstico avançado do contrato para identificar problemas específicos
  */
 async function performAdvancedContractDiagnostics(provider) {
     const diagnosticFunctions = [
         { name: 'paused', desc: 'Contrato pausado' },
         { name: 'saleActive', desc: 'Venda ativa' },
         { name: 'saleEnabled', desc: 'Venda habilitada' },
-        { name: 'owner', desc: 'Proprietá¡rio do contrato' },
-        { name: 'maxPurchase', desc: 'Compra má¡xima permitida' },
-        { name: 'minPurchase', desc: 'Compra má­nima permitida' },
+        { name: 'owner', desc: 'Proprietário do contrato' },
+        { name: 'maxPurchase', desc: 'Compra máxima permitida' },
+        { name: 'minPurchase', desc: 'Compra mínima permitida' },
         { name: 'tokensForSale', desc: 'Tokens para venda' },
-        { name: 'tokensAvailable', desc: 'Tokens disponá­veis' }
+        { name: 'tokensAvailable', desc: 'Tokens disponíveis' }
     ];
     
     const contractWithProvider = new ethers.Contract(currentContract.address, CONFIG.tokenABI, provider);
@@ -2533,23 +2533,23 @@ async function performAdvancedContractDiagnostics(provider) {
             const result = await contractWithProvider[func.name]();
             console.log(`“‹ ${func.desc}: ${result.toString()}`);
             
-            // Aná¡lise especá­fica de cada resultado
+            // Análise específica de cada resultado
             if (func.name === 'paused' && result === true) {
-                console.log('š¨ PROBLEMA: Contrato está¡ pausado!');
-                throw new Error('Contrato está¡ pausado - compras temporariamente desabilitadas');
+                console.log('š¨ PROBLEMA: Contrato está pausado!');
+                throw new Error('Contrato está pausado - compras temporariamente desabilitadas');
             }
             
             if ((func.name === 'saleActive' || func.name === 'saleEnabled') && result === false) {
-                console.log('š¨ PROBLEMA: Venda ná£o está¡ ativa!');
-                throw new Error('Venda ná£o está¡ ativa neste contrato');
+                console.log('š¨ PROBLEMA: Venda nÃo está ativa!');
+                throw new Error('Venda nÃo está ativa neste contrato');
             }
             
             if (func.name === 'maxPurchase' && result.gt(0)) {
                 const maxInBNB = ethers.utils.formatEther(result);
                 const totalValueNeeded = quantity * parseFloat(tokenInfo.price);
                 if (totalValueNeeded > parseFloat(maxInBNB)) {
-                    console.log(`š¨ PROBLEMA: Valor solicitado (${totalValueNeeded} BNB) excede má¡ximo permitido (${maxInBNB} BNB)`);
-                    throw new Error(`Valor má¡ximo permitido: ${maxInBNB} BNB`);
+                    console.log(`š¨ PROBLEMA: Valor solicitado (${totalValueNeeded} BNB) excede máximo permitido (${maxInBNB} BNB)`);
+                    throw new Error(`Valor máximo permitido: ${maxInBNB} BNB`);
                 }
             }
             
@@ -2557,64 +2557,64 @@ async function performAdvancedContractDiagnostics(provider) {
                 const minInBNB = ethers.utils.formatEther(result);
                 const totalValueNeeded = quantity * parseFloat(tokenInfo.price);
                 if (totalValueNeeded < parseFloat(minInBNB)) {
-                    console.log(`š¨ PROBLEMA: Valor solicitado (${totalValueNeeded} BNB) á© menor que má­nimo (${minInBNB} BNB)`);
-                    throw new Error(`Valor má­nimo necessá¡rio: ${minInBNB} BNB`);
+                    console.log(`š¨ PROBLEMA: Valor solicitado (${totalValueNeeded} BNB) é menor que mínimo (${minInBNB} BNB)`);
+                    throw new Error(`Valor mínimo necessário: ${minInBNB} BNB`);
                 }
             }
             
         } catch (error) {
-            // Se á© um erro especá­fico da aná¡lise, repassa
+            // Se é um erro específico da análise, repassa
             if (error.message.includes('pausado') || error.message.includes('ativa') || 
-                error.message.includes('má¡xima') || error.message.includes('má­nima')) {
+                error.message.includes('máxima') || error.message.includes('mínima')) {
                 throw error;
             }
-            // Sená£o, funá§á£o simplesmente ná£o existe no contrato (normal)
-            console.log(`“‹ ${func.desc}: Ná£o disponá­vel`);
+            // SenÃo, funçÃo simplesmente nÃo existe no contrato (normal)
+            console.log(`“‹ ${func.desc}: NÃo disponível`);
         }
     }
     
-    // Verifica se usuá¡rio está¡ na whitelist (se aplicá¡vel)
+    // Verifica se usuário está na whitelist (se aplicável)
     try {
         const isWhitelisted = await contractWithProvider.isWhitelisted(walletAddress);
-        console.log(`“‹ Usuá¡rio na whitelist: ${isWhitelisted}`);
+        console.log(`“‹ Usuário na whitelist: ${isWhitelisted}`);
         if (isWhitelisted === false) {
-            console.log('š¨ PROBLEMA: Usuá¡rio ná£o está¡ na whitelist!');
-            throw new Error('Seu endereá§o ná£o está¡ autorizado para comprar tokens');
+            console.log('š¨ PROBLEMA: Usuário nÃo está na whitelist!');
+            throw new Error('Seu endereço nÃo está autorizado para comprar tokens');
         }
     } catch (error) {
         if (error.message.includes('autorizado')) {
             throw error;
         }
-        console.log('“‹ Whitelist: Ná£o aplicá¡vel');
+        console.log('“‹ Whitelist: NÃo aplicável');
     }
     
-    // Verifica limites por usuá¡rio
+    // Verifica limites por usuário
     try {
         const userLimit = await contractWithProvider.purchaseLimit(walletAddress);
         const hasPurchased = await contractWithProvider.hasPurchased(walletAddress);
         
-        console.log(`“‹ Limite por usuá¡rio: ${userLimit.toString()}`);
-        console.log(`“‹ Já¡ comprou antes: ${hasPurchased}`);
+        console.log(`“‹ Limite por usuário: ${userLimit.toString()}`);
+        console.log(`“‹ Já comprou antes: ${hasPurchased}`);
         
         if (hasPurchased && userLimit.eq(0)) {
-            console.log('š¨ PROBLEMA: Usuá¡rio já¡ atingiu limite de compras!');
-            throw new Error('Vocáª já¡ atingiu o limite de compras para este token');
+            console.log('š¨ PROBLEMA: Usuário já atingiu limite de compras!');
+            throw new Error('Vocáª já atingiu o limite de compras para este token');
         }
     } catch (error) {
         if (error.message.includes('limite')) {
             throw error;
         }
-        console.log('“‹ Limites por usuá¡rio: Ná£o aplicá¡vel');
+        console.log('“‹ Limites por usuário: NÃo aplicável');
     }
     
-    console.log('… Diagná³stico avaná§ado concluá­do - nenhum problema detectado');
+    console.log('… Diagnóstico avançado concluído - nenhum problema detectado');
 }
 
 /**
- * Analisa a razá£o especá­fica do revert para dar feedback preciso
+ * Analisa a razÃo específica do revert para dar feedback preciso
  */
 async function analyzeRevertReason(error, contract, valueInWei) {
-    console.log('” Analisando razá£o do revert...');
+    console.log('” Analisando razÃo do revert...');
     
     // Tenta extrair mensagem de revert
     let revertReason = 'Desconhecida';
@@ -2627,9 +2627,9 @@ async function analyzeRevertReason(error, contract, valueInWei) {
         }
     }
     
-    console.log(`š¨ Razá£o do revert: ${revertReason}`);
+    console.log(`š¨ RazÃo do revert: ${revertReason}`);
     
-    // Testes especá­ficos baseados em padráµes comuns
+    // Testes específicos baseados em padrões comuns
     const testScenarios = [
         {
             name: 'Valor muito baixo',
@@ -2646,7 +2646,7 @@ async function analyzeRevertReason(error, contract, valueInWei) {
             }
         },
         {
-            name: 'Valor exato do preá§o',
+            name: 'Valor exato do preço',
             test: async () => {
                 const exactPrice = ethers.utils.parseEther(tokenInfo.price);
                 return await contract.callStatic[buyFunctionName]({ value: exactPrice, from: walletAddress });
@@ -2665,47 +2665,47 @@ async function analyzeRevertReason(error, contract, valueInWei) {
             // Testando: ${scenario.name}
             await scenario.test();
             console.log(`… ${scenario.name}: FUNCIONOU!`);
-            // Ná£o mostra mais descobertas para o usuá¡rio - apenas no console
+            // NÃo mostra mais descobertas para o usuário - apenas no console
             return;
         } catch (testError) {
-            console.log(`âŒ ${scenario.name}: ${testError.reason || 'Falhou'}`);
+            console.log(`ÃŒ ${scenario.name}: ${testError.reason || 'Falhou'}`);
         }
     }
     
-    // Aná¡lise de padráµes comuns de revert
+    // Análise de padrões comuns de revert
     const commonReverts = {
-        'insufficient funds': 'Saldo insuficiente no contrato ou usuá¡rio',
-        'saldo insuficiente': 'Saldo insuficiente no contrato ou usuá¡rio',
+        'insufficient funds': 'Saldo insuficiente no contrato ou usuário',
+        'saldo insuficiente': 'Saldo insuficiente no contrato ou usuário',
         'not enough tokens': 'Contrato sem tokens suficientes',
         'sem tokens': 'Contrato sem tokens suficientes',
-        'paused': 'Contrato está¡ pausado',
-        'pausado': 'Contrato está¡ pausado',
-        'not whitelisted': 'Endereá§o ná£o está¡ na whitelist',
-        'ná£o autorizado': 'Endereá§o ná£o está¡ na whitelist',
-        'sale not active': 'Venda ná£o está¡ ativa',
-        'venda inativa': 'Venda ná£o está¡ ativa',
-        'minimum purchase': 'Valor abaixo do má­nimo',
-        'valor má­nimo': 'Valor abaixo do má­nimo',
-        'maximum purchase': 'Valor acima do má¡ximo',
-        'valor má¡ximo': 'Valor acima do má¡ximo',
-        'already purchased': 'Usuá¡rio já¡ comprou antes',
-        'já¡ comprou': 'Usuá¡rio já¡ comprou antes',
-        'wrong price': 'Preá§o incorreto',
-        'preá§o incorreto': 'Preá§o incorreto',
-        'invalid amount': 'Quantidade invá¡lida',
-        'quantidade invá¡lida': 'Quantidade invá¡lida'
+        'paused': 'Contrato está pausado',
+        'pausado': 'Contrato está pausado',
+        'not whitelisted': 'Endereço nÃo está na whitelist',
+        'nÃo autorizado': 'Endereço nÃo está na whitelist',
+        'sale not active': 'Venda nÃo está ativa',
+        'venda inativa': 'Venda nÃo está ativa',
+        'minimum purchase': 'Valor abaixo do mínimo',
+        'valor mínimo': 'Valor abaixo do mínimo',
+        'maximum purchase': 'Valor acima do máximo',
+        'valor máximo': 'Valor acima do máximo',
+        'already purchased': 'Usuário já comprou antes',
+        'já comprou': 'Usuário já comprou antes',
+        'wrong price': 'Preço incorreto',
+        'preço incorreto': 'Preço incorreto',
+        'invalid amount': 'Quantidade inválida',
+        'quantidade inválida': 'Quantidade inválida'
     };
     
     for (const [pattern, explanation] of Object.entries(commonReverts)) {
         if (revertReason.toLowerCase().includes(pattern)) {
-            console.log(`’¡ Padrá£o identificado: ${explanation}`);
-            // Ná£o mostra mais erros tá©cnicos para o usuá¡rio durante simulaá§á£o
+            console.log(`’¡ PadrÃo identificado: ${explanation}`);
+            // NÃo mostra mais erros técnicos para o usuário durante simulaçÃo
             return;
         }
     }
     
-    // Log apenas no console - ná£o mostra erro tá©cnico para o usuá¡rio
-    console.log(`” Razá£o do revert: ${revertReason}`);
+    // Log apenas no console - nÃo mostra erro técnico para o usuário
+    console.log(`” RazÃo do revert: ${revertReason}`);
 }
 
 // ==================== FUNá‡á•ES AUXILIARES ====================
@@ -2722,7 +2722,7 @@ function updateCompatibilityStatus(elementId, text, type) {
 }
 
 /**
- * Atualiza botá£o de verificaá§á£o
+ * Atualiza botÃo de verificaçÃo
  */
 function updateVerifyButton(isLoading) {
     const btn = document.getElementById('verify-contract-btn');
@@ -2738,15 +2738,15 @@ function updateVerifyButton(isLoading) {
 }
 
 /**
- * Mostra seá§á£o de informaá§áµes do token
+ * Mostra seçÃo de informações do token
  */
 function showTokenInfo() {
     const section = document.getElementById('token-info-section');
     if (section) {
         section.style.display = 'block';
         
-        // Apá³s mostrar as informaá§áµes, verifica se pode habilitar a compra
-        console.log('“¢ Sistema: Seá§á£o de informaá§áµes exibida, verificando se pode habilitar compra...');
+        // Após mostrar as informações, verifica se pode habilitar a compra
+        console.log('“¢ Sistema: SeçÃo de informações exibida, verificando se pode habilitar compra...');
         if (buyFunctionName) {
             enablePurchaseSection();
         }
@@ -2754,7 +2754,7 @@ function showTokenInfo() {
 }
 
 /**
- * Esconde seá§á£o de informaá§áµes do token
+ * Esconde seçÃo de informações do token
  */
 function hideTokenInfo() {
     const section = document.getElementById('token-info-section');
@@ -2764,7 +2764,7 @@ function hideTokenInfo() {
 }
 
 /**
- * Mostra detalhes da transaá§á£o
+ * Mostra detalhes da transaçÃo
  */
 function showTransactionDetails(receipt, tokensQuantity, totalValue) {
     const section = document.getElementById('transactionDetails');
@@ -2789,13 +2789,13 @@ function showTransactionDetails(receipt, tokensQuantity, totalValue) {
 }
 
 /**
- * Formata náºmeros para exibiá§á£o de forma amigá¡vel
+ * Formata números para exibiçÃo de forma amigável
  */
 function formatNumber(num) {
     const number = parseFloat(num);
     if (isNaN(number) || number === 0) return '0';
     
-    // Para náºmeros muito grandes
+    // Para números muito grandes
     if (number >= 1000000000) {
         return (number / 1000000000).toFixed(2) + 'B';
     } else if (number >= 1000000) {
@@ -2803,20 +2803,20 @@ function formatNumber(num) {
     } else if (number >= 1000) {
         return (number / 1000).toFixed(2) + 'K';
     } 
-    // Para náºmeros muito pequenos, mostrar com mais precisá£o sem notaá§á£o cientá­fica
+    // Para números muito pequenos, mostrar com mais precisÃo sem notaçÃo científica
     else if (number < 1 && number > 0) {
-        // Encontrar quantas casas decimais sá£o necessá¡rias
+        // Encontrar quantas casas decimais sÃo necessárias
         const str = number.toString();
         if (str.includes('e-')) {
-            // Se ainda tem notaá§á£o cientá­fica, converter para decimal fixo
+            // Se ainda tem notaçÃo científica, converter para decimal fixo
             const parts = str.split('e-');
             const decimals = parseInt(parts[1]) + 2; // Adiciona 2 casas extras
-            return number.toFixed(Math.min(decimals, 18)); // Má¡ximo 18 casas
+            return number.toFixed(Math.min(decimals, 18)); // Máximo 18 casas
         } else {
-            return number.toFixed(6).replace(/\.?0+$/, ''); // Remove zeros desnecessá¡rios
+            return number.toFixed(6).replace(/\.?0+$/, ''); // Remove zeros desnecessários
         }
     } 
-    // Para náºmeros normais
+    // Para números normais
     else {
         return number.toLocaleString('pt-BR', { maximumFractionDigits: 6 });
     }
@@ -2825,7 +2825,7 @@ function formatNumber(num) {
 // ==================== SISTEMA DE FEEDBACK ====================
 
 /**
- * Adiciona mensagem na seá§á£o de contrato
+ * Adiciona mensagem na seçÃo de contrato
  */
 function addContractMessage(msg, type = 'info') {
     const listId = "contractErrors";
@@ -2847,7 +2847,7 @@ function addContractMessage(msg, type = 'info') {
 }
 
 /**
- * Adiciona mensagem na seá§á£o de compra
+ * Adiciona mensagem na seçÃo de compra
  */
 function addPurchaseMessage(msg, type = 'info') {
     const listId = "purchaseErrors";
@@ -2869,7 +2869,7 @@ function addPurchaseMessage(msg, type = 'info') {
 }
 
 /**
- * Limpa mensagens da seá§á£o de contrato
+ * Limpa mensagens da seçÃo de contrato
  */
 function clearContractMessages() {
     const list = document.getElementById("contractErrors");
@@ -2880,7 +2880,7 @@ function clearContractMessages() {
 }
 
 /**
- * Limpa mensagens da seá§á£o de compra
+ * Limpa mensagens da seçÃo de compra
  */
 function clearPurchaseMessages() {
     const list = document.getElementById("purchaseErrors");
@@ -2906,10 +2906,10 @@ function getMessageClass(type) {
 // ==================== FUNá‡á•ES GLOBAIS PARA COMPATIBILIDADE ====================
 
 /**
- * Inicializa conexá£o da wallet (compatibilidade)
+ * Inicializa conexÃo da wallet (compatibilidade)
  */
 function initializeWalletConnection() {
-    // Monitora mudaná§as de rede e conta
+    // Monitora mudanças de rede e conta
     if (typeof window.ethereum !== 'undefined') {
         window.ethereum.on('accountsChanged', (accounts) => {
             if (accounts.length > 0) {
@@ -2929,12 +2929,12 @@ function initializeWalletConnection() {
         });
         
         window.ethereum.on('chainChanged', () => {
-            // Recarrega a pá¡gina quando muda de rede
+            // Recarrega a página quando muda de rede
             location.reload();
         });
     }
     
-    // Verificaá§á£o periá³dica menos frequente (60 segundos se conectado)
+    // VerificaçÃo periódica menos frequente (60 segundos se conectado)
     setInterval(() => {
         if (walletConnected && walletAddress && !balanceUpdateInProgress) {
             updateWalletBalance();
@@ -2946,27 +2946,27 @@ function initializeWalletConnection() {
 
 /**
  * Inicializa provider com fallback para resolver problemas de RPC
- * ESTRATá‰GIA: Usa APENAS RPC páºblico para leitura, MetaMask apenas para transaá§áµes
+ * ESTRATá‰GIA: Usa APENAS RPC público para leitura, MetaMask apenas para transações
  */
 async function initializeProviderWithFallback() {
-    // Evitar inicializaá§áµes máºltiplas
+    // Evitar inicializações múltiplas
     if (providerInitialized && currentProvider) {
-        // Provider já¡ inicializado, reutilizando...
+        // Provider já inicializado, reutilizando...
         return currentProvider;
     }
     
-    // Inicializando provider com estratá©gia RPC-primeiro
+    // Inicializando provider com estratégia RPC-primeiro
     
-    // NUNCA usa MetaMask para operaá§áµes de leitura
+    // NUNCA usa MetaMask para operações de leitura
     // Detecta chain ID da MetaMask para usar RPC correspondente
-    let chainId = 97; // BSC Testnet padrá£o
+    let chainId = 97; // BSC Testnet padrÃo
     
     try {
         const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
         chainId = parseInt(currentChainId, 16);
         console.log(`Œ Chain ID detectado: ${chainId}`);
     } catch (error) {
-        console.warn('âš ï¸ Ná£o foi possá­vel detectar chain ID, usando BSC Testnet');
+        console.warn('Ãš ï¸ NÃo foi possível detectar chain ID, usando BSC Testnet');
     }
     
     // RPC endpoints por rede
@@ -2993,7 +2993,7 @@ async function initializeProviderWithFallback() {
             
             const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
             
-            // Teste rá¡pido de conectividade (3s timeout)
+            // Teste rápido de conectividade (3s timeout)
             const network = await Promise.race([
                 provider.getNetwork(),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
@@ -3003,15 +3003,15 @@ async function initializeProviderWithFallback() {
             return provider;
             
         } catch (error) {
-            console.warn(`âŒ RPC ${i + 1} falhou: ${rpcUrl} - ${error.message}`);
+            console.warn(`ÃŒ RPC ${i + 1} falhou: ${rpcUrl} - ${error.message}`);
         }
     }
     
-    throw new Error('âŒ Todos os RPC endpoints falharam - verifique sua conexá£o com a internet');
+    throw new Error('ÃŒ Todos os RPC endpoints falharam - verifique sua conexÃo com a internet');
 }
 
 /**
- * Obtá©m URL de RPC fallback baseado na rede
+ * Obtém URL de RPC fallback baseado na rede
  */
 function getFallbackRpcUrl(chainId) {
     const rpcUrls = {
@@ -3038,11 +3038,11 @@ function getFallbackRpcUrl(chainId) {
     };
     
     const urls = rpcUrls[chainId];
-    return urls ? urls[0] : null; // Retorna primeiro RPC disponá­vel
+    return urls ? urls[0] : null; // Retorna primeiro RPC disponível
 }
 
 /**
- * Tenta obter cá³digo do contrato com retry
+ * Tenta obter código do contrato com retry
  */
 async function getCodeWithRetry(contractAddress, maxRetries = 3) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -3050,7 +3050,7 @@ async function getCodeWithRetry(contractAddress, maxRetries = 3) {
             const code = await currentProvider.getCode(contractAddress);
             return code;
         } catch (error) {
-            console.warn(`âš ï¸ Tentativa ${attempt}/${maxRetries} falhou:`, error.message);
+            console.warn(`Ãš ï¸ Tentativa ${attempt}/${maxRetries} falhou:`, error.message);
             
             if (attempt === maxRetries) {
                 throw error;
@@ -3063,20 +3063,20 @@ async function getCodeWithRetry(contractAddress, maxRetries = 3) {
 }
 
 /**
- * Retry com provider alternativo - tenta máºltiplos RPCs
+ * Retry com provider alternativo - tenta múltiplos RPCs
  */
 async function retryWithFallbackProvider(contractAddress) {
     // Detecta chain ID
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
     const chainIdDecimal = parseInt(chainId, 16);
     
-    // Obtá©m lista de RPCs
+    // Obtém lista de RPCs
     const rpcUrls = getFallbackRpcUrls(chainIdDecimal);
     if (!rpcUrls || rpcUrls.length === 0) {
-        throw new Error('Nenhum RPC alternativo disponá­vel para esta rede');
+        throw new Error('Nenhum RPC alternativo disponível para esta rede');
     }
     
-    // Tenta cada RPC atá© encontrar um que funcione
+    // Tenta cada RPC até encontrar um que funcione
     for (let i = 0; i < rpcUrls.length; i++) {
         try {
             const rpcUrl = rpcUrls[i];
@@ -3091,17 +3091,17 @@ async function retryWithFallbackProvider(contractAddress) {
             // Testa com novo provider
             const code = await fallbackProvider.getCode(contractAddress);
             if (code === '0x') {
-                throw new Error('Endereá§o ná£o á© um smart contract vá¡lido');
+                throw new Error('Endereço nÃo é um smart contract válido');
             }
             
             addContractMessage('… Smart contract detectado via RPC alternativo', 'success');
             
             // Atualiza provider global
             currentProvider = fallbackProvider;
-            currentSigner = null; // Sem signer no RPC páºblico
+            currentSigner = null; // Sem signer no RPC público
             providerInitialized = true; // Marca como inicializado
             
-            // Continua verificaá§á£o
+            // Continua verificaçÃo
             currentContract = new ethers.Contract(contractAddress, CONFIG.tokenABI, currentProvider);
             await verifyERC20Functions();
             await verifyBuyFunctions();
@@ -3109,13 +3109,13 @@ async function retryWithFallbackProvider(contractAddress) {
             showTokenInfo();
             
             addContractMessage('Ž‰ Contrato verificado com RPC alternativo!', 'success');
-            addContractMessage('âš ï¸ Para transaá§áµes, reconecte com MetaMask', 'warning');
-            return; // Sucesso, sai da funá§á£o
+            addContractMessage('Ãš ï¸ Para transações, reconecte com MetaMask', 'warning');
+            return; // Sucesso, sai da funçÃo
             
         } catch (error) {
-            console.warn(`âŒ RPC ${rpcUrls[i]} falhou:`, error.message);
+            console.warn(`ÃŒ RPC ${rpcUrls[i]} falhou:`, error.message);
             if (i === rpcUrls.length - 1) {
-                // ášltimo RPC tambá©m falhou
+                // ášltimo RPC também falhou
                 throw new Error(`Todos os RPCs falharam. ášltimo erro: ${error.message}`);
             }
         }
@@ -3159,13 +3159,13 @@ function getFallbackRpcUrls(chainId) {
 // ==================== CONTROLES DO SISTEMA ====================
 
 /**
- * Funá§á£o de limpeza simplificada - removida porque agora usa location.reload()
- * O botá£o "Limpar e Recomeá§ar" simplesmente recarrega a pá¡gina
+ * FunçÃo de limpeza simplificada - removida porque agora usa location.reload()
+ * O botÃo "Limpar e Recomeçar" simplesmente recarrega a página
  */
 
 // ==================== EXPORTS ====================
 
-// Tornar funá§áµes disponá­veis globalmente para compatibilidade
+// Tornar funções disponíveis globalmente para compatibilidade
 window.DynamicTokenPurchase = {
     connectWallet,
     verifyContract,
@@ -3179,7 +3179,7 @@ window.DynamicTokenPurchase = {
     retryWithFallbackProvider
 };
 
-// CSS para animaá§á£o de loading
+// CSS para animaçÃo de loading
 const style = document.createElement('style');
 style.textContent = `
     .spin {
@@ -3192,6 +3192,8 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
 
 
 

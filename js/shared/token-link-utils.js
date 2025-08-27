@@ -1,4 +1,4 @@
-// Checa e baixa chains.json atualizado a cada 5 dias (432000000 ms)
+﻿// Checa e baixa chains.json atualizado a cada 5 dias (432000000 ms)
 export async function autoUpdateChainsJson() {
   const API_URL = 'https://chainid.network/chains.json';
   const LOCAL_KEY = 'xcafe_chainsjson_lastupdate';
@@ -38,7 +38,7 @@ export async function autoUpdateChainsJson() {
   } catch (e) {}
 }
 // js/shared/token-link-utils.js
-// Funções utilitárias para geração de link de token, autocomplete de redes, busca de token, copiar/compartilhar link
+// Funções utilitárias para gerAção de link de token, autocomplete de redes, busca de token, copiar/compartilhar link
 
 
 import { fallbackNetworks } from './networks-fallback.js';
@@ -138,3 +138,4 @@ export function showCopyAndShareButtons(copyBtnId, shareBtnId, show) {
     }
   }
 }
+

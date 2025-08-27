@@ -3,17 +3,17 @@
  * 
  * “ RESPONSABILIDADES:
  * - Detectar MetaMask e outras carteiras Web3
- * - Conectar carteira e obter endereá§o do usuá¡rio
+ * - Conectar carteira e obter endereço do usuário
  * - Verificar e trocar de rede
- * - Monitorar mudaná§as de conta/rede
+ * - Monitorar mudanças de conta/rede
  * 
  * ”— USADO POR:
- * - Todos os má³dulos que precisam de interaá§á£o blockchain
- * - Especialmente: má³dulo de dados bá¡sicos e deploy
+ * - Todos os módulos que precisam de interaçÃo blockchain
+ * - Especialmente: módulo de dados básicos e deploy
  * 
  * “¤ EXPORTS:
  * - MetaMaskConnector: Classe principal
- * - connectWallet(): Funá§á£o de conexá£o rá¡pida
+ * - connectWallet(): FunçÃo de conexÃo rápida
  * - getCurrentAccount(): Obter conta atual
  * - switchToNetwork(): Trocar rede
  */
@@ -21,7 +21,7 @@
 // ==================== CONFIGURAá‡á•ES DE REDES ====================
 
 /**
- * Configuraá§áµes das redes suportadas
+ * Configurações das redes suportadas
  */
 const NETWORKS = {
   // BSC Mainnet
@@ -64,7 +64,7 @@ const NETWORKS = {
 // ==================== CLASSE PRINCIPAL ====================
 
 /**
- * Classe principal para gerenciar conexá£o com MetaMask
+ * Classe principal para gerenciar conexÃo com MetaMask
  */
 class MetaMaskConnector {
   constructor() {
@@ -73,11 +73,11 @@ class MetaMaskConnector {
     this.currentChainId = null;
     this.isConnected = false;
     
-    // Configuraá§áµes
+    // Configurações
     this.config = {
       showDebugLogs: true,
       autoConnect: false,
-      preferredNetwork: 56 // BSC Mainnet por padrá£o
+      preferredNetwork: 56 // BSC Mainnet por padrÃo
     };
     
     // Eventos
@@ -98,8 +98,8 @@ class MetaMaskConnector {
       const prefix = {
         info: '¦Š',
         success: '…',
-        warning: 'âš ï¸',
-        error: 'âŒ',
+        warning: 'Ãš ï¸',
+        error: 'ÃŒ',
         debug: '”§'
       }[type] || '“‹';
       
@@ -108,11 +108,11 @@ class MetaMaskConnector {
   }
   
   /**
-   * Detecta se MetaMask está¡ instalado
+   * Detecta se MetaMask está instalado
    */
   isMetaMaskInstalled() {
     const isInstalled = typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
-    this.log(`MetaMask ${isInstalled ? 'detectado' : 'ná£o encontrado'}`, isInstalled ? 'success' : 'warning');
+    this.log(`MetaMask ${isInstalled ? 'detectado' : 'nÃo encontrado'}`, isInstalled ? 'success' : 'warning');
     return isInstalled;
   }
   
@@ -120,18 +120,18 @@ class MetaMaskConnector {
    * Conecta com a carteira MetaMask
    */
   async connect() {
-    this.log('Iniciando conexá£o com MetaMask...');
+    this.log('Iniciando conexÃo com MetaMask...');
     
     try {
-      // Verificar se MetaMask está¡ instalado
+      // Verificar se MetaMask está instalado
       if (!this.isMetaMaskInstalled()) {
-        throw new Error('MetaMask ná£o está¡ instalado. Instale em https://metamask.io');
+        throw new Error('MetaMask nÃo está instalado. Instale em https://metamask.io');
       }
       
       // Obter provider
       this.provider = window.ethereum;
       
-      // Solicitar conexá£o
+      // Solicitar conexÃo
       const accounts = await this.provider.request({
         method: 'eth_requestAccounts'
       });
@@ -156,7 +156,7 @@ class MetaMaskConnector {
       this.log(`Conectado com sucesso: ${this.currentAccount}`, 'success');
       this.log(`Rede atual: ${this.getNetworkName(this.currentChainId)}`, 'info');
       
-      // Callback de conexá£o
+      // Callback de conexÃo
       if (this.onConnect) {
         this.onConnect({
           account: this.currentAccount,
@@ -172,7 +172,7 @@ class MetaMaskConnector {
       };
       
     } catch (error) {
-      this.log(`Erro na conexá£o: ${error.message}`, 'error');
+      this.log(`Erro na conexÃo: ${error.message}`, 'error');
       this.isConnected = false;
       throw error;
     }
@@ -189,7 +189,7 @@ class MetaMaskConnector {
     this.currentChainId = null;
     this.isConnected = false;
     
-    // Callback de desconexá£o
+    // Callback de desconexÃo
     if (this.onDisconnect) {
       this.onDisconnect();
     }
@@ -205,7 +205,7 @@ class MetaMaskConnector {
     
     this.log('Configurando listeners de eventos...', 'debug');
     
-    // Mudaná§a de conta
+    // Mudança de conta
     this.provider.on('accountsChanged', (accounts) => {
       this.log(`Conta alterada: ${accounts[0] || 'desconectada'}`);
       
@@ -220,7 +220,7 @@ class MetaMaskConnector {
       }
     });
     
-    // Mudaná§a de rede
+    // Mudança de rede
     this.provider.on('chainChanged', (chainId) => {
       this.currentChainId = parseInt(chainId, 16);
       const networkName = this.getNetworkName(this.currentChainId);
@@ -239,19 +239,19 @@ class MetaMaskConnector {
   }
   
   /**
-   * Troca para uma rede especá­fica
+   * Troca para uma rede específica
    */
   async switchToNetwork(chainId) {
     this.log(`Solicitando troca para rede ${chainId}...`);
     
     try {
       if (!this.provider) {
-        throw new Error('MetaMask ná£o conectado');
+        throw new Error('MetaMask nÃo conectado');
       }
       
       const networkConfig = NETWORKS[chainId];
       if (!networkConfig) {
-        throw new Error(`Rede ${chainId} ná£o suportada`);
+        throw new Error(`Rede ${chainId} nÃo suportada`);
       }
       
       // Tentar trocar para a rede
@@ -264,9 +264,9 @@ class MetaMaskConnector {
         this.log(`Trocou para ${networkConfig.chainName}`, 'success');
         
       } catch (switchError) {
-        // Se a rede ná£o existe, tentar adicionar
+        // Se a rede nÃo existe, tentar adicionar
         if (switchError.code === 4902) {
-          this.log(`Rede ná£o encontrada, adicionando ${networkConfig.chainName}...`);
+          this.log(`Rede nÃo encontrada, adicionando ${networkConfig.chainName}...`);
           
           await this.provider.request({
             method: 'wallet_addEthereumChain',
@@ -288,7 +288,7 @@ class MetaMaskConnector {
   }
   
   /**
-   * Obtá©m informaá§áµes da conta atual
+   * Obtém informações da conta atual
    */
   async getCurrentAccount() {
     if (!this.isConnected) {
@@ -296,7 +296,7 @@ class MetaMaskConnector {
     }
     
     try {
-      // Verificar se ainda está¡ conectado
+      // Verificar se ainda está conectado
       const accounts = await this.provider.request({
         method: 'eth_accounts'
       });
@@ -322,7 +322,7 @@ class MetaMaskConnector {
   }
   
   /**
-   * Obtá©m saldo da conta atual
+   * Obtém saldo da conta atual
    */
   async getBalance() {
     if (!this.isConnected || !this.currentAccount) {
@@ -351,7 +351,7 @@ class MetaMaskConnector {
   }
   
   /**
-   * Obtá©m nome da rede por chainId
+   * Obtém nome da rede por chainId
    */
   getNetworkName(chainId) {
     const network = NETWORKS[chainId];
@@ -359,14 +359,14 @@ class MetaMaskConnector {
   }
   
   /**
-   * Verifica se está¡ na rede correta
+   * Verifica se está na rede correta
    */
   isOnCorrectNetwork(requiredChainId) {
     return this.currentChainId === requiredChainId;
   }
   
   /**
-   * Obtá©m configuraá§á£o da rede atual
+   * Obtém configuraçÃo da rede atual
    */
   getCurrentNetworkConfig() {
     return NETWORKS[this.currentChainId] || null;
@@ -377,7 +377,7 @@ class MetaMaskConnector {
    */
   async signMessage(message) {
     if (!this.isConnected || !this.currentAccount) {
-      throw new Error('MetaMask ná£o conectado');
+      throw new Error('MetaMask nÃo conectado');
     }
     
     try {
@@ -406,7 +406,7 @@ window.metaMaskConnector = new MetaMaskConnector();
 // ==================== FUNá‡á•ES DE CONVENIáŠNCIA ====================
 
 /**
- * Funá§á£o rá¡pida para conectar carteira
+ * FunçÃo rápida para conectar carteira
  */
 async function connectWallet() {
   console.log('¦Š [QUICK-CONNECT] Conectando carteira...');
@@ -416,34 +416,34 @@ async function connectWallet() {
     console.log('… [QUICK-CONNECT] Conectado:', result);
     return result;
   } catch (error) {
-    console.error('âŒ [QUICK-CONNECT] Erro:', error.message);
+    console.error('ÃŒ [QUICK-CONNECT] Erro:', error.message);
     throw error;
   }
 }
 
 /**
- * Funá§á£o rá¡pida para obter conta atual
+ * FunçÃo rápida para obter conta atual
  */
 async function getCurrentAccount() {
   return await window.metaMaskConnector.getCurrentAccount();
 }
 
 /**
- * Funá§á£o rá¡pida para trocar rede
+ * FunçÃo rápida para trocar rede
  */
 async function switchToNetwork(chainId) {
   return await window.metaMaskConnector.switchToNetwork(chainId);
 }
 
 /**
- * Funá§á£o para verificar se MetaMask está¡ instalado
+ * FunçÃo para verificar se MetaMask está instalado
  */
 function isMetaMaskInstalled() {
   return window.metaMaskConnector.isMetaMaskInstalled();
 }
 
 /**
- * Mostra modal de instalaá§á£o do MetaMask
+ * Mostra modal de instalaçÃo do MetaMask
  */
 function showMetaMaskInstallModal() {
   const modal = document.createElement('div');
@@ -454,20 +454,20 @@ function showMetaMaskInstallModal() {
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="bi bi-wallet2 me-2"></i>MetaMask Necessá¡rio
+            <i class="bi bi-wallet2 me-2"></i>MetaMask Necessário
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body text-center">
           <img src="../imgs/metamask-fox.svg" alt="MetaMask" style="width: 80px; height: 80px;" class="mb-3">
-          <h6>MetaMask ná£o está¡ instalado</h6>
+          <h6>MetaMask nÃo está instalado</h6>
           <p>Para interagir com a blockchain, vocáª precisa ter o MetaMask instalado no seu navegador.</p>
           <div class="d-grid gap-2">
             <a href="https://metamask.io/download/" target="_blank" class="btn btn-primary">
               <i class="bi bi-download me-2"></i>Instalar MetaMask
             </a>
             <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
-              <i class="bi bi-arrow-clockwise me-2"></i>Recarregar Pá¡gina
+              <i class="bi bi-arrow-clockwise me-2"></i>Recarregar Página
             </button>
           </div>
         </div>
@@ -487,14 +487,14 @@ function showMetaMaskInstallModal() {
 }
 
 /**
- * Configuraá§á£o automá¡tica de eventos comuns
+ * ConfiguraçÃo automática de eventos comuns
  */
 function setupCommonWalletEvents() {
   const connector = window.metaMaskConnector;
   
   // Atualizar interface quando conta mudar
   connector.onAccountChange = (account) => {
-    // Atualizar elementos que mostram endereá§o
+    // Atualizar elementos que mostram endereço
     const addressElements = document.querySelectorAll('[data-account-address]');
     addressElements.forEach(el => {
       el.textContent = account ? 
@@ -502,7 +502,7 @@ function setupCommonWalletEvents() {
         '';
     });
     
-    // Atualizar botáµes de conexá£o
+    // Atualizar botões de conexÃo
     const connectButtons = document.querySelectorAll('[data-connect-button]');
     connectButtons.forEach(btn => {
       btn.textContent = account ? 'Carteira Conectada' : 'Conectar Carteira';
@@ -529,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Configurar eventos comuns
   setupCommonWalletEvents();
   
-  // Auto-conectar se já¡ autorizado
+  // Auto-conectar se já autorizado
   if (window.metaMaskConnector.config.autoConnect) {
     setTimeout(async () => {
       try {
@@ -540,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
       } catch (error) {
-        console.log('”§ [METAMASK] Auto-connect falhou (normal se ná£o autorizado)');
+        console.log('”§ [METAMASK] Auto-connect falhou (normal se nÃo autorizado)');
       }
     }, 1000);
   }
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==================== EXPORTS GLOBAIS ====================
 
-// Disponibilizar funá§áµes globalmente
+// Disponibilizar funções globalmente
 window.connectWallet = connectWallet;
 window.getCurrentAccount = getCurrentAccount;
 window.switchToNetwork = switchToNetwork;
@@ -557,6 +557,8 @@ window.showMetaMaskInstallModal = showMetaMaskInstallModal;
 window.setupCommonWalletEvents = setupCommonWalletEvents;
 
 console.log('… [METAMASK] MetaMask Connector inicializado');
+
+
 
 
 

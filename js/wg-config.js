@@ -1,4 +1,4 @@
-// Configuração global do widget
+﻿// ConfigurAção global do widget
 let widgetConfig = {
   contract: '',
   network: 97,
@@ -11,9 +11,9 @@ let widgetConfig = {
   theme: 'dark'
 };
 
-// Inicialização da página
+// InicializAção da página
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Página carregada - aguardando configuração manual...');
+  console.log('Página carregada - aguardando ConfigurAção manual...');
 });
 
 // FUNÇÕES DO WIDGET
@@ -57,7 +57,7 @@ async function createPreviewWidget(config, containerId) {
     const maxQuantity = config.maxQuantity || contractData.maxPurchase || null;
     const initialQuantity = config.initialQuantity || minQuantity || '1';
     
-    // Função para calcular total
+    // função para calcular total
     const calculateTotal = (quantity, price) => {
       if (!quantity || isNaN(quantity)) return '0.000000';
       return (quantity * parseFloat(price)).toFixed(6);
@@ -139,7 +139,7 @@ async function createPreviewWidget(config, containerId) {
   } catch (error) {
     console.error('Erro ao buscar dados do contrato:', error);
     
-    // Mostrar preview com dados padrão em caso de erro
+    // Mostrar preview com dados Padrão em caso de erro
     const priceDisplay = config.price ? `${config.price} BNB` : '0.000009 BNB';
     const minQuantity = config.minQuantity || 1;
     const initialQuantity = config.initialQuantity || minQuantity;
@@ -194,7 +194,7 @@ async function createPreviewWidget(config, containerId) {
   }
 }
 
-// Função auxiliar para nome da rede
+// função auxiliar para nome da rede
 function getNetworkName(networkId) {
   const networks = {
     97: 'BSC Testnet',
@@ -207,7 +207,7 @@ function getNetworkName(networkId) {
   return networks[networkId] || `Network ${networkId}`;
 }
 
-// Função para buscar dados reais do contrato
+// função para buscar dados reais do contrato
 async function fetchContractData(contractAddress, networkId) {
   try {
     console.log('Buscando dados do contrato:', contractAddress, 'na rede:', networkId);
@@ -255,7 +255,7 @@ async function fetchContractData(contractAddress, networkId) {
     
     // Buscar dados básicos do token com timeout
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout: Operação demorou mais de 10 segundos')), 10000)
+      setTimeout(() => reject(new Error('Timeout: OperAção demorou mais de 10 segundos')), 10000)
     );
     
     const dataPromise = Promise.all([
@@ -287,7 +287,7 @@ async function fetchContractData(contractAddress, networkId) {
           const rate = await contract.rate();
           contractPrice = ethers.utils.formatEther(rate);
         } catch {
-          // Usar preço padrão se não encontrar
+          // Usar preço Padrão se não encontrar
           contractPrice = '0.000009';
         }
       }
@@ -336,7 +336,7 @@ async function fetchContractData(contractAddress, networkId) {
   }
 }
 
-// Função para buscar e preencher informações do contrato
+// função para buscar e preencher informações do contrato
 async function fetchAndFillContractInfo() {
   const contractAddress = document.getElementById('config-contract').value.trim();
   const networkId = parseInt(document.getElementById('config-network').value);
@@ -347,7 +347,7 @@ async function fetchAndFillContractInfo() {
     return;
   }
   
-  // Feedback visual no botão
+  // Feedback visual no Botão
   const originalText = btn.innerHTML;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Buscando...';
   btn.disabled = true;
@@ -364,7 +364,7 @@ async function fetchAndFillContractInfo() {
       titleField.value = `Comprar ${contractData.name} (${contractData.symbol})`;
     }
 
-    // Preencher campos de configuração com valores do contrato
+    // Preencher campos de ConfigurAção com valores do contrato
     const configMinEl = document.getElementById('config-min-quantity');
     const configMaxEl = document.getElementById('config-max-quantity');
 
@@ -390,7 +390,7 @@ async function fetchAndFillContractInfo() {
         priceHint.innerHTML = `<i class="bi bi-info-circle me-1"></i>Preço mínimo: ${contractData.price} BNB`;
       }
       
-      // Adicionar validação em tempo real
+      // Adicionar validAção em tempo real
       priceField.oninput = function() {
         const currentValue = parseFloat(this.value);
         const minPrice = parseFloat(this.getAttribute('data-min-price'));
@@ -437,7 +437,7 @@ async function fetchAndFillContractInfo() {
     if (error.message.includes('call revert exception')) {
       errorMessage = `O contrato não existe na rede ${networkName} ou não é um token ERC20 válido`;
     } else if (error.message.includes('network')) {
-      errorMessage = `Erro de conexão com a rede ${networkName}`;
+      errorMessage = `Erro de Conexão com a rede ${networkName}`;
     } else if (error.message.includes('elementos do formulário')) {
       errorMessage = 'Erro interno da página. Recarregue a página.';
     } else {
@@ -458,7 +458,7 @@ async function fetchAndFillContractInfo() {
                 Verifique se:
                 • O endereço está correto<br>
                 • O contrato existe na rede ${networkName}<br>
-                • O contrato implementa o padrão ERC20
+                • O contrato implementa o Padrão ERC20
               </small>
             </div>
           </div>
@@ -466,7 +466,7 @@ async function fetchAndFillContractInfo() {
       `;
     }
 
-    // Feedback de erro no botão
+    // Feedback de erro no Botão
     btn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Não encontrado';
     btn.classList.remove('btn-outline-info');
     btn.classList.add('btn-danger');
@@ -480,7 +480,7 @@ async function fetchAndFillContractInfo() {
   }
 }
 
-// Função chamada quando a rede é alterada
+// função chamada quando a rede é alterada
 async function onNetworkChange() {
   const networkSelect = document.getElementById('config-network');
   const networkName = networkSelect.options[networkSelect.selectedIndex].text;
@@ -498,7 +498,7 @@ async function onNetworkChange() {
   `;
 }
 
-// FUNÇÕES DE CONFIGURAÇÃO
+// FUNÇÕES DE ConfigurAção
 async function updateWidget() {
   try {
     const contractAddress = document.getElementById('config-contract').value.trim();
@@ -523,7 +523,7 @@ async function updateWidget() {
     widgetConfig.title = document.getElementById('config-title').value || 'Widget de Token';
     widgetConfig.logo = document.getElementById('config-logo').value;
     
-    // Capturar preço do campo, com validação
+    // Capturar preço do campo, com validAção
     const priceField = document.getElementById('config-price');
     const priceValue = priceField ? priceField.value.trim() : '';
     widgetConfig.price = priceValue || null;
@@ -545,10 +545,10 @@ async function updateWidget() {
   generateSimpleCode();
   // Limpar preview
   previewContainer.innerHTML = '<div id="wg-widget-preview"></div>';
-    // Cria o widget real no preview, mas com botão de compra real visível
+    // Cria o widget real no preview, mas com Botão de compra real visível
     const configPreview = {...widgetConfig, containerId: 'wg-widget-preview'};
     window.createxcafeWidget && createxcafeWidget(configPreview);
-    // Adiciona botão de compra real só no preview
+    // Adiciona Botão de compra real só no preview
     setTimeout(() => {
       const previewDiv = document.getElementById('wg-widget-preview');
       if (previewDiv) {
@@ -668,7 +668,7 @@ function generateSimpleCode() {
   const textarea = document.getElementById('embed-code');
   textarea.value = code;
   
-  // Feedback visual no botão
+  // Feedback visual no Botão
   const btn = document.querySelector('button[onclick="generateSimpleCode()"]');
   if (btn) {
     const originalText = btn.innerHTML;
@@ -703,7 +703,7 @@ function copyEmbedCode() {
   }, 2000);
 }
 
-// Função para lidar com a compra no preview
+// função para lidar com a compra no preview
 function handlePurchase(symbol, contractAddress) {
   const quantity = document.getElementById('widget-quantity')?.value || '0';
   const total = document.getElementById('widget-total')?.value || '0';
@@ -712,5 +712,6 @@ function handlePurchase(symbol, contractAddress) {
         `Quantidade: ${quantity} tokens\n` +
         `Total: ${total} BNB\n` +
         `Contrato: ${contractAddress}\n\n` +
-        `💡 Este é apenas o preview. No widget real, esta ação conectaria com MetaMask para realizar a compra.`);
+        `💡 Este é apenas o preview. No widget real, esta Ação conectaria com MetaMask para realizar a compra.`);
 }
+

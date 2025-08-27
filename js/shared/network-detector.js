@@ -3,26 +3,26 @@
  * 
  * “ RESPONSABILIDADES:
  * - Detectar rede blockchain atual
- * - Validar se rede á© suportada
- * - Fornecer informaá§áµes detalhadas da rede
+ * - Validar se rede é suportada
+ * - Fornecer informações detalhadas da rede
  * - Mapear explorers e APIs por rede
  * 
  * ”— USADO POR:
- * - Má³dulos que precisam de informaá§áµes especá­ficas da rede
- * - Sistema de verificaá§á£o de contratos
+ * - Módulos que precisam de informações específicas da rede
+ * - Sistema de verificAção de contratos
  * - Sistema de deploy
  * 
  * “¤ EXPORTS:
  * - NetworkDetector: Classe principal
  * - detectCurrentNetwork(): Detecta rede atual
- * - getNetworkInfo(): Informaá§áµes detalhadas
+ * - getNetworkInfo(): Informações detalhadas
  * - getSupportedNetworks(): Lista de redes suportadas
  */
 
 // ==================== CONFIGURAá‡á•ES DE REDES ====================
 
 /**
- * Configuraá§áµes completas das redes suportadas
+ * Configurações completas das redes suportadas
  */
 const NETWORK_CONFIGS = {
   // BSC Mainnet
@@ -47,14 +47,14 @@ const NETWORK_CONFIGS = {
       name: 'BscScan'
     },
     
-    // APIs de verificaá§á£o
+    // APIs de verificAção
     verification: {
       apiUrl: 'https://api.bscscan.com/api',
       apiKeyRequired: true,
       supportedCompilers: ['0.8.19', '0.8.20', '0.8.21']
     },
     
-    // Configuraá§áµes especá­ficas
+    // Configurações específicas
     isTestnet: false,
     isSupported: true,
     gasPrice: {
@@ -170,14 +170,14 @@ const NETWORK_CONFIGS = {
 // ==================== CLASSE PRINCIPAL ====================
 
 /**
- * Classe para detectar e gerenciar informaá§áµes de rede
+ * Classe para detectar e gerenciar informações de rede
  */
 class NetworkDetector {
   constructor() {
     this.currentNetwork = null;
     this.isConnected = false;
     
-    // Configuraá§áµes
+    // Configurações
     this.config = {
       showDebugLogs: true,
       autoDetect: true,
@@ -233,9 +233,9 @@ class NetworkDetector {
         }
       }
       
-      // Verificar se há¡ provider Web3
+      // Verificar se há provider Web3
       if (typeof window.ethereum === 'undefined') {
-        throw new Error('Provedor Web3 ná£o encontrado (instale MetaMask)');
+        throw new Error('Provedor Web3 não encontrado (instale MetaMask)');
       }
       
       // Obter chainId atual
@@ -245,7 +245,7 @@ class NetworkDetector {
       
       const chainIdDecimal = parseInt(chainId, 16);
       
-      // Buscar configuraá§á£o da rede
+      // Buscar ConfigurAção da rede
       const networkConfig = NETWORK_CONFIGS[chainIdDecimal];
       
       const result = {
@@ -257,7 +257,7 @@ class NetworkDetector {
         detectedAt: new Date().toISOString()
       };
       
-      // Adicionar informaá§áµes extras se rede conhecida
+      // Adicionar informações extras se rede conhecida
       if (networkConfig) {
         result.name = networkConfig.name;
         result.shortName = networkConfig.shortName;
@@ -291,14 +291,14 @@ class NetworkDetector {
       return result;
       
     } catch (error) {
-      this.log(`Erro na detecá§á£o: ${error.message}`, 'error');
+      this.log(`Erro na detecção: ${error.message}`, 'error');
       this.isConnected = false;
       throw error;
     }
   }
   
   /**
-   * Obtá©m informaá§áµes detalhadas da rede atual
+   * Obtém informações detalhadas da rede atual
    */
   async getNetworkInfo(chainId = null) {
     const targetChainId = chainId || (this.currentNetwork ? this.currentNetwork.chainId : null);
@@ -315,7 +315,7 @@ class NetworkDetector {
         chainId: targetChainId,
         isSupported: false,
         name: `Rede Desconhecida (${targetChainId})`,
-        error: 'Rede ná£o suportada'
+        error: 'Rede não suportada'
       };
     }
     
@@ -326,7 +326,7 @@ class NetworkDetector {
   }
   
   /**
-   * Verifica se a rede atual á© suportada
+   * Verifica se a rede atual é suportada
    */
   async isNetworkSupported(chainId = null) {
     const targetChainId = chainId || (this.currentNetwork ? this.currentNetwork.chainId : null);
@@ -340,19 +340,19 @@ class NetworkDetector {
   }
   
   /**
-   * Obtá©m URL do explorador para endereá§o/transaá§á£o
+   * Obtém URL do explorador para endereço/transAção
    */
   getExplorerUrl(addressOrTx, type = 'address', chainId = null) {
     const targetChainId = chainId || (this.currentNetwork ? this.currentNetwork.chainId : null);
     
     if (!targetChainId) {
-      this.log('ChainId ná£o disponá­vel para explorador', 'warning');
+      this.log('ChainId não disponível para explorador', 'warning');
       return null;
     }
     
     const config = NETWORK_CONFIGS[targetChainId];
     if (!config) {
-      this.log(`Rede ${targetChainId} ná£o suportada para explorador`, 'warning');
+      this.log(`Rede ${targetChainId} não suportada para explorador`, 'warning');
       return null;
     }
     
@@ -370,7 +370,7 @@ class NetworkDetector {
   }
   
   /**
-   * Obtá©m configuraá§á£o da API de verificaá§á£o
+   * Obtém ConfigurAção da API de verificAção
    */
   getVerificationConfig(chainId = null) {
     const targetChainId = chainId || (this.currentNetwork ? this.currentNetwork.chainId : null);
@@ -398,7 +398,7 @@ class NetworkDetector {
   }
   
   /**
-   * Filtra redes por critá©rio
+   * Filtra redes por critério
    */
   getNetworksByType(isTestnet = false) {
     return Object.values(NETWORK_CONFIGS)
@@ -412,11 +412,11 @@ class NetworkDetector {
   }
   
   /**
-   * Configura monitoramento de mudaná§as de rede
+   * Configura monitoramento de mudanças de rede
    */
   setupNetworkMonitoring() {
     if (typeof window.ethereum === 'undefined') {
-      this.log('MetaMask ná£o disponá­vel para monitoramento', 'warning');
+      this.log('MetaMask não disponível para monitoramento', 'warning');
       return;
     }
     
@@ -447,7 +447,7 @@ class NetworkDetector {
   }
   
   /**
-   * Obtá©m preá§o de gas recomendado
+   * Obtém preço de gas recomendado
    */
   getGasPrice(priority = 'standard', chainId = null) {
     const targetChainId = chainId || (this.currentNetwork ? this.currentNetwork.chainId : null);
@@ -465,7 +465,7 @@ class NetworkDetector {
   }
   
   /**
-   * Verifica se rede requer API key para verificaá§á£o
+   * Verifica se rede requer API key para verificAção
    */
   requiresApiKey(chainId = null) {
     const verificationConfig = this.getVerificationConfig(chainId);
@@ -473,7 +473,7 @@ class NetworkDetector {
   }
   
   /**
-   * Obtá©m compilers suportados pela rede
+   * Obtém compilers suportados pela rede
    */
   getSupportedCompilers(chainId = null) {
     const verificationConfig = this.getVerificationConfig(chainId);
@@ -491,7 +491,7 @@ window.networkDetector = new NetworkDetector();
 // ==================== FUNá‡á•ES DE CONVENIáŠNCIA ====================
 
 /**
- * Funá§á£o rá¡pida para detectar rede
+ * função rápida para detectar rede
  */
 async function detectCurrentNetwork() {
   console.log('Œ [QUICK-DETECT] Detectando rede...');
@@ -507,35 +507,35 @@ async function detectCurrentNetwork() {
 }
 
 /**
- * Funá§á£o rá¡pida para obter informaá§áµes da rede
+ * função rápida para obter informações da rede
  */
 async function getNetworkInfo(chainId = null) {
   return await window.networkDetector.getNetworkInfo(chainId);
 }
 
 /**
- * Funá§á£o rá¡pida para verificar se rede á© suportada
+ * função rápida para verificar se rede é suportada
  */
 async function isNetworkSupported(chainId = null) {
   return await window.networkDetector.isNetworkSupported(chainId);
 }
 
 /**
- * Funá§á£o rá¡pida para obter URL do explorador
+ * função rápida para obter URL do explorador
  */
 function getExplorerUrl(addressOrTx, type = 'address', chainId = null) {
   return window.networkDetector.getExplorerUrl(addressOrTx, type, chainId);
 }
 
 /**
- * Funá§á£o rá¡pida para listar redes suportadas
+ * função rápida para listar redes suportadas
  */
 function getSupportedNetworks() {
   return window.networkDetector.getSupportedNetworks();
 }
 
 /**
- * Funá§á£o para obter redes mainnet ou testnet
+ * função para obter redes mainnet ou testnet
  */
 function getMainnetNetworks() {
   return window.networkDetector.getNetworksByType(false);
@@ -546,7 +546,7 @@ function getTestnetNetworks() {
 }
 
 /**
- * Exibe modal de rede ná£o suportada
+ * Exibe modal de rede não suportada
  */
 function showUnsupportedNetworkModal(currentNetwork) {
   const modal = document.createElement('div');
@@ -557,14 +557,14 @@ function showUnsupportedNetworkModal(currentNetwork) {
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="bi bi-exclamation-triangle text-warning me-2"></i>Rede Ná£o Suportada
+            <i class="bi bi-exclamation-triangle text-warning me-2"></i>Rede Não Suportada
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <div class="alert alert-warning">
             <h6>Rede Atual: ${currentNetwork.name}</h6>
-            <p>Esta rede ná£o á© suportada pela plataforma xcafe.</p>
+            <p>Esta rede não é suportada pela plataforma xcafe.</p>
           </div>
           
           <h6>Redes Suportadas:</h6>
@@ -608,7 +608,7 @@ function showUnsupportedNetworkModal(currentNetwork) {
 }
 
 /**
- * Configuraá§á£o automá¡tica de eventos de rede
+ * ConfigurAção automática de eventos de rede
  */
 function setupNetworkChangeEvents() {
   const detector = window.networkDetector;
@@ -630,7 +630,7 @@ function setupNetworkChangeEvents() {
       el.textContent = network.symbol;
     });
     
-    // Alertar se rede ná£o suportada
+    // Alertar se rede não suportada
     if (!network.isSupported) {
       setTimeout(() => {
         showUnsupportedNetworkModal(network);
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Configurar eventos
   setupNetworkChangeEvents();
   
-  // Configurar monitoramento se disponá­vel
+  // Configurar monitoramento se disponível
   if (window.networkDetector.config.autoDetect) {
     setTimeout(() => {
       window.networkDetector.setupNetworkMonitoring();
@@ -659,7 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ==================== EXPORTS GLOBAIS ====================
 
-// Disponibilizar funá§áµes globalmente
+// Disponibilizar funções globalmente
 window.detectCurrentNetwork = detectCurrentNetwork;
 window.getNetworkInfo = getNetworkInfo;
 window.isNetworkSupported = isNetworkSupported;
@@ -671,6 +671,7 @@ window.showUnsupportedNetworkModal = showUnsupportedNetworkModal;
 window.setupNetworkChangeEvents = setupNetworkChangeEvents;
 
 console.log('… [NETWORK] Network Detector inicializado');
+
 
 
 

@@ -2,35 +2,35 @@
  * ’¾ STORAGE MANAGER - GERENCIAMENTO DE DADOS ENTRE Má“DULOS
  * 
  * “‹ RESPONSABILIDADES:
- * - Salvar/carregar dados do projeto token entre má³dulos
+ * - Salvar/carregar dados do projeto token entre módulos
  * - Validar integridade dos dados
  * - Gerenciar estado de progresso do fluxo
  * - Sincronizar dados entre localStorage e sessionStorage
- * - Fornecer interface áºnica para acesso aos dados
+ * - Fornecer interface única para acesso aos dados
  * 
  * ”— USADO POR:
- * - Todos os má³dulos (01-dados-basicos, 02-personalizacao, etc.)
+ * - Todos os módulos (01-dados-basicos, 02-personalizacao, etc.)
  * - Sistema principal (add-index.html)
- * - Templates e verificaá§á£o
+ * - Templates e verificaçÃo
  * 
  * “Š ESTRUTURA DE DADOS:
  * - TokenProjectData: Dados principais do projeto
- * - ModuleProgress: Status de progresso de cada má³dulo
- * - TemporaryData: Dados temporá¡rios para transferáªncia
+ * - ModuleProgress: Status de progresso de cada módulo
+ * - TemporaryData: Dados temporários para transferáªncia
  */
 
 // ==================== ESTRUTURA DE DADOS CENTRAL ====================
 
 /**
- * Estrutura padrá£o dos dados do projeto token
+ * Estrutura padrÃo dos dados do projeto token
  */
 const DEFAULT_PROJECT_DATA = {
-  // Identificaá§á£o do projeto
+  // IdentificaçÃo do projeto
   projectId: null,
   createdAt: null,
   lastModified: null,
   
-  // Dados bá¡sicos do token (Má³dulo 01)
+  // Dados básicos do token (Módulo 01)
   tokenName: '',
   tokenSymbol: '',
   decimals: 18,
@@ -43,13 +43,13 @@ const DEFAULT_PROJECT_DATA = {
   networkName: '',
   networkChainId: null,
   
-  // Personalizaá§á£o (Má³dulo 02)
+  // PersonalizaçÃo (Módulo 02)
   contractType: 'simple', // 'simple' ou 'custom'
   targetSuffix: '',
   saltFound: '',
   predictedAddress: '',
   
-  // Compilaá§á£o e Deploy (Má³dulo 03)
+  // CompilaçÃo e Deploy (Módulo 03)
   contractSource: '',
   contractName: '',
   contractAbi: null,
@@ -63,12 +63,12 @@ const DEFAULT_PROJECT_DATA = {
   deployBlockNumber: null,
   deployGasUsed: null,
   
-  // Verificaá§á£o (Má³dulo 04)
+  // VerificaçÃo (Módulo 04)
   verificationStatus: 'pending', // 'pending', 'success', 'failed'
   verificationTxId: '',
   verificationUrl: '',
   
-  // Status do processo por má³dulo
+  // Status do processo por módulo
   moduleProgress: {
     'dados-basicos': false,
     'personalizacao': false,
@@ -106,8 +106,8 @@ class TokenStorageManager {
     const prefix = {
       info: '’¾',
       success: '…',
-      warning: 'âš ï¸',
-      error: 'âŒ',
+      warning: 'Ãš ï¸',
+      error: 'ÃŒ',
       debug: '”§'
     }[type] || '“‹';
     
@@ -118,7 +118,7 @@ class TokenStorageManager {
   
   /**
    * Inicializa o storage manager
-   * Cria estrutura padrá£o se ná£o existir
+   * Cria estrutura padrÃo se nÃo existir
    */
   initialize() {
     if (this.initialized) return;
@@ -143,12 +143,12 @@ class TokenStorageManager {
       this.initialized = true;
       
     } catch (error) {
-      this.log(`Erro na inicializaá§á£o: ${error.message}`, 'error');
+      this.log(`Erro na inicializaçÃo: ${error.message}`, 'error');
     }
   }
   
   /**
-   * Gera ID áºnico para o projeto
+   * Gera ID único para o projeto
    */
   generateProjectId() {
     return 'token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -157,7 +157,7 @@ class TokenStorageManager {
   // ==================== DADOS PRINCIPAIS ====================
   
   /**
-   * Obtá©m todos os dados do projeto
+   * Obtém todos os dados do projeto
    */
   getProjectData() {
     try {
@@ -190,7 +190,7 @@ class TokenStorageManager {
       
       this.log('Dados salvos com sucesso', 'success');
       
-      // Notificar outros má³dulos sobre mudaná§a
+      // Notificar outros módulos sobre mudança
       this.notifyDataChange(data);
       
     } catch (error) {
@@ -200,7 +200,7 @@ class TokenStorageManager {
   }
   
   /**
-   * Atualiza campos especá­ficos do projeto
+   * Atualiza campos específicos do projeto
    */
   updateProjectData(updates) {
     try {
@@ -220,7 +220,7 @@ class TokenStorageManager {
   // ==================== PROGRESSO DOS Má“DULOS ====================
   
   /**
-   * Marca um má³dulo como completo
+   * Marca um módulo como completo
    */
   completeModule(moduleName) {
     try {
@@ -228,18 +228,18 @@ class TokenStorageManager {
       if (data) {
         data.moduleProgress[moduleName] = true;
         this.saveProjectData(data);
-        this.log(`Má³dulo ${moduleName} marcado como completo`, 'success');
+        this.log(`Módulo ${moduleName} marcado como completo`, 'success');
         return true;
       }
       return false;
     } catch (error) {
-      this.log(`Erro ao completar má³dulo: ${error.message}`, 'error');
+      this.log(`Erro ao completar módulo: ${error.message}`, 'error');
       return false;
     }
   }
   
   /**
-   * Verifica se um má³dulo está¡ completo
+   * Verifica se um módulo está completo
    */
   isModuleComplete(moduleName) {
     const data = this.getProjectData();
@@ -247,7 +247,7 @@ class TokenStorageManager {
   }
   
   /**
-   * Verifica se um má³dulo pode ser acessado
+   * Verifica se um módulo pode ser acessado
    */
   canAccessModule(moduleName) {
     const moduleOrder = [
@@ -261,16 +261,16 @@ class TokenStorageManager {
     const currentIndex = moduleOrder.indexOf(moduleName);
     if (currentIndex === -1) return false;
     
-    // Primeiro má³dulo sempre pode ser acessado
+    // Primeiro módulo sempre pode ser acessado
     if (currentIndex === 0) return true;
     
-    // Verificar se má³dulo anterior está¡ completo
+    // Verificar se módulo anterior está completo
     const previousModule = moduleOrder[currentIndex - 1];
     return this.isModuleComplete(previousModule);
   }
   
   /**
-   * Obtá©m status de todos os má³dulos
+   * Obtém status de todos os módulos
    */
   getModuleProgress() {
     const data = this.getProjectData();
@@ -280,7 +280,7 @@ class TokenStorageManager {
   // ==================== DADOS ESPECáFICOS POR TIPO ====================
   
   /**
-   * Salva dados bá¡sicos do token (Má³dulo 01)
+   * Salva dados básicos do token (Módulo 01)
    */
   saveBasicTokenData(tokenData) {
     const updates = {
@@ -295,12 +295,12 @@ class TokenStorageManager {
       networkChainId: tokenData.chainId
     };
     
-    this.log('Salvando dados bá¡sicos do token...', 'debug');
+    this.log('Salvando dados básicos do token...', 'debug');
     return this.updateProjectData(updates);
   }
   
   /**
-   * Salva dados de personalizaá§á£o (Má³dulo 02)
+   * Salva dados de personalizaçÃo (Módulo 02)
    */
   saveCustomizationData(customData) {
     const updates = {
@@ -310,12 +310,12 @@ class TokenStorageManager {
       predictedAddress: customData.predictedAddress || ''
     };
     
-    this.log('Salvando dados de personalizaá§á£o...', 'debug');
+    this.log('Salvando dados de personalizaçÃo...', 'debug');
     return this.updateProjectData(updates);
   }
   
   /**
-   * Salva dados de compilaá§á£o (Má³dulo 03)
+   * Salva dados de compilaçÃo (Módulo 03)
    */
   saveCompilationData(compileData) {
     const updates = {
@@ -327,12 +327,12 @@ class TokenStorageManager {
       compilerVersion: compileData.compilerVersion || compileData.version
     };
     
-    this.log('Salvando dados de compilaá§á£o...', 'debug');
+    this.log('Salvando dados de compilaçÃo...', 'debug');
     return this.updateProjectData(updates);
   }
   
   /**
-   * Salva dados de deploy (Má³dulo 03)
+   * Salva dados de deploy (Módulo 03)
    */
   saveDeployData(deployData) {
     const updates = {
@@ -347,7 +347,7 @@ class TokenStorageManager {
   }
   
   /**
-   * Salva dados de verificaá§á£o (Má³dulo 04)
+   * Salva dados de verificaçÃo (Módulo 04)
    */
   saveVerificationData(verifyData) {
     const updates = {
@@ -356,14 +356,14 @@ class TokenStorageManager {
       verificationUrl: verifyData.url || verifyData.verificationUrl
     };
     
-    this.log('Salvando dados de verificaá§á£o...', 'debug');
+    this.log('Salvando dados de verificaçÃo...', 'debug');
     return this.updateProjectData(updates);
   }
   
   // ==================== DADOS TEMPORáRIOS ====================
   
   /**
-   * Salva dados temporá¡rios para transferáªncia entre má³dulos
+   * Salva dados temporários para transferáªncia entre módulos
    */
   saveTempData(data, key = 'default') {
     try {
@@ -375,15 +375,15 @@ class TokenStorageManager {
       };
       
       sessionStorage.setItem(this.STORAGE_KEYS.TEMP_DATA + '_' + key, JSON.stringify(tempData));
-      this.log(`Dados temporá¡rios salvos: ${key}`, 'debug');
+      this.log(`Dados temporários salvos: ${key}`, 'debug');
       
     } catch (error) {
-      this.log(`Erro ao salvar dados temporá¡rios: ${error.message}`, 'error');
+      this.log(`Erro ao salvar dados temporários: ${error.message}`, 'error');
     }
   }
   
   /**
-   * Carrega dados temporá¡rios
+   * Carrega dados temporários
    */
   loadTempData(key = 'default') {
     try {
@@ -392,28 +392,28 @@ class TokenStorageManager {
       
       const tempData = JSON.parse(stored);
       
-      // Verificar expiraá§á£o
+      // Verificar expiraçÃo
       if (Date.now() > tempData.expiresAt) {
         this.clearTempData(key);
-        this.log(`Dados temporá¡rios expirados: ${key}`, 'warning');
+        this.log(`Dados temporários expirados: ${key}`, 'warning');
         return null;
       }
       
-      this.log(`Dados temporá¡rios carregados: ${key}`, 'debug');
+      this.log(`Dados temporários carregados: ${key}`, 'debug');
       return tempData.data;
       
     } catch (error) {
-      this.log(`Erro ao carregar dados temporá¡rios: ${error.message}`, 'error');
+      this.log(`Erro ao carregar dados temporários: ${error.message}`, 'error');
       return null;
     }
   }
   
   /**
-   * Limpa dados temporá¡rios
+   * Limpa dados temporários
    */
   clearTempData(key = 'default') {
     sessionStorage.removeItem(this.STORAGE_KEYS.TEMP_DATA + '_' + key);
-    this.log(`Dados temporá¡rios limpos: ${key}`, 'debug');
+    this.log(`Dados temporários limpos: ${key}`, 'debug');
   }
   
   // ==================== BACKUP E RESTAURAá‡áƒO ====================
@@ -462,14 +462,14 @@ class TokenStorageManager {
   
   /**
    * Sincroniza com dados do sistema existente
-   * Mantá©m compatibilidade com add-index.html
+   * Mantém compatibilidade com add-index.html
    */
   syncWithExistingSystem() {
     try {
       const projectData = this.getProjectData();
       if (!projectData) return;
       
-      // Sincronizar variá¡veis globais existentes
+      // Sincronizar variáveis globais existentes
       if (projectData.contractSource && typeof window !== 'undefined') {
         window.contratoSource = projectData.contractSource;
         window.contratoName = projectData.contractName;
@@ -494,10 +494,10 @@ class TokenStorageManager {
         localStorage.setItem('deployedContract', JSON.stringify(deployedContract));
       }
       
-      this.log('Sincronizaá§á£o com sistema existente concluá­da', 'success');
+      this.log('SincronizaçÃo com sistema existente concluída', 'success');
       
     } catch (error) {
-      this.log(`Erro na sincronizaá§á£o: ${error.message}`, 'error');
+      this.log(`Erro na sincronizaçÃo: ${error.message}`, 'error');
     }
   }
   
@@ -530,7 +530,7 @@ class TokenStorageManager {
         this.log('Dados importados do localStorage existente', 'success');
       }
       
-      // Importar de variá¡veis globais
+      // Importar de variáveis globais
       if (typeof window !== 'undefined') {
         const globalData = {};
         
@@ -543,14 +543,14 @@ class TokenStorageManager {
         if (Object.keys(globalData).length > 0) {
           this.saveCompilationData(globalData);
           imported = true;
-          this.log('Dados importados das variá¡veis globais', 'success');
+          this.log('Dados importados das variáveis globais', 'success');
         }
       }
       
       return imported;
       
     } catch (error) {
-      this.log(`Erro na importaá§á£o: ${error.message}`, 'error');
+      this.log(`Erro na importaçÃo: ${error.message}`, 'error');
       return false;
     }
   }
@@ -566,24 +566,24 @@ class TokenStorageManager {
     
     const errors = [];
     
-    // Validaá§áµes bá¡sicas
+    // Validações básicas
     if (!data.projectId) errors.push('ID do projeto ausente');
-    if (!data.createdAt) errors.push('Data de criaá§á£o ausente');
+    if (!data.createdAt) errors.push('Data de criaçÃo ausente');
     
-    // Validaá§áµes por má³dulo
+    // Validações por módulo
     if (data.moduleProgress['dados-basicos']) {
       if (!data.tokenName) errors.push('Nome do token ausente');
-      if (!data.tokenSymbol) errors.push('Sá­mbolo do token ausente');
-      if (!data.ownerAddress) errors.push('Endereá§o do proprietá¡rio ausente');
+      if (!data.tokenSymbol) errors.push('Símbolo do token ausente');
+      if (!data.ownerAddress) errors.push('Endereço do proprietário ausente');
     }
     
     if (data.moduleProgress['resumo-criacao']) {
-      if (!data.contractSource) errors.push('Cá³digo fonte ausente');
-      if (!data.deployedAddress) errors.push('Endereá§o de deploy ausente');
+      if (!data.contractSource) errors.push('Código fonte ausente');
+      if (!data.deployedAddress) errors.push('Endereço de deploy ausente');
     }
     
     if (errors.length > 0) {
-      this.log(`Erros de validaá§á£o: ${errors.join(', ')}`, 'error');
+      this.log(`Erros de validaçÃo: ${errors.join(', ')}`, 'error');
       return false;
     }
     
@@ -600,7 +600,7 @@ class TokenStorageManager {
       localStorage.removeItem(this.STORAGE_KEYS.BACKUP_DATA);
       sessionStorage.removeItem(this.STORAGE_KEYS.MODULE_STATE);
       
-      // Limpar dados temporá¡rios
+      // Limpar dados temporários
       const keys = Object.keys(sessionStorage);
       keys.forEach(key => {
         if (key.startsWith(this.STORAGE_KEYS.TEMP_DATA)) {
@@ -619,10 +619,10 @@ class TokenStorageManager {
   // ==================== NOTIFICAá‡á•ES ====================
   
   /**
-   * Notifica outros má³dulos sobre mudaná§as nos dados
+   * Notifica outros módulos sobre mudanças nos dados
    */
   notifyDataChange(data) {
-    // Disparar evento customizado para outros má³dulos escutarem
+    // Disparar evento customizado para outros módulos escutarem
     if (typeof window !== 'undefined' && window.dispatchEvent) {
       const event = new CustomEvent('tokenDataChanged', {
         detail: {
@@ -633,14 +633,14 @@ class TokenStorageManager {
       });
       
       window.dispatchEvent(event);
-      this.log('Evento de mudaná§a de dados disparado', 'debug');
+      this.log('Evento de mudança de dados disparado', 'debug');
     }
   }
   
   // ==================== UTILITáRIOS ====================
   
   /**
-   * Obtá©m resumo dos dados para debug
+   * Obtém resumo dos dados para debug
    */
   getDataSummary() {
     const data = this.getProjectData();
@@ -710,16 +710,18 @@ if (document.readyState === 'loading') {
 
 // ==================== EXPORTS PARA COMPATIBILIDADE ====================
 
-// Funá§áµes de conveniáªncia para uso direto
+// Funções de conveniáªncia para uso direto
 window.saveTokenData = (data) => window.TokenStorage.updateProjectData(data);
 window.loadTokenData = () => window.TokenStorage.getProjectData();
 window.completeModule = (name) => window.TokenStorage.completeModule(name);
 window.canAccessModule = (name) => window.TokenStorage.canAccessModule(name);
 
-// Export para má³dulos ES6
+// Export para módulos ES6
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = TokenStorageManager;
 }
+
+
 
 
 

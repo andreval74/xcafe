@@ -1,5 +1,5 @@
-/**
- * Sistema de Adição de Tokens usando EIP-6963
+﻿/**
+ * Sistema de AdiçÃo de Tokens usando EIP-6963
  * Detecta e conecta especificamente ao MetaMask e TrustWallet sem conflitos
  */
 
@@ -23,13 +23,13 @@ let isEIP6963Loaded = false;
  */
 
 /**
- * Configurar detecção EIP-6963 para múltiplas carteiras
+ * Configurar detecçÃo EIP-6963 para múltiplas carteiras
  */
 function setupEIP6963Detection() {
   if (isEIP6963Loaded) return Promise.resolve();
   
   return new Promise((resolve) => {
-    console.log('🔍 Configurando detecção EIP-6963...');
+    console.log('🔍 Configurando detecçÃo EIP-6963...');
     
     // Escutar anúncios de providers
     function handleProviderAnnounce(event) {
@@ -93,7 +93,7 @@ function findProviderByWallet(walletName) {
     }
   }
   
-  console.log(`❌ Provider não encontrado para: ${walletName}`);
+  console.log(`❌ Provider nÃo encontrado para: ${walletName}`);
   return null;
 }
 
@@ -132,9 +132,9 @@ async function detectInstalledWallets() {
     console.log('🔒 TrustWallet detectado via EIP-6963');
   }
   
-  // Fallback para detecção clássica se EIP-6963 não funcionou
+  // Fallback para detecçÃo clássica se EIP-6963 nÃo funcionou
   if (wallets.length === 0 && window.ethereum) {
-    console.log('🔄 Fallback para detecção window.ethereum');
+    console.log('🔄 Fallback para detecçÃo window.ethereum');
     
     if (window.ethereum.isMetaMask) {
       wallets.push({
@@ -156,7 +156,7 @@ async function detectInstalledWallets() {
       console.log('🔒 TrustWallet detectado via fallback');
     }
     
-    // Se não identificou especificamente, mas tem provider
+    // Se nÃo identificou especificamente, mas tem provider
     if (wallets.length === 0) {
       wallets.push({
         type: 'generic',
@@ -168,14 +168,14 @@ async function detectInstalledWallets() {
     }
   }
   
-  console.log('🎯 Resultado da detecção:', wallets);
+  console.log('🎯 Resultado da detecçÃo:', wallets);
   console.log('=== FIM DA DETECÇÃO DE WALLETS ===');
   
   return wallets;
 }
 
 /**
- * Configurar botões de wallet baseado na detecção
+ * Configurar botões de wallet baseado na detecçÃo
  */
 async function setupWalletButtons(address, symbol, decimals, name, chainId) {
   const walletDetected = document.getElementById('wallet-detected');
@@ -183,7 +183,7 @@ async function setupWalletButtons(address, symbol, decimals, name, chainId) {
   const copyBtn = document.getElementById('copy-btn');
   
   if (!walletDetected || !walletButtonsContainer) {
-    console.error('❌ Elementos de wallet não encontrados no DOM');
+    console.error('❌ Elementos de wallet nÃo encontrados no DOM');
     return;
   }
   
@@ -225,7 +225,7 @@ async function setupWalletButtons(address, symbol, decimals, name, chainId) {
     const buttonRow = document.createElement('div');
     buttonRow.className = 'row g-2';
     
-    // Criar botão para cada wallet
+    // Criar botÃo para cada wallet
     availableWallets.forEach(wallet => {
       const colDiv = document.createElement('div');
       colDiv.className = availableWallets.length === 2 ? 'col-6' : 'col-12 col-md-6';
@@ -244,7 +244,7 @@ async function setupWalletButtons(address, symbol, decimals, name, chainId) {
     walletButtonsContainer.appendChild(buttonRow);
   }
   
-  // Configurar botão de copiar
+  // Configurar botÃo de copiar
   if (copyBtn) {
     copyBtn.addEventListener('click', function() {
       navigator.clipboard.writeText(address).then(() => {
@@ -264,7 +264,7 @@ async function setupWalletButtons(address, symbol, decimals, name, chainId) {
 }
 
 /**
- * Obter HTML do botão baseado no tipo de wallet
+ * Obter HTML do botÃo baseado no tipo de wallet
  */
 function getWalletButtonHTML(walletType) {
   switch (walletType) {
@@ -278,7 +278,7 @@ function getWalletButtonHTML(walletType) {
 }
 
 /**
- * Obter classe CSS do botão baseado no tipo de wallet
+ * Obter classe CSS do botÃo baseado no tipo de wallet
  */
 function getWalletButtonClass(walletType) {
   switch (walletType) {
@@ -292,7 +292,7 @@ function getWalletButtonClass(walletType) {
 }
 
 /**
- * Criar botão de wallet dinamicamente
+ * Criar botÃo de wallet dinamicamente
  */
 function createWalletButton(id, innerHTML, className, clickHandler) {
   const button = document.createElement('button');
@@ -322,7 +322,7 @@ async function addTokenToSpecificWallet(wallet, address, symbol, decimals, name,
     // Usar o provider específico da wallet
     const provider = wallet.provider;
     
-    // Primeiro, garantir conexão
+    // Primeiro, garantir conexÃo
     await provider.request({ method: 'eth_requestAccounts' });
     console.log(`✅ ${wallet.name} conectado com sucesso`);
     
@@ -349,7 +349,7 @@ async function addTokenToSpecificWallet(wallet, address, symbol, decimals, name,
     } else {
       button.innerHTML = '<i class="bi bi-x-circle me-2"></i>Cancelado';
       button.className = originalClass.replace(/btn-\w+/, 'btn-warning');
-      showAlert('❌ Adição do token foi cancelada pelo usuário.', 'warning');
+      showAlert('❌ AdiçÃo do token foi cancelada pelo usuário.', 'warning');
     }
     
   } catch (error) {
@@ -370,7 +370,7 @@ async function addTokenToSpecificWallet(wallet, address, symbol, decimals, name,
     }
   }
   
-  // Restaurar botão após 3 segundos
+  // Restaurar botÃo após 3 segundos
   setTimeout(() => {
     button.innerHTML = originalText;
     button.className = originalClass;
@@ -411,7 +411,7 @@ function addTokenViaDeepLink(walletType, address, symbol, decimals, name, chainI
  * Mostrar alerta na interface
  */
 function showAlert(message, type = 'info') {
-  // Criar elemento de alerta se não existir
+  // Criar elemento de alerta se nÃo existir
   let alertContainer = document.getElementById('alert-container');
   if (!alertContainer) {
     alertContainer = document.createElement('div');
@@ -446,3 +446,5 @@ window.addTokenToSpecificWallet = addTokenToSpecificWallet;
 window.addTokenViaDeepLink = addTokenViaDeepLink;
 
 console.log('✅ Sistema EIP-6963 carregado com sucesso');
+
+

@@ -1,5 +1,5 @@
-// js/shared/link-index-core.js
-// Centraliza toda a lógica de geração de link de token para todas as telas
+﻿// js/shared/link-index-core.js
+// Centraliza toda a lógica de gerAção de link de token para todas as telas
 import { fetchAllNetworks, showAutocomplete, copyToClipboard, shareLink, showCopyAndShareButtons } from './token-link-utils.js';
 import { fetchTokenData } from './token-global.js';
 
@@ -237,7 +237,7 @@ export function setupLinkGenerator({
             <i class="bi bi-info-circle"></i>
             <strong>Como usar:</strong>
             <ul class="mb-0 mt-2">
-              <li><strong>Método 1:</strong> Clique no botão azul - adiciona automaticamente a rede e o token</li>
+              <li><strong>Método 1:</strong> Clique no Botão azul - adiciona automaticamente a rede e o token</li>
               <li><strong>Método 2:</strong> Para desenvolvedores - cole no console</li>
               <li><strong>Método 3:</strong> Para dispositivos móveis</li>
               <li><strong>Método 4:</strong> Copie o endereço e adicione manualmente</li>
@@ -245,7 +245,7 @@ export function setupLinkGenerator({
             
             <div class="alert alert-info mt-2 mb-0">
               <i class="bi bi-lightbulb"></i>
-              <strong>Novo:</strong> O botão azul agora detecta automaticamente se você está na rede correta e:
+              <strong>Novo:</strong> O Botão azul agora detecta automaticamente se você está na rede correta e:
               <ul class="mb-0 mt-1">
                 <li>✅ Muda para a rede correta se você já tem ela</li>
                 <li>✅ Adiciona a rede se você não tem ela</li>
@@ -270,7 +270,7 @@ export function setupLinkGenerator({
     }
     showCopyAndShareButtons(btnCopyLinkId, btnShareLinkId, true);
     
-    // Trocar o botão "Gerar Link" por "Limpar Informações"
+    // Trocar o Botão "Gerar Link" por "Limpar Informações"
     const generateBtn = document.getElementById(btnGenerateLinkId);
     if (generateBtn) {
       generateBtn.innerHTML = '<i class="bi bi-trash me-2"></i>Limpar Informações';
@@ -279,7 +279,7 @@ export function setupLinkGenerator({
       generateBtn.removeEventListener('click', generateLink);
       generateBtn.addEventListener('click', function() {
         clearForm();
-        // Restaurar o botão original
+        // Restaurar o Botão original
         generateBtn.innerHTML = '<i class="bi bi-link-45deg"></i> Gerar Link';
         generateBtn.className = 'btn btn-primary w-100';
         // Restaurar o listener original
@@ -358,7 +358,7 @@ export function setupLinkGenerator({
   });
 }
 
-// Função global para copiar links individuais
+// função global para copiar links individuais
 window.copyToClipboard = function(elementId) {
   const el = document.getElementById(elementId);
   if (el) {
@@ -390,7 +390,7 @@ window.copyToClipboard = function(elementId) {
   }
 };
 
-// Função global para adicionar token diretamente ao MetaMask
+// função global para adicionar token diretamente ao MetaMask
 window.addTokenToMetaMask = async function(address, symbol, decimals, image = '') {
   if (typeof window.ethereum !== 'undefined') {
     try {
@@ -471,12 +471,12 @@ window.addTokenToMetaMask = async function(address, symbol, decimals, image = ''
       if (wasAdded) {
         alert(`✅ Token ${symbol} adicionado ao MetaMask com sucesso na rede ${window.selectedNetwork.name}!`);
       } else {
-        alert('❌ Token não foi adicionado. Verifique se você confirmou a ação no MetaMask.');
+        alert('❌ Token não foi adicionado. Verifique se você confirmou a Ação no MetaMask.');
       }
     } catch (error) {
       console.error('Erro ao adicionar token:', error);
       if (error.code === 4001) {
-        alert('❌ Usuário rejeitou a solicitação.');
+        alert('❌ Usuário rejeitou a solicitAção.');
       } else {
         alert('❌ Erro ao adicionar token: ' + error.message);
       }
@@ -504,7 +504,7 @@ ${image ? 'Imagem: ' + image : ''}
   }
 };
 
-// Função para tentar múltiplos métodos de adição de token no mobile
+// função para tentar múltiplos métodos de adição de token no mobile
 window.tryAddTokenMobile = async function(tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
   const userAgent = navigator.userAgent;
   const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
@@ -600,7 +600,7 @@ INSTRUÇÕES MANUAIS:
   tryNext();
 };
 
-// Função para gerar QR Code com informações do token
+// função para gerar QR Code com informações do token
 window.generateTokenQR = async function(tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
   const container = document.getElementById('qrCodeContainer');
   const qrDiv = document.getElementById('qrCodeDiv');
@@ -658,7 +658,7 @@ window.generateTokenQR = async function(tokenAddress, tokenSymbol, tokenDecimals
   }, 500);
 };
 
-// Função para gerar QR Code usando biblioteca (canvas)
+// função para gerar QR Code usando biblioteca (canvas)
 async function generateCanvasQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   return new Promise((resolve, reject) => {
     try {
@@ -700,8 +700,8 @@ async function generateCanvasQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) 
   });
 }
 
-// Função para gerar QR Code usando API externa (fallback)
-// Função para gerar QR Code usando API externa (método confiável)
+// função para gerar QR Code usando API externa (fallback)
+// função para gerar QR Code usando API externa (método confiável)
 function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   console.log('🌐 Gerando QR Code personalizado via API externa');
   
@@ -711,7 +711,7 @@ function generateFallbackQR(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   generateCustomQRWithLogo(qrDiv, qrText, qrSize, tokenSymbol, tokenName, chainId);
 }
 
-// Função para gerar QR Code customizado com logo XCafe
+// função para gerar QR Code customizado com logo XCafe
 async function generateCustomQRWithLogo(qrDiv, qrText, size, tokenSymbol, tokenName, chainId) {
   
   // Corrigir formato do QR Code para ser reconhecido pelas wallets
@@ -781,7 +781,7 @@ async function generateCustomQRWithLogo(qrDiv, qrText, size, tokenSymbol, tokenN
   tryNextAPI();
 }
 
-// Função para adicionar logo XCafe ao centro do QR Code
+// função para adicionar logo XCafe ao centro do QR Code
 function addLogoToQR(canvas, ctx, qrSize, qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   const logo = new Image();
   logo.crossOrigin = 'anonymous';
@@ -881,7 +881,7 @@ function addLogoToQR(canvas, ctx, qrSize, qrDiv, qrText, tokenSymbol, tokenName,
   };
 }
 
-// Função para finalizar e exibir o QR Code customizado
+// função para finalizar e exibir o QR Code customizado
 function finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   qrDiv.innerHTML = '';
   
@@ -912,7 +912,7 @@ function finalizeCustomQR(canvas, qrDiv, qrText, tokenSymbol, tokenName, chainId
   console.log('🎨 QR Code personalizado com logo XCafe criado com sucesso!');
 }
 
-// Função fallback para mostrar dados em texto
+// função fallback para mostrar dados em texto
 function showTextFallback(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   qrDiv.innerHTML = `
     <div class="alert alert-warning text-center">
@@ -929,7 +929,7 @@ function showTextFallback(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
           <i class="bi bi-clipboard"></i> Copiar Dados JSON
         </button>
         <small class="text-muted d-block mt-2">
-          Cole estes dados em uma wallet que suporte importação via JSON
+          Cole estes dados em uma wallet que suporte importAção via JSON
         </small>
       </div>
       <textarea id="qrFallbackTextarea" style="display:none;">${qrText}</textarea>
@@ -937,7 +937,7 @@ function showTextFallback(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   `;
 }
 
-// Função para adicionar informações e botões ao QR Code
+// função para adicionar informações e botões ao QR Code
 function addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   const infoDiv = document.createElement('div');
   infoDiv.className = 'mt-3';
@@ -962,7 +962,7 @@ function addQRInfo(qrDiv, qrText, tokenSymbol, tokenName, chainId) {
   qrDiv.appendChild(infoDiv);
 }
 
-// Função para baixar o QR Code como imagem
+// função para baixar o QR Code como imagem
 window.downloadQRCode = function(filename) {
   const canvas = document.querySelector('#qrCodeDiv canvas');
   const img = document.querySelector('#qrCodeDiv img');
@@ -1026,9 +1026,9 @@ window.downloadQRCode = function(filename) {
   }
 };
 
-// ========== SOLUÇÃO MOBILE 2024: FORMATOS TESTADOS E FUNCIONAIS ==========
+// ========== SOLUção MOBILE 2024: FORMATOS TESTADOS E FUNCIONAIS ==========
 
-// Função principal para gerar QR Codes e links MOBILE
+// função principal para gerar QR Codes e links MOBILE
 function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecimals, tokenName, chainId) {
   console.log('📱 MODO MOBILE CORRIGIDO: Gerando formatos que realmente funcionam');
   
@@ -1067,7 +1067,7 @@ function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecim
     },
     {
       name: 'QR Code Universal',
-      description: '� QR Code padrão para todas as wallets',
+      description: '� QR Code Padrão para todas as wallets',
       data: `ethereum:${tokenAddress}@${chainId}?symbol=${tokenSymbol}&decimals=${tokenDecimals}&name=${encodeURIComponent(tokenName)}`,
       type: 'qrcode',
       priority: 1,
@@ -1126,14 +1126,14 @@ function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecim
           <div class="mt-3 p-3 bg-light text-dark rounded">
             <h6>📱 No Celular:</h6>
             <ol class="small">
-              <li><strong>Toque no botão da sua wallet</strong> para abrir diretamente</li>
+              <li><strong>Toque no Botão da sua wallet</strong> para abrir diretamente</li>
               <li><strong>OU escaneie o QR Code</strong> com o leitor da wallet</li>
               <li><strong>Confirme</strong> quando a wallet pedir para adicionar o token</li>
             </ol>
             
             <h6 class="mt-3">🛠️ Se não funcionar:</h6>
             <ul class="small">
-              <li><strong>TrustWallet:</strong> Use o primeiro botão - sempre funciona</li>
+              <li><strong>TrustWallet:</strong> Use o primeiro Botão - sempre funciona</li>
               <li><strong>QR Code simples:</strong> Apenas endereço do contrato</li>
               <li><strong>Cópia manual:</strong> Copie e adicione manualmente na wallet</li>
               <li><strong>Instruções:</strong> Tutorial passo-a-passo</li>
@@ -1166,7 +1166,7 @@ function generateMultiWalletQRCodes(qrDiv, tokenAddress, tokenSymbol, tokenDecim
   generateMobileOptimizedQR(mobileFormats.find(f => f.type === 'qrcode'), tokenSymbol, tokenName);
 }
 
-// Função para gerar QR Code otimizado para mobile
+// função para gerar QR Code otimizado para mobile
 async function generateMobileOptimizedQR(format, tokenSymbol, tokenName) {
   const container = document.getElementById('mobileQRDisplay');
   if (!container || !format) return;
@@ -1237,7 +1237,7 @@ async function generateMobileOptimizedQR(format, tokenSymbol, tokenName) {
   tryMobileQRAPI();
 }
 
-// Função para tratar ações das wallets no mobile - VERSÃO CORRIGIDA
+// função para tratar ações das wallets no mobile - VERSÃO CORRIGIDA
 window.handleMobileWalletAction = function(type, data, walletName) {
   console.log(`📱 Ação mobile CORRIGIDA: ${type} para ${walletName}`);
   console.log(`🔗 Dados:`, data);
@@ -1293,7 +1293,7 @@ window.handleMobileWalletAction = function(type, data, walletName) {
       break;
   }
   
-  // Restaurar botão após 3 segundos
+  // Restaurar Botão após 3 segundos
   setTimeout(() => {
     if (type !== 'copy') { // Não restaurar se foi cópia bem-sucedida
       button.innerHTML = originalHtml;
@@ -1302,7 +1302,7 @@ window.handleMobileWalletAction = function(type, data, walletName) {
   }, 3000);
 };
 
-// Função para baixar QR Code mobile
+// função para baixar QR Code mobile
 window.downloadMobileQR = function(imageSrc, filename) {
   const link = document.createElement('a');
   link.download = filename + '.png';
@@ -1312,7 +1312,7 @@ window.downloadMobileQR = function(imageSrc, filename) {
   document.body.removeChild(link);
 };
 
-// Função para compartilhar QR Code mobile
+// função para compartilhar QR Code mobile
 window.shareMobileQR = async function(qrData) {
   if (navigator.share) {
     // API nativa de compartilhamento do mobile
@@ -1337,7 +1337,7 @@ window.shareMobileQR = async function(qrData) {
   }
 };
 
-// Função para gerar links diretos para wallets
+// função para gerar links diretos para wallets
 function generateWalletLinks(qrFormats, tokenSymbol, tokenName, chainId) {
   const walletLinksDiv = document.getElementById('walletLinks');
   
@@ -1361,7 +1361,7 @@ function generateWalletLinks(qrFormats, tokenSymbol, tokenName, chainId) {
   walletLinksDiv.innerHTML = walletButtons;
 }
 
-// Função para gerar QR Code individual
+// função para gerar QR Code individual
 async function generateSingleQR(containerId, qrData, size = 200, title = '') {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -1434,7 +1434,7 @@ async function generateSingleQR(containerId, qrData, size = 200, title = '') {
   tryNextAPI();
 }
 
-// Função para adicionar marca XCafe discretamente
+// função para adicionar marca XCafe discretamente
 function addXCafeMark(ctx, qrSize) {
   const markSize = qrSize * 0.15;
   const markX = qrSize - markSize - 5;
@@ -1456,7 +1456,7 @@ function addXCafeMark(ctx, qrSize) {
   ctx.fillText('XCafe', markX + markSize/2, markY + markSize/2 + 2);
 }
 
-// Função para gerar QR Codes alternativos
+// função para gerar QR Codes alternativos
 function generateAllAlternativeQRs(formats, tokenSymbol, tokenName, chainId) {
   const allQRDiv = document.getElementById('allQRCodes');
   
@@ -1483,7 +1483,7 @@ function generateAllAlternativeQRs(formats, tokenSymbol, tokenName, chainId) {
   allQRDiv.innerHTML = qrCards;
 }
 
-// Funções auxiliares para interação
+// Funções auxiliares para interAção
 window.openWalletLink = function(url) {
   console.log('🔗 Abrindo link da wallet:', url);
   window.open(url, '_blank');
@@ -1520,7 +1520,7 @@ window.downloadQR = function(canvas, filename) {
 
 // NOVAS FUNÇÕES AUXILIARES PARA MOBILE
 
-// Função para gerar QR Code simples (apenas endereço do contrato)
+// função para gerar QR Code simples (apenas endereço do contrato)
 function generateSimpleMobileQR(contractAddress, container) {
   console.log('📱 Gerando QR Code simples com endereço:', contractAddress);
   
@@ -1598,7 +1598,7 @@ function generateSimpleMobileQR(contractAddress, container) {
   trySimpleQRAPI();
 }
 
-// Função para mostrar instruções manuais
+// função para mostrar instruções manuais
 function showManualInstructions(walletName) {
   const modal = document.createElement('div');
   modal.style.cssText = `
@@ -1691,3 +1691,4 @@ function showManualInstructions(walletName) {
     }
   });
 }
+

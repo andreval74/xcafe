@@ -1,7 +1,7 @@
 ﻿/**
  * “ SISTEMA DE LOG PARA SUPORTE Tá‰CNICO
  * 
- * Gera arquivos de log detalhados quando há¡ problemas com contratos
+ * Gera arquivos de log detalhados quando há problemas com contratos
  * Permite download do arquivo para envio ao suporte
  */
 
@@ -11,7 +11,7 @@ class ContractLogger {
         this.sessionId = this.generateSessionId();
         this.startTime = new Date();
         
-        // Inicia o log da sessá£o
+        // Inicia o log da sessÃo
         this.addLog('INFO', 'SESSáƒO INICIADA', {
             sessionId: this.sessionId,
             timestamp: this.startTime.toISOString(),
@@ -35,7 +35,7 @@ class ContractLogger {
         
         this.logs.push(logEntry);
         
-        // Tambá©m registra no console para debug
+        // Também registra no console para debug
         console.log(`[${level}] ${message}`, data);
     }
     
@@ -87,7 +87,7 @@ class ContractLogger {
             },
             walletInfo: {
                 connected: window.walletConnected || false,
-                address: window.walletAddress || 'ná£o conectada',
+                address: window.walletAddress || 'nÃo conectada',
                 networkId: window.currentNetworkId || 'desconhecida',
                 balance: window.walletBalance || 'desconhecido'
             },
@@ -146,14 +146,14 @@ class ContractLogger {
     }
     
     showDownloadButton() {
-        // Verifica se já¡ existe o botá£o
+        // Verifica se já existe o botÃo
         let existingButton = document.getElementById('logDownloadButton');
         if (existingButton) {
             existingButton.style.display = 'block';
             return;
         }
         
-        // Cria o botá£o de download
+        // Cria o botÃo de download
         const button = document.createElement('button');
         button.id = 'logDownloadButton';
         button.className = 'btn btn-warning btn-sm mt-2';
@@ -162,13 +162,13 @@ class ContractLogger {
         button.onclick = () => {
             const fileName = this.downloadLogFile();
             if (fileName) {
-                alert(`… Log salvo como: ${fileName}\n\nEnvie este arquivo para o suporte tá©cnico para aná¡lise do problema.`);
+                alert(`📋 Log salvo como: ${fileName}\n\nEnvie este arquivo para o suporte técnico para análise do problema.`);
             } else {
-                alert('âŒ Erro ao gerar arquivo de log. Tente novamente.');
+                alert('ÃŒ Erro ao gerar arquivo de log. Tente novamente.');
             }
         };
         
-        // Adiciona o botá£o na seá§á£o de mensagens de contrato
+        // Adiciona o botÃo na seçÃo de mensagens de contrato
         const contractMessages = document.getElementById('contractMessages');
         if (contractMessages) {
             contractMessages.appendChild(button);
@@ -193,19 +193,21 @@ window.addEventListener('error', (event) => {
         filename: event.filename,
         lineno: event.lineno,
         colno: event.colno,
-        stack: event.error ? event.error.stack : 'ná£o disponá­vel'
+        stack: event.error ? event.error.stack : 'nÃo disponível'
     });
 });
 
-// Intercepta rejeiá§áµes de Promise ná£o tratadas
+// Intercepta rejeições de Promise nÃo tratadas
 window.addEventListener('unhandledrejection', (event) => {
     window.contractLogger.addLog('ERROR', 'PROMISE REJEITADA', {
         reason: event.reason,
-        stack: event.reason && event.reason.stack ? event.reason.stack : 'ná£o disponá­vel'
+        stack: event.reason && event.reason.stack ? event.reason.stack : 'nÃo disponível'
     });
 });
 
 console.log('“ Sistema de Log xcafe inicializado');
+
+
 
 
 
