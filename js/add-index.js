@@ -114,44 +114,26 @@ async function connectWallet() {
 }
 
 /**
- * Atualiza interface da wallet
+ * Atualiza interface da wallet (versão simplificada para evitar conflitos)
  */
 function updateWalletUI() {
+    // Deixa o progressive-flow.js gerenciar a UI principal
+    // Apenas atualizar campos básicos se não estiverem sendo gerenciados
     const statusInput = document.getElementById('wallet-status');
-    const connectBtn = document.getElementById('connect-metamask-btn');
     const ownerInput = document.getElementById('ownerAddress');
-    const networkSection = document.getElementById('network-info-section');
-    const connectionSection = document.querySelector('.connection-section');
     
     if (walletConnected && walletAddress) {
-        // Status da wallet
-        if (statusInput) {
+        // Status da wallet - apenas se ainda não foi preenchido
+        if (statusInput && !statusInput.value.includes('...')) {
             statusInput.value = `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
-            statusInput.classList.add('wallet-status-connected');
         }
         
-        // Botão conectar
-        if (connectBtn) {
-            connectBtn.innerHTML = '<i class="bi bi-check-circle"></i> CONECTADO';
-            connectBtn.classList.add('btn-success');
-            connectBtn.classList.remove('btn-outline-warning');
-            connectBtn.disabled = true;
-        }
-        
-        // Endereço do owner
-        if (ownerInput) {
+        // Endereço do owner - apenas se vazio
+        if (ownerInput && !ownerInput.value) {
             ownerInput.value = walletAddress;
         }
         
-        // Mostra info da rede
-        if (networkSection) {
-            networkSection.style.display = 'block';
-        }
-        
-        // Atualiza seção de Conexão
-        if (connectionSection) {
-            connectionSection.classList.add('connected-state');
-        }
+        console.log('✅ add-index.js: UI atualizada (modo compatibilidade)');
     }
 }
 
@@ -166,7 +148,8 @@ async function detectNetwork() {
         
         networkData = getNetworkInfo(chainId);
         
-        // Atualiza UI da rede
+        // Atualiza UI da rede - DESABILITADO PARA EVITAR CONFLITOS COM progressive-flow.js
+        /*
         const currentNetworkSpan = document.getElementById('current-network');
         const chainIdSpan = document.getElementById('chain-id-value');
         const networkDisplayInput = document.getElementById('network-display');
@@ -187,6 +170,7 @@ async function detectNetwork() {
         if (networkStatus) {
             networkStatus.innerHTML = '<i class="bi bi-check-circle text-success"></i> Detectada';
         }
+        */
         
         console.log('Œ Rede detectada:', networkData);
         
@@ -388,6 +372,21 @@ function pararBusca() {
 window.toggleAddressCustomization = toggleAddressCustomization;
 window.buscarSalt = buscarSalt;
 window.pararBusca = pararBusca;
+
+// Função para resetar estado do add-index quando chamada pelo progressive-flow
+window.resetAddIndexState = function() {
+    console.log('🔄 Resetando estado do add-index.js...');
+    
+    currentStep = 1;
+    walletConnected = false;
+    walletAddress = '';
+    networkData = {};
+    
+    // Re-inicializar
+    initializeSteps();
+    
+    console.log('✅ Estado do add-index resetado');
+};
 
 console.log('… xcafe Token Creator carregado');
 

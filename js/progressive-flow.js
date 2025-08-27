@@ -4,6 +4,9 @@ class ProgressiveFlow {
         this.completedSections = new Set();
         this.sectionData = {};
         this.walletConnected = false;
+        this.checkingConnection = false; // Flag para evitar verificações múltiplas
+        this.supportedNetworks = []; // Cache das redes suportadas
+        this.api = null; // Instância da API
         
         this.initializeFlow();
     }
@@ -11,14 +14,161 @@ class ProgressiveFlow {
     initializeFlow() {
         console.log('Inicializando Progressive Flow...');
         
-        // Configurar eventos dos formulários
-        this.setupFormEvents();
+        // Inicializar API
+        this.initializeAPI();
         
-        // Verificar se já existe conexão de carteira
-        this.checkIfAlreadyConnected();
+        // Aguardar add-index.js estar carregado
+        this.waitForAddIndexReady().then(() => {
+            // Inicializar seletores de rede
+            this.initializeNetworkSelectors();
+            
+            // Configurar eventos dos formulários
+            this.setupFormEvents();
+            
+            // Verificar se já existe conexão de carteira
+            this.checkIfAlreadyConnected();
+            
+            // Configurar observador de mudanças na carteira
+            this.setupWalletEventListeners();
+        });
+    }
+    
+    
+    initializeAPI() {
+        // Inicializar cliente da API
+        if (typeof TokenDeployAPI !== 'undefined') {
+            this.api = new TokenDeployAPI();
+            console.log('API Client inicializada');
+        } else {
+            console.warn('TokenDeployAPI não encontrada. Deploy via API não estará disponível.');
+        }
+    }
+    
+    async initializeNetworkSelectors() {
+        try {
+            if (this.api) {
+                console.log('Carregando redes suportadas da API...');
+                const networks = await this.api.getSupportedNetworksForUI();
+                this.supportedNetworks = networks;
+                this.populateNetworkSelector();
+            } else {
+                // Fallback para redes fixas
+                console.log('Usando redes fixas (fallback)');
+                this.supportedNetworks = [
+                    { name: 'BSC Mainnet', chainId: 56, symbol: 'BNB', displayName: 'BSC Mainnet (BNB)' },
+                    { name: 'BSC Testnet', chainId: 97, symbol: 'tBNB', displayName: 'BSC Testnet (tBNB)' },
+                    { name: 'Ethereum', chainId: 1, symbol: 'ETH', displayName: 'Ethereum (ETH)' },
+                    { name: 'Polygon', chainId: 137, symbol: 'MATIC', displayName: 'Polygon (MATIC)' }
+                ];
+                this.populateNetworkSelector();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar redes:', error);
+            // Usar fallback em caso de erro
+            this.supportedNetworks = [
+                { name: 'BSC Mainnet', chainId: 56, symbol: 'BNB', displayName: 'BSC Mainnet (BNB)' },
+                { name: 'BSC Testnet', chainId: 97, symbol: 'tBNB', displayName: 'BSC Testnet (tBNB)' }
+            ];
+            this.populateNetworkSelector();
+        }
+    }
+    
+    populateNetworkSelector() {
+        const networkSelect = document.getElementById('deploy-network');
+        if (!networkSelect) return;
         
-        // Configurar observador de mudanças na carteira
-        this.setupWalletEventListeners();
+        // Limpar opções existentes
+        networkSelect.innerHTML = '<option value="">Selecione a rede...</option>';
+        
+        // Adicionar redes suportadas
+        this.supportedNetworks.forEach(network => {
+            const option = document.createElement('option');
+            option.value = network.chainId;
+            option.textContent = network.displayName;
+            option.dataset.symbol = network.symbol;
+            networkSelect.appendChild(option);
+        });
+        
+        // Listener para atualizar estimativa de custo
+        networkSelect.addEventListener('change', () => {
+            this.updateDeployCostEstimate();
+            
+            // Habilitar/desabilitar botão de deploy
+            const deployBtn = document.getElementById('deploy-token-btn');
+            if (deployBtn) {
+                if (networkSelect.value) {
+                    deployBtn.disabled = false;
+                    const selectedNetwork = this.supportedNetworks.find(n => n.chainId == networkSelect.value);
+                    if (selectedNetwork) {
+                        deployBtn.innerHTML = `<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN EM ${selectedNetwork.name.toUpperCase()}`;
+                    }
+                } else {
+                    deployBtn.disabled = true;
+                    deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
+                }
+            }
+        });
+        
+        console.log(`✅ ${this.supportedNetworks.length} redes carregadas no seletor`);
+    }
+    
+    async updateDeployCostEstimate() {
+        const networkSelect = document.getElementById('deploy-network');
+        const costElement = document.getElementById('deploy-cost-estimate');
+        
+        if (!networkSelect || !networkSelect.value) {
+            if (costElement) costElement.textContent = 'Selecione uma rede para ver a estimativa';
+            return;
+        }
+        
+        const chainId = parseInt(networkSelect.value);
+        
+        try {
+            if (this.api) {
+                const estimate = await this.api.estimateDeployCost(chainId);
+                if (costElement) {
+                    costElement.innerHTML = `
+                        <strong>Custo estimado:</strong> ${estimate.costDisplay}<br>
+                        <small>Gas: ${estimate.gasPrice} (limite: ${estimate.gasLimit})</small>
+                    `;
+                }
+            } else {
+                // Fallback para estimativas fixas
+                const estimates = {
+                    1: '~0.02 ETH ($30-60)',
+                    56: '~0.003 BNB ($1-2)',
+                    97: '~0.003 tBNB (Testnet)',
+                    137: '~0.01 MATIC ($0.01)',
+                    43114: '~0.01 AVAX ($0.30)'
+                };
+                
+                const estimate = estimates[chainId] || '~0.01 ETH';
+                if (costElement) {
+                    costElement.innerHTML = `<strong>Custo estimado:</strong> ${estimate}`;
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao estimar custo:', error);
+            if (costElement) {
+                costElement.textContent = 'Erro ao calcular estimativa';
+            }
+        }
+    }
+    
+    async waitForAddIndexReady() {
+        return new Promise((resolve) => {
+            const checkReady = () => {
+                // Verificar se as funções do add-index.js estão disponíveis
+                if (typeof window.connectWallet === 'function') {
+                    console.log('add-index.js detectado e pronto');
+                    resolve();
+                } else {
+                    console.log('Aguardando add-index.js...');
+                    setTimeout(checkReady, 100);
+                }
+            };
+            checkReady();
+        });
     }
 
     setupFormEvents() {
@@ -31,6 +181,27 @@ class ProgressiveFlow {
         if (walletNextBtn) {
             walletNextBtn.addEventListener('click', () => {
                 this.enableSection('basicinfo');
+            });
+        }
+        
+        // Listener para o evento customizado disparado pelo add-index.js
+        document.addEventListener('walletConnected', (event) => {
+            console.log('Progressive Flow recebeu evento walletConnected:', event.detail);
+            
+            // Prevenir processamento duplo
+            if (!this.walletConnected) {
+                this.handleWalletComplete(event.detail);
+            } else {
+                console.log('Progressive Flow: Wallet já processada, ignorando evento duplicado');
+            }
+        });
+        
+        // Listener adicional para o botão conectar (para casos onde add-index.js não funciona)
+        const connectBtn = document.getElementById('connect-metamask-btn');
+        if (connectBtn) {
+            connectBtn.addEventListener('click', async () => {
+                // Se add-index.js não estiver funcionando, fazer conexão direta
+                await this.connectWalletDirectly();
             });
         }
         
@@ -113,8 +284,15 @@ class ProgressiveFlow {
     }
 
     async checkIfAlreadyConnected() {
+        if (this.checkingConnection) {
+            console.log('Progressive Flow: Verificação já em andamento, ignorando...');
+            return;
+        }
+        
+        this.checkingConnection = true;
+        
         try {
-            if (window.ethereum) {
+            if (window.ethereum && !this.walletConnected) {
                 const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                 
                 if (accounts.length > 0) {
@@ -127,12 +305,18 @@ class ProgressiveFlow {
                         chainId: chainId
                     };
                     
-                    console.log('Carteira já conectada:', walletData.address);
+                    console.log('Progressive Flow: Carteira já conectada detectada:', walletData.address);
                     this.handleWalletComplete(walletData);
+                } else {
+                    console.log('Progressive Flow: Nenhuma carteira conectada detectada');
                 }
+            } else if (this.walletConnected) {
+                console.log('Progressive Flow: Wallet já está conectada no estado interno');
             }
         } catch (error) {
             console.log('Erro ao verificar conexão:', error);
+        } finally {
+            this.checkingConnection = false;
         }
     }
 
@@ -163,6 +347,20 @@ class ProgressiveFlow {
         
         this.walletConnected = true;
         this.sectionData.wallet = walletData;
+        
+        // Sincronizar com as variáveis globais do add-index.js
+        if (typeof window.walletConnected !== 'undefined') {
+            window.walletConnected = true;
+        }
+        if (typeof window.walletAddress !== 'undefined') {
+            window.walletAddress = walletData.address;
+        }
+        if (typeof window.networkData !== 'undefined') {
+            window.networkData = {
+                name: walletData.network,
+                chainId: walletData.chainId
+            };
+        }
         
         // Marcar seção wallet como completa
         this.markSectionComplete('wallet', walletData);
@@ -246,6 +444,12 @@ class ProgressiveFlow {
             connectBtn.classList.add('btn-success');
             connectBtn.disabled = false;
         }
+        
+        // Mostrar botão "Próximo" da seção wallet
+        const walletNextBtn = document.getElementById('wallet-next-btn');
+        if (walletNextBtn) {
+            walletNextBtn.style.display = 'block';
+        }
     }
 
     async updateWalletBalance(address) {
@@ -275,6 +479,42 @@ class ProgressiveFlow {
             if (balanceDisplay) {
                 balanceDisplay.textContent = 'Erro ao carregar';
             }
+        }
+    }
+
+    async connectWalletDirectly() {
+        try {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask não detectado! Por favor, instale a MetaMask.');
+                return;
+            }
+            
+            console.log('Progressive Flow conectando diretamente com MetaMask...');
+            
+            // Solicita conexão
+            const accounts = await window.ethereum.request({
+                method: 'eth_requestAccounts'
+            });
+            
+            if (accounts.length > 0) {
+                const chainId = await window.ethereum.request({
+                    method: 'eth_chainId'
+                });
+                
+                const networkName = this.getNetworkName(chainId);
+                
+                const walletData = {
+                    address: accounts[0],
+                    network: networkName,
+                    chainId: chainId
+                };
+                
+                this.handleWalletComplete(walletData);
+            }
+            
+        } catch (error) {
+            console.error('Erro ao conectar wallet diretamente:', error);
+            alert('Erro ao conectar com a MetaMask: ' + error.message);
         }
     }
 
@@ -418,40 +658,62 @@ class ProgressiveFlow {
 
     async handleDeploy() {
         try {
+            console.log('🚀 Iniciando deploy via API...');
+            
             // Desabilitar botão durante deploy
             const deployBtn = document.getElementById('deploy-token-btn');
             if (deployBtn) {
                 deployBtn.disabled = true;
-                deployBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Criando Token...';
+                deployBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Preparando Deploy...';
             }
 
             // Coletar dados do formulário
             const tokenData = this.collectFormData();
-            console.log('Dados do token para deploy:', tokenData);
+            console.log('📋 Dados do token para deploy:', tokenData);
             
             // Verificar conexão da carteira
             if (!window.ethereum) {
                 throw new Error('MetaMask não detectada');
             }
 
-            // Verificar se está conectado
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length === 0) {
-                throw new Error('Carteira não conectada');
+            // Obter signer
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            
+            // Inicializar deploy manager
+            if (!window.deployManager) {
+                window.deployManager = new TokenDeployManager();
             }
 
-            // Deploy do contrato
-            const deployResult = await this.deployTokenContract(tokenData);
-            
-            if (deployResult.success) {
-                this.handleDeploySuccess(deployResult);
-            } else {
-                this.handleDeployError(deployResult);
-            }
+            // Atualizar progresso
+            this.updateDeployProgress('Conectando com API...', 20);
+
+            // Executar deploy via API
+            const deployResult = await window.deployManager.initializeDeploy(tokenData, signer);
+
+            // Atualizar progresso
+            this.updateDeployProgress('Token criado com sucesso!', 100);
+
+            // Processar resultado
+            this.handleDeploySuccess(deployResult);
 
         } catch (error) {
-            console.error('Erro no deploy:', error);
+            console.error('❌ Erro no deploy:', error);
             this.handleDeployError(error);
+        }
+    }
+
+    updateDeployProgress(message, percentage) {
+        const deployBtn = document.getElementById('deploy-token-btn');
+        if (deployBtn) {
+            deployBtn.innerHTML = `<i class="bi bi-hourglass-split me-2"></i>${message}`;
+        }
+        
+        // Atualizar barra de progresso se existir
+        const progressBar = document.getElementById('deploy-progress');
+        if (progressBar) {
+            progressBar.style.width = `${percentage}%`;
+            progressBar.setAttribute('aria-valuenow', percentage);
         }
     }
 
@@ -773,9 +1035,21 @@ class ProgressiveFlow {
 
     resetDeployButton() {
         const deployBtn = document.getElementById('deploy-token-btn');
+        const networkSelect = document.getElementById('deploy-network');
+        
         if (deployBtn) {
-            deployBtn.disabled = false;
-            deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN (0.01 BNB)';
+            if (networkSelect && networkSelect.value) {
+                deployBtn.disabled = false;
+                const selectedNetwork = this.supportedNetworks.find(n => n.chainId == networkSelect.value);
+                if (selectedNetwork) {
+                    deployBtn.innerHTML = `<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN EM ${selectedNetwork.name.toUpperCase()}`;
+                } else {
+                    deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
+                }
+            } else {
+                deployBtn.disabled = true;
+                deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
+            }
         }
     }
 
@@ -812,10 +1086,30 @@ class ProgressiveFlow {
     resetFlow() {
         console.log('🔄 Resetando fluxo completo...');
         
-        // Limpar todos os dados
+        // Limpar todos os dados do progressive flow
         this.completedSections.clear();
         this.sectionData = {};
         this.walletConnected = false;
+        this.checkingConnection = false; // Reset do flag
+        
+        // Resetar variáveis globais do add-index.js se existirem
+        if (typeof window.walletConnected !== 'undefined') {
+            window.walletConnected = false;
+        }
+        if (typeof window.walletAddress !== 'undefined') {
+            window.walletAddress = '';
+        }
+        if (typeof window.currentStep !== 'undefined') {
+            window.currentStep = 1;
+        }
+        if (typeof window.networkData !== 'undefined') {
+            window.networkData = {};
+        }
+        
+        // Chamar função de reset do add-index.js se disponível
+        if (typeof window.resetAddIndexState === 'function') {
+            window.resetAddIndexState();
+        }
         
         // Limpar formulários
         const forms = document.querySelectorAll('form');
@@ -864,7 +1158,7 @@ class ProgressiveFlow {
         }
         
         // Ocultar botões próximo
-        const nextButtons = ['basic-info-next-btn'];
+        const nextButtons = ['wallet-next-btn', 'basic-info-next-btn'];
         nextButtons.forEach(btnId => {
             const btn = document.getElementById(btnId);
             if (btn) btn.style.display = 'none';
@@ -905,14 +1199,14 @@ class ProgressiveFlow {
         const clearBtn = document.getElementById('clear-all-btn');
         if (clearBtn) {
             const originalText = clearBtn.innerHTML;
+            const originalClasses = clearBtn.className;
+            
             clearBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Limpo!';
-            clearBtn.classList.add('btn-success');
-            clearBtn.classList.remove('btn-outline-danger');
+            clearBtn.className = 'btn btn-success';
             
             setTimeout(() => {
                 clearBtn.innerHTML = originalText;
-                clearBtn.classList.remove('btn-success');
-                clearBtn.classList.add('btn-outline-danger');
+                clearBtn.className = originalClasses;
             }, 2000);
         }
     }
