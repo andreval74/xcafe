@@ -1,0 +1,270 @@
+/*
+==========================================================================
+XCAFE - SISTEMA DE ANIMAÇÕES E EFEITOS ESPECIAIS
+Sistema otimizado para trabalhar com globals.css (evita duplicações)
+==========================================================================
+*/
+
+/* ===== COMPONENTES ESPECÍFICOS DA HOME PAGE ===== */
+
+/* Hero Section Gradient */
+.hero-gradient {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(248, 93, 35, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #374151;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--bs-primary), var(--bs-warning));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(248, 93, 35, 0.2);
+    border-color: var(--bs-primary);
+}
+
+/* Tool Cards */
+.tool-card {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #374151;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    border-color: var(--bs-primary);
+}
+
+/* Roadmap Cards */
+.roadmap-card {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #374151;
+    border-radius: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.roadmap-card.active {
+    border-color: var(--bs-primary);
+    background: linear-gradient(145deg, #2d1a0a, #3d2a1a);
+}
+
+.roadmap-card.completed {
+    border-color: var(--bs-success);
+    background: linear-gradient(145deg, #0a1a0d, #1a2d1a);
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(45deg, var(--bs-primary), var(--bs-warning));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Stats Counter */
+.stats-counter {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+}
+
+/* Blockchain Logos (usa transition do globals.css) */
+.blockchain-logo {
+    transition: var(--transition);
+    opacity: 0.7;
+}
+
+.blockchain-logo:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Section Divider */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--bs-primary), transparent);
+    margin: 4rem 0;
+}
+
+/* ===== ANIMAÇÕES ADICIONAIS (complementa globals.css) ===== */
+
+/* Animações de Entrada para Scroll */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Classes Utilitárias para Scroll Animations */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Efeitos de Glow */
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(248, 93, 35, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(248, 93, 35, 0.8), 0 0 30px rgba(248, 93, 35, 0.4);
+    }
+}
+
+.glowing {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Hover Effects para Cards */
+.card-hover-effect {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+}
+
+.card-hover-effect:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(248, 93, 35, 0.2);
+}
+
+/* Button Effects */
+.button-hover-effect {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.button-hover-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.button-hover-effect:hover::before {
+    left: 100%;
+}
+
+.button-hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(248, 93, 35, 0.4);
+}
+
+/* Loading Animations */
+.dots-loading::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+}
+
+/* Stagger Animation para elementos filhos */
+.stagger-animation > * {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Performance Optimizations */
+.gpu-acceleration {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Responsividade para animações */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .animate-on-scroll {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* Mobile: reduz efeitos em telas menores */
+@media (max-width: 768px) {
+    .card-hover-effect:hover,
+    .button-hover-effect:hover {
+        transform: translateY(-2px); /* Menor movimento */
+    }
+    
+    .floating-animation {
+        animation-duration: 8s; /* Mais lento em mobile */
+    }
+}
+
+/* Focus States para acessibilidade */
+.focus-visible:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}

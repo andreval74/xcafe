@@ -1,0 +1,87 @@
+body {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
+  color: #ffffff;
+  min-height: 100vh;
+  padding-top: 76px; /* Space for fixed navbar */
+}
+
+.card {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(10px);
+}
+
+.form-control, .form-select {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  border-color: #f85d23 !important;
+  box-shadow: 0 0 0 0.2rem rgba(248, 93, 35, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f85d23, #f59e0b);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #e04e1a, #d97706);
+  transform: translateY(-1px);
+}
+
+#widget-preview {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Header/Footer specific styles */
+.navbar-brand .text-primary {
+  color: #f85d23 !important;
+}
+
+.nav-link.active {
+  color: #f85d23 !important;
+}
+
+.btn-outline-primary {
+  border-color: #f85d23;
+  color: #f85d23;
+}
+
+.btn-outline-primary:hover {
+  background-color: #f85d23;
+  border-color: #f85d23;
+}
+
+/* Footer adjustments */
+footer .text-primary {
+  color: #f85d23 !important;
+}
+
+footer .btn-outline-primary {
+  border-color: #f85d23;
+  color: #f85d23;
+}
+
+footer .btn-outline-primary:hover {
+  background-color: #f85d23;
+  border-color: #f85d23;
+}
+
+/* Responsive fixes */
+main {
+  margin-top: 0 !important; /* Override inline style */
+  padding-top: 20px;
+}
+
+@media (max-width: 991.98px) {
+  body {
+    padding-top: 56px; /* Smaller navbar on mobile */
+  }
+}

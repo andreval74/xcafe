@@ -1,0 +1,79 @@
+/* Mobile-specific styles for add-token page */
+
+/* Mobile button container */
+#mobileButtons {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile wallet buttons */
+#mobileButtons button {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+#mobileButtons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+#mobileButtons button:active {
+  transform: translateY(0);
+}
+
+/* Pulse effect for mobile detection */
+.detecting-mobile {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Mobile-specific responsive adjustments */
+@media (max-width: 768px) {
+  #mobileButtons button {
+    font-size: 1.1rem;
+    padding: 12px 20px;
+  }
+  
+  .card {
+    margin: 0 10px;
+  }
+  
+  .alert {
+    font-size: 0.9rem;
+  }
+}
+
+/* Desktop vs Mobile indicator */
+.device-indicator {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.device-desktop {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.device-mobile {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}

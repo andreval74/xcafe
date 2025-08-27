@@ -1,0 +1,574 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xcafe - Plataforma de Criação de Tokens Blockchain</title>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="imgs/xcafe-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="imgs/xcafe-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="imgs/xcafe-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="imgs/xcafe-512x512.png">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- xcafe Global CSS Unificado -->
+    <link href="styles/globals.css" rel="stylesheet">
+    
+    <!-- Meta tags SEO -->
+    <meta name="description" content="xcafe - Crie tokens blockchain personalizados sem conhecimento tá©cnico. Suporte para Ethereum, Polygon, BSC e outras redes. Plataforma segura e auditada.">
+    <meta name="keywords" content="criar token, blockchain, ethereum, polygon, smart contract, crypto, defi, xcafe, token creator">
+    <meta name="author" content="xcafe Team">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="xcafe - Criador de Tokens Blockchain">
+    <meta property="og:description" content="Crie tokens personalizados em máºltiplas blockchains sem conhecimento tá©cnico">
+    <meta property="og:image" content="imgs/xcafe-512x512.png">
+    <meta property="og:type" content="website">
+</head>
+<body>
+    <!-- Header -->
+    <header data-component="header"></header>
+
+    <!-- Hero Section -->
+    <section class="hero-section py-5">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <div class="badge bg-primary text-dark mb-3 px-3 py-2">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Auditado por Especialistas em Seguraná§a
+                        </div>
+                        
+                        <h1 class="hero-title display-3 fw-bold mb-4">
+                            Crie Tokens Blockchain
+                            <span class="gradient-text">Personalizados</span>
+                        </h1>
+                        
+                        <p class="lead text-secondary mb-4 fs-5">
+                            A plataforma mais avaná§ada para criaá§á£o de tokens ERC-20, SPL e outros padráµes. 
+                            Economize atá© 40% em taxas de gas e lance seu projeto com seguraná§a auditada.
+                        </p>
+                        
+                        <div class="hero-stats row g-4 mb-5">
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item text-center">
+                                    <h3 class="text-primary fw-bold mb-1">1000+</h3>
+                                    <p class="text-muted small mb-0">Tokens Criados</p>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item text-center">
+                                    <h3 class="text-primary fw-bold mb-1">15+</h3>
+                                    <p class="text-muted small mb-0">Funcionalidades</p>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item text-center">
+                                    <h3 class="text-primary fw-bold mb-1">10+</h3>
+                                    <p class="text-muted small mb-0">Blockchains</p>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="stat-item text-center">
+                                    <h3 class="text-primary fw-bold mb-1">500+</h3>
+                                    <p class="text-muted small mb-0">Usuá¡rios Ativos</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="hero-actions d-flex flex-column flex-sm-row gap-3">
+                            <a href="add-index.html" class="btn btn-primary btn-lg px-4 py-3">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Criar Token
+                            </a>
+                            <a href="#features" class="btn btn-outline-primary btn-lg px-4 py-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Ver Funcionalidades
+                            </a>
+                        </div>
+                        
+                        <p class="text-muted small mt-3">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Sem conhecimento tá©cnico â€¢ Verificaá§á£o automá¡tica â€¢ Suporte 24/7
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="hero-image text-center">
+                        <!-- xcafe Token Card Example -->
+                        <div class="card bg-dark border-primary shadow-lg mx-auto" style="max-width: 400px;">
+                            <div class="card-header bg-dark border-primary">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <img src="imgs/moeda-cafe-tec.png" alt="xcafe Token" class="rounded-circle me-3" style="width: 40px; height: 40px;">
+                                        <div>
+                                            <h5 class="mb-0 text-white">xcafe Token</h5>
+                                            <small class="text-muted">ERC-20 â€¢ Ethereum</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-patch-check-fill me-1"></i>
+                                        Verificado
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Supply Total</span>
+                                            <span class="text-white fw-bold">1,000,000 xcafe</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Contrato</span>
+                                            <span class="text-white fw-bold">0x1234...5678</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blockchain Support Section -->
+    <section class="py-5 bg-dark">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h6 class="text-muted text-uppercase mb-3">Suportado por</h6>
+            </div>
+            <div class="row align-items-center justify-content-center">
+                <div class="col-auto">
+                    <div class="d-flex align-items-center gap-4 flex-wrap justify-content-center">
+                        <div class="blockchain-logo">
+                            <i class="bi bi-ethereum text-primary fs-2"></i>
+                            <small class="d-block text-muted">Ethereum</small>
+                        </div>
+                        <div class="blockchain-logo">
+                            <i class="bi bi-triangle text-warning fs-2"></i>
+                            <small class="d-block text-muted">Polygon</small>
+                        </div>
+                        <div class="blockchain-logo">
+                            <i class="bi bi-currency-bitcoin text-warning fs-2"></i>
+                            <small class="d-block text-muted">BSC</small>
+                        </div>
+                        <div class="blockchain-logo">
+                            <i class="bi bi-snow text-info fs-2"></i>
+                            <small class="d-block text-muted">Avalanche</small>
+                        </div>
+                        <div class="blockchain-logo">
+                            <i class="bi bi-gem text-primary fs-2"></i>
+                            <small class="d-block text-muted">Base</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-3">Por que escolher xcafe?</h2>
+                    <p class="lead text-secondary">
+                        Ferramentas profissionais para desenvolvimento de tokens com seguraná§a e facilidade
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="card h-100 border-0 bg-dark text-center p-4">
+                        <div class="card-body">
+                            <div class="feature-icon mb-4">
+                                <i class="bi bi-shield-check text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h4 class="card-title mb-3">Seguraná§a Avaná§ada</h4>
+                            <p class="card-text text-secondary mb-4">
+                                Contratos auditados e testados com as melhores prá¡ticas de seguraná§a da indáºstria
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Auditoria automá¡tica</li>
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Proteá§á£o anti-rug pull</li>
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Verificaá§á£o de cá³digo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card h-100 border-0 bg-dark text-center p-4">
+                        <div class="card-body">
+                            <div class="feature-icon mb-4">
+                                <i class="bi bi-lightning text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h4 class="card-title mb-3">Deploy Instantá¢neo</h4>
+                            <p class="card-text text-secondary mb-4">
+                                Crie e faá§a deploy de seus tokens em minutos com nossa interface intuitiva
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Interface drag & drop</li>
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Templates prá©-configurados</li>
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Deploy com 1 clique</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card h-100 border-0 bg-dark text-center p-4">
+                        <div class="card-body">
+                            <div class="feature-icon mb-4">
+                                <i class="bi bi-globe text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h4 class="card-title mb-3">Multi-Chain</h4>
+                            <p class="card-text text-secondary mb-4">
+                                Suporte para máºltiplas blockchains com a mesma facilidade e interface
+                            </p>
+                            <ul class="list-unstyled text-start">
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Ethereum Mainnet</li>
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Polygon & BSC</li>
+                                <li class="mb-2"><i class="bi bi-check text-primary me-2"></i>Avalanche & mais</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-5 bg-dark">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-3">Como Funciona?</h2>
+                    <p class="lead text-secondary">
+                        4 passos simples para laná§ar seu token na blockchain
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div class="step-card text-center">
+                        <div class="step-number mb-3">
+                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-4">1</span>
+                        </div>
+                        <h5 class="mb-3">Conecte sua Carteira</h5>
+                        <p class="text-secondary">
+                            Conecte MetaMask ou outra wallet Web3. Escolha a blockchain onde deseja criar seu token.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3">
+                    <div class="step-card text-center">
+                        <div class="step-number mb-3">
+                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-4">2</span>
+                        </div>
+                        <h5 class="mb-3">Configure seu Token</h5>
+                        <p class="text-secondary">
+                            Defina nome, sá­mbolo, supply e selecione as funcionalidades avaná§adas que seu projeto precisa.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3">
+                    <div class="step-card text-center">
+                        <div class="step-number mb-3">
+                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-4">3</span>
+                        </div>
+                        <h5 class="mb-3">Teste na Testnet</h5>
+                        <p class="text-secondary">
+                            Implante gratuitamente na testnet para validar todas as funcionalidades antes do laná§amento oficial.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3">
+                    <div class="step-card text-center">
+                        <div class="step-number mb-3">
+                            <span class="badge bg-primary text-dark rounded-circle p-3 fs-4">4</span>
+                        </div>
+                        <h5 class="mb-3">Lance na Mainnet</h5>
+                        <p class="text-secondary">
+                            Publique seu token e acesse o dashboard completo para gerenciar todas as funcionalidades.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-3">Ferramentas Poderosas</h2>
+                    <p class="lead text-secondary">
+                        Conjunto completo de ferramentas para desenvolvimento blockchain
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 bg-dark p-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon me-3">
+                                    <i class="bi bi-plus-circle text-primary" style="font-size: 2.5rem;"></i>
+                                </div>
+                                <div>
+                                    <h4 class="card-title mb-1">Criador de Tokens</h4>
+                                    <p class="card-text text-secondary mb-0">
+                                        Crie tokens ERC-20 personalizados com funcionalidades avaná§adas
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a href="add-token.html" class="btn btn-primary">
+                                    Comeá§ar
+                                    <i class="bi bi-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 bg-dark p-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon me-3">
+                                    <i class="bi bi-shield-check text-primary" style="font-size: 2.5rem;"></i>
+                                </div>
+                                <div>
+                                    <h4 class="card-title mb-1">Verificador de Contratos</h4>
+                                    <p class="card-text text-secondary mb-0">
+                                        Verifique automaticamente seus contratos nos exploradores de blockchain
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a href="verificacao-simples.html" class="btn btn-primary">
+                                    Verificar
+                                    <i class="bi bi-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 bg-dark p-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon me-3">
+                                    <i class="bi bi-search text-primary" style="font-size: 2.5rem;"></i>
+                                </div>
+                                <div>
+                                    <h4 class="card-title mb-1">Detector de Contratos</h4>
+                                    <p class="card-text text-secondary mb-0">
+                                        Analise e detecte informaá§áµes detalhadas de qualquer contrato
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a href="test-detector.html" class="btn btn-primary">
+                                    Analisar
+                                    <i class="bi bi-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0 bg-dark p-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon me-3">
+                                    <i class="bi bi-link-45deg text-primary" style="font-size: 2.5rem;"></i>
+                                </div>
+                                <div>
+                                    <h4 class="card-title mb-1">Gerador de Links</h4>
+                                    <p class="card-text text-secondary mb-0">
+                                        Gere links personalizados para seus tokens e contratos
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a href="link-index.html" class="btn btn-primary">
+                                    Gerar
+                                    <i class="bi bi-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-3">A Plataforma Mais Confiá¡vel</h2>
+                    <p class="lead text-secondary">
+                        Náºmeros que comprovam nossa lideraná§a no mercado de criaá§á£o de tokens
+                    </p>
+                </div>
+            </div>
+            
+            <div class="row g-4 text-center">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card">
+                        <h3 class="display-4 fw-bold text-primary mb-2">10k+</h3>
+                        <p class="text-secondary mb-0">Usuá¡rios</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card">
+                        <h3 class="display-4 fw-bold text-primary mb-2">50k+</h3>
+                        <p class="text-secondary mb-0">Tokens</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card">
+                        <h3 class="display-4 fw-bold text-primary mb-2">10+</h3>
+                        <p class="text-secondary mb-0">Blockchains Suportadas</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card">
+                        <h3 class="display-4 fw-bold text-primary mb-2">15+</h3>
+                        <p class="text-secondary mb-0">Funcionalidades Personalizá¡veis</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-dark">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="display-5 fw-bold mb-3">Pronto para criar seu primeiro token?</h2>
+                    <p class="lead text-secondary mb-5">
+                        Junte-se a milhares de desenvolvedores que confiam na xcafe para seus projetos blockchain
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mb-5">
+                        <a href="add-index.html" class="btn btn-primary btn-lg px-5 py-3">
+                            <i class="bi bi-rocket-takeoff me-2"></i>
+                            Comeá§ar Agora
+                        </a>
+                        <a href="service-details.html" class="btn btn-outline-primary btn-lg px-5 py-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Saiba Mais
+                        </a>
+                    </div>
+                    
+                    <!-- Additional Stats in CTA -->
+                    <div class="row g-4 text-center mt-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="me-3">
+                                    <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="text-start">
+                                    <h4 class="fw-bold mb-0">10k+</h4>
+                                    <p class="text-muted mb-0">Usuá¡rios</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="me-3">
+                                    <i class="bi bi-layers text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="text-start">
+                                    <h4 class="fw-bold mb-0">50k+</h4>
+                                    <p class="text-muted mb-0">Tokens</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer data-component="footer"></footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Template Loader -->
+    <script src="js/template-loader.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        // Smooth scrolling para links internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animaá§á£o simples para estatá­sticas
+        const animateStats = () => {
+            const stats = document.querySelectorAll('.stat-card h3, .stat-item h3');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.transform = 'scale(1.1)';
+                        entry.target.style.transition = 'transform 0.3s ease';
+                        setTimeout(() => {
+                            entry.target.style.transform = 'scale(1)';
+                        }, 300);
+                    }
+                });
+            });
+            
+            stats.forEach(stat => observer.observe(stat));
+        };
+
+        // Inicializar animaá§áµes quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', animateStats);
+    </script>
+</body>
+</html>
+</html>
+
+
+
+

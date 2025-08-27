@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprar XCAFE Token</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .main-container {
+            max-width: 500px;
+            width: 100%;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            color: #f85d23;
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .header p {
+            color: #e5e7eb;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        
+        .widget-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>XCAFE Token</h1>
+            <p>Compre tokens XCAFE de forma segura e rápida</p>
+        </div>
+        
+        <!-- Widget -->
+        <div class="widget-wrapper">
+            <div id="xcafe-widget-container"></div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Transações protegidas por blockchain BSC</p>
+        </div>
+    </div>
+
+    <!-- Scripts necessários -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="js/wg-widget.js"></script>
+    
+    <script>
+        // Inicializa o widget automaticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            createxcafeWidget({
+                containerId: 'xcafe-widget-container',
+                contractAddress: '0x7Ab950357Bb80172718a70FD04783e6949193006',
+                tokenPrice: '0.001',
+                receiverWallet: '0x742d35Cc6601C590f1d4F7fcA12d84B2d4b68d5d',
+                tokenSymbol: 'XCAFE',
+                tokenName: 'xcafe Token',
+                preferredNetwork: 97,
+                theme: 'dark'
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+

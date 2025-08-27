@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar Token | xcafe</title>
+  <link rel="icon" type="image/png" href="imgs/xcafe-32x32.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="styles/globals.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header data-component="header"></header>
+
+  <main class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <div class="card shadow-lg border-primary">
+          <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Adicionar Token</h2>
+          </div>
+          <div class="card-body">
+            <div id="tokenInfo" class="text-center mb-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+              </div>
+              <p class="mt-2">Carregando informações do token...</p>
+            </div>
+            
+            <div id="addTokenContent" style="display: none;">
+              <div class="text-center mb-4">
+                <div id="tokenIcon" class="mb-3">
+                  <i class="bi bi-currency-bitcoin" style="font-size: 4rem; color: var(--bs-primary);"></i>
+                </div>
+                <h4 id="tokenName" class="text-primary">Token Name</h4>
+                <p class="text-muted mb-1">
+                  <strong id="tokenSymbol">SYMBOL</strong> • 
+                  <span id="tokenDecimals">18</span> decimais
+                </p>
+                <p class="small text-muted">
+                  <i class="bi bi-link"></i> 
+                  <span id="tokenAddress">0x...</span>
+                </p>
+              </div>
+
+              <div class="alert alert-primary border-primary" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Como adicionar:</strong>
+                <ol class="mb-0 mt-2">
+                  <li>O sistema detecta automaticamente as wallets instaladas no seu navegador</li>
+                  <li>Clique no botão da wallet desejada</li>
+                  <li>Confirme a adição do token na sua wallet</li>
+                </ol>
+              </div>
+
+              <div id="walletButtons" class="d-grid gap-2 mb-3">
+                <!-- Botões serão inseridos aqui dinamicamente -->
+              </div>
+              
+              <div class="d-grid gap-2 mb-3">
+                <button id="copyAddressBtn" class="btn btn-outline-secondary">
+                  <i class="bi bi-clipboard me-2"></i>
+                  Copiar Endereço do Contrato
+                </button>
+              </div>
+
+              <div class="text-center">
+                <small class="text-muted" id="walletDetected">
+                  <i class="bi bi-search"></i>
+                  Detectando wallets...
+                </small>
+              </div>
+
+              <div class="text-center">
+                <small class="text-muted">
+                  <i class="bi bi-shield-check text-success"></i>
+                  Powered by XCafe.app
+                </small>
+              </div>
+            </div>
+            
+            <div id="errorContent" style="display: none;" class="text-center">
+              <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Erro ao carregar token</strong>
+                <p class="mb-0 mt-2">Parâmetros de token inválidos ou não encontrados.</p>
+              </div>
+              <a href="link-index.html" class="btn btn-primary">
+                <i class="bi bi-arrow-left me-2"></i>
+                Voltar ao Gerador
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer data-component="footer"></footer>
+
+  <!-- Scripts -->
+  <script type="module" src="js/template-loader.js"></script>
+  <script src="js/add-token.js"></script>
+</body>
+</html>

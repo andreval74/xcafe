@@ -1,0 +1,165 @@
+/*
+==========================================================================
+XCAFE - COMPONENTES DA HOME PAGE
+Arquivo específico para estilos da home page (trabalha com globals.css)
+==========================================================================
+*/
+
+/* ===== COMPONENTES ESPECÍFICOS DA HOME PAGE ===== */
+
+/* Hero Section */
+.hero-gradient {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(248, 93, 35, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #374151;
+    border-radius: 16px;
+    transition: var(--transition); /* Usa variável do globals.css */
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--bs-primary), var(--bs-warning));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(248, 93, 35, 0.2);
+    border-color: var(--bs-primary);
+}
+
+/* Tool Cards */
+.tool-card {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #374151;
+    border-radius: 12px;
+    transition: var(--transition); /* Usa variável do globals.css */
+}
+
+.tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    border-color: var(--bs-primary);
+}
+
+/* Roadmap Cards */
+.roadmap-card {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    border: 1px solid #374151;
+    border-radius: 12px;
+    position: relative;
+    transition: var(--transition); /* Usa variável do globals.css */
+}
+
+.roadmap-card.active {
+    border-color: var(--bs-primary);
+    background: linear-gradient(145deg, #2d1a0a, #3d2a1a);
+}
+
+.roadmap-card.completed {
+    border-color: var(--bs-success);
+    background: linear-gradient(145deg, #0a1a0d, #1a2d1a);
+}
+
+/* Text Gradients */
+.gradient-text {
+    background: linear-gradient(45deg, var(--bs-primary), var(--bs-warning));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Stats Counter */
+.stats-counter {
+    font-family: var(--heading-font); /* Usa variável do globals.css */
+    font-weight: 700;
+}
+
+/* Blockchain Logos */
+.blockchain-logo {
+    transition: var(--transition); /* Usa variável do globals.css */
+    opacity: 0.7;
+}
+
+.blockchain-logo:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Section Divider */
+.section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--bs-primary), transparent);
+    margin: 4rem 0;
+}
+
+/* Animações Específicas */
+.floating-animation {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+.pulse-animation {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(248, 93, 35, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(248, 93, 35, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(248, 93, 35, 0); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-gradient::before {
+        opacity: 0.5; /* Reduz o efeito em mobile */
+    }
+    
+    .feature-card:hover,
+    .tool-card:hover {
+        transform: translateY(-2px); /* Menor movimento em mobile */
+    }
+}
+
+/* High Performance CSS */
+.feature-card,
+.tool-card,
+.roadmap-card {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0); /* GPU acceleration */
+}
