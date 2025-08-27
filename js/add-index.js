@@ -287,6 +287,15 @@ function updateStepIndicators() {
  * Valida step 1
  */
 function validateStep1() {
+    // Validação do Step 1 (agora Personalização)
+    // Por enquanto sempre passa, pois é só seleção de tipo
+    return true;
+}
+
+/**
+ * Valida step 2 (agora Dados Básicos)
+ */
+function validateStep2() {
     const tokenName = document.getElementById('tokenName').value.trim();
     const tokenSymbol = document.getElementById('tokenSymbol').value.trim();
     const totalSupply = document.getElementById('totalSupply').value.trim();
@@ -315,27 +324,37 @@ function validateStep1() {
 }
 
 /**
- * Valida step 2
- */
-function validateStep2() {
-    // ValidAção básica - sempre passa por enquanto
-    return true;
-}
-
-/**
  * Funções globais para compatibilidade
  */
 window.nextStep = nextStep;
 window.prevStep = prevStep;
 window.connectWallet = connectWallet;
+window.toggleAddressCustomization = toggleAddressCustomization;
 
-// Funções para o step 2 (PersonalizAção)
+// Funções para o step 1 (agora Personalização)
 function toggleAddressCustomization() {
     const customizationSection = document.getElementById('customization-section');
     const personalizadoRadio = document.getElementById('contrato-personalizado');
     
     if (customizationSection) {
         customizationSection.style.display = personalizadoRadio.checked ? 'block' : 'none';
+    }
+    
+    // Opcional: mostrar preços diferentes baseados na seleção
+    updatePriceDisplay();
+}
+
+// Função para atualizar exibição de preços
+function updatePriceDisplay() {
+    const simplesRadio = document.getElementById('contrato-simples');
+    const personalizadoRadio = document.getElementById('contrato-personalizado');
+    
+    // Aqui você pode adicionar lógica para mostrar diferentes preços
+    // baseado no tipo de contrato selecionado
+    if (simplesRadio && simplesRadio.checked) {
+        console.log('Contrato simples selecionado - Preço: 0.01 BNB');
+    } else if (personalizadoRadio && personalizadoRadio.checked) {
+        console.log('Contrato personalizado selecionado - Preço: 0.02 BNB');
     }
 }
 
