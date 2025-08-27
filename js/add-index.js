@@ -90,6 +90,20 @@ async function connectWallet() {
             // Detecta rede
             await detectNetwork();
             
+            // Dispara evento para progressive flow
+            const walletConnectedEvent = new CustomEvent('walletConnected', {
+                detail: {
+                    address: walletAddress,
+                    network: networkData
+                }
+            });
+            document.dispatchEvent(walletConnectedEvent);
+            
+            console.log('🎯 Evento walletConnected disparado:', {
+                address: walletAddress,
+                network: networkData
+            });
+            
             console.log('… Wallet conectada:', walletAddress);
         }
         
@@ -189,6 +203,7 @@ function getNetworkInfo(chainId) {
         '0x1': { name: 'Ethereum Mainnet', chainId: '1' },
         '0x89': { name: 'Polygon Mainnet', chainId: '137' },
         '0x38': { name: 'BSC Mainnet', chainId: '56' },
+        '0x61': { name: 'BSC Testnet', chainId: '97' },
         '0x2105': { name: 'Base Mainnet', chainId: '8453' },
         '0xaa36a7': { name: 'Sepolia Testnet', chainId: '11155111' },
         '0x13881': { name: 'Polygon Mumbai', chainId: '80001' }
