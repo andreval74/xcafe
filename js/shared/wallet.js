@@ -65,6 +65,9 @@ class Wallet {
         const connectBtn = document.getElementById('connect-metamask-btn');
         if (connectBtn) {
             connectBtn.addEventListener('click', () => this.connect());
+            console.log('🔗 Event listener do botão conectar configurado');
+        } else {
+            console.log('⚠️ Botão connect-metamask-btn não encontrado ainda');
         }
         
         // Event listeners do MetaMask
@@ -172,6 +175,47 @@ class Wallet {
     }
     
     /**
+     * Aguarda elementos carregarem e re-configura sistema
+     */
+    static async waitForElementsAndReconfigure() {
+        console.log('⏳ Aguardando elementos da interface carregarem...');
+        
+        // Aguarda até o botão aparecer (máximo 5 segundos)
+        let attempts = 0;
+        const maxAttempts = 50; // 5 segundos / 100ms
+        
+        while (attempts < maxAttempts) {
+            const connectBtn = document.getElementById('connect-metamask-btn');
+            const statusInput = document.getElementById('wallet-status');
+            
+            if (connectBtn && statusInput) {
+                console.log('✅ Elementos da interface carregados!');
+                
+                // Re-configura event listeners
+                this.setupEventListeners();
+                
+                // Se já estava conectado, atualiza UI
+                if (walletConnected && walletAddress) {
+                    console.log('🔄 Atualizando UI para conexão existente...');
+                    console.log('📍 Endereço conectado:', walletAddress);
+                    console.log('🌐 Rede:', networkData.name);
+                    this.updateWalletUI();
+                } else {
+                    console.log('⚠️ Nenhuma conexão existente detectada');
+                }
+                
+                return true;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        
+        console.log('⚠️ Timeout aguardando elementos da interface');
+        return false;
+    }
+    
+    /**
      * Verifica conexão existente
      */
     static async checkExistingConnection() {
@@ -255,13 +299,21 @@ class Wallet {
         const connectBtn = document.getElementById('connect-metamask-btn');
         const networkSection = document.getElementById('network-info-section');
         
+        console.log('🎨 Atualizando UI da wallet...');
+        console.log('📊 Estado atual:', { connected: walletConnected, address: walletAddress });
+        
         if (walletConnected && walletAddress) {
+            console.log('✅ Atualizando para estado conectado');
+            
             // Status da wallet - mostrar endereço completo
             if (statusInput) {
                 statusInput.value = walletAddress;
                 statusInput.classList.add('text-success');
                 statusInput.classList.remove('border-secondary');
                 statusInput.classList.add('border-success');
+                console.log('✅ Input de status atualizado');
+            } else {
+                console.log('⚠️ Input wallet-status não encontrado');
             }
             
             // Botão conectar
@@ -270,11 +322,17 @@ class Wallet {
                 connectBtn.classList.remove('btn-warning');
                 connectBtn.classList.add('btn-success');
                 connectBtn.disabled = true;
+                console.log('✅ Botão atualizado para conectado');
+            } else {
+                console.log('⚠️ Botão connect-metamask-btn não encontrado');
             }
             
             // Mostra info da rede
             if (networkSection) {
                 networkSection.style.display = 'block';
+                console.log('✅ Seção de rede mostrada');
+            } else {
+                console.log('⚠️ Seção network-info-section não encontrada');
             }
             
             // Auto-preencher endereço do proprietário se existir
@@ -287,6 +345,8 @@ class Wallet {
             this.enableDependentSections();
             
         } else {
+            console.log('⚠️ Atualizando para estado desconectado');
+            
             // Estado desconectado
             if (statusInput) {
                 statusInput.value = '';
@@ -545,6 +605,17 @@ class Wallet {
 // Auto-inicializar quando DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
     Wallet.init();
+    
+    // Aguarda componentes carregarem (para template-loader)
+    setTimeout(() => {
+        Wallet.waitForElementsAndReconfigure();
+    }, 1000); // 1 segundo após DOM ready
+});
+
+// Listener adicional para quando template loader terminar
+document.addEventListener('templatesLoaded', () => {
+    console.log('📦 Componentes carregados - reconfigurando wallet...');
+    Wallet.waitForElementsAndReconfigure();
 });
 
 // ==================== EXPORTS GLOBAIS ====================

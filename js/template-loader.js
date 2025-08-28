@@ -24,6 +24,10 @@ class TemplateLoader {
         for (const element of components) {
             await this.loadComponent(element);
         }
+        
+        // Emitir evento quando todos os componentes terminarem de carregar
+        console.log('✅ Todos os componentes carregados - emitindo evento');
+        document.dispatchEvent(new CustomEvent('templatesLoaded'));
     }
 
     async loadComponent(element) {
