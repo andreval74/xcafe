@@ -72,6 +72,25 @@ function updateVisualProgress() {
             connector.classList.add('active');
         }
     });
+    
+    // Controlar botão "Próxima Seção" - sempre mostrar se conectado
+    const nextSectionBtn = document.getElementById('next-section-btn');
+    if (nextSectionBtn) {
+        if (wallet.connected) {
+            nextSectionBtn.style.display = 'block';
+            console.log('✅ Botão "Próxima Seção" mostrado (carteira conectada)');
+            nextSectionBtn.onclick = () => {
+                console.log('🚀 Botão "Próxima Seção" clicado');
+                enableSection('section-deploy');
+                nextSectionBtn.style.display = 'none'; // Esconder após usar
+            };
+        } else {
+            nextSectionBtn.style.display = 'none';
+            console.log('❌ Botão "Próxima Seção" escondido - carteira não conectada');
+        }
+    } else {
+        console.log('⚠️ Botão next-section-btn não encontrado no DOM');
+    }
 }
 
 /**
@@ -352,7 +371,7 @@ async function copyToClipboard(text) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 xcafe Token Creator - Tela Única iniciado');
     
-    // Configurar callbacks para o UniversalWallet
+    // Configurar callbacks para o Wallet
     window.onWalletConnected = function(walletData) {
         console.log('📡 Callback: Wallet conectada', walletData);
         
@@ -360,6 +379,13 @@ document.addEventListener('DOMContentLoaded', function() {
         AppState.wallet.connected = true;
         AppState.wallet.address = walletData.address;
         AppState.wallet.network = walletData.network;
+        
+        // Preencher owner se vazio
+        const ownerInput = document.getElementById('ownerAddress');
+        if (ownerInput && !ownerInput.value) {
+            ownerInput.value = walletData.address;
+            onTokenDataChange(); // Trigger data update
+        }
         
         // Atualizar progresso visual
         updateVisualProgress();
@@ -505,11 +531,11 @@ function formatSupplyInput(event) {
  */
 async function connectWallet() {
     try {
-        const result = await UniversalWallet.connect();
+        const result = await Wallet.connect();
         
         if (result) {
-            // Atualizar estado global com dados do UniversalWallet
-            const status = UniversalWallet.getStatus();
+            // Atualizar estado global com dados do Wallet
+            const status = Wallet.getStatus();
             AppState.wallet.connected = status.connected;
             AppState.wallet.address = status.address;
             AppState.wallet.network = status.network;
@@ -594,14 +620,14 @@ function onTokenDataChange(event) {
 }
 
 /**
- * Verifica progresso e faz scroll automático - só quando TUDO estiver preenchido
+ * Verifica progresso - versão simplificada sem scroll automático
  */
 function checkProgressAndScroll() {
     // Atualizar dados primeiro
     onTokenDataChange();
     
-    // Atualizar botões de navegação
-    updateNavigationButtons();
+    // Apenas verificar se pode habilitar seções - sem validação de campos
+    // O botão "Próxima Seção" controla o fluxo manualmente
     
     const { tokenData, wallet } = AppState;
     
@@ -621,46 +647,7 @@ function checkProgressAndScroll() {
         owner: progressData.owner?.slice(0,10) + '...'
     });
     
-    // Atualizar indicadores visuais
-    updateFieldIndicators(progressData);
-    
-    // Verificar se TODOS os campos obrigatórios estão preenchidos E válidos
-    const isValid = wallet.connected && 
-        tokenData.name && tokenData.name.length >= 3 &&
-        tokenData.symbol && tokenData.symbol.length >= 2 &&
-        tokenData.totalSupply && !isNaN(tokenData.totalSupply) && tokenData.totalSupply > 0 &&
-        tokenData.owner && tokenData.owner.length === 42 && tokenData.owner.startsWith('0x');
-    
-    if (isValid) {
-        console.log('✅ Todos os campos preenchidos - preparando para scroll');
-        
-        // Mostrar indicador de progresso
-        showProgressIndicator();
-        
-        // Habilitar botão de deploy
-        const deployBtn = document.getElementById('deploy-token-btn');
-        if (deployBtn) {
-            deployBtn.disabled = false;
-        }
-        
-        // Auto-scroll com countdown
-        startCountdown(() => {
-            scrollToSection('section-deploy');
-            updateDeploySummary();
-            enableSection('section-deploy');
-        });
-    } else {
-        // Esconder indicador e mostrar campos pendentes
-        hideProgressIndicator();
-        
-        // Desabilitar botão de deploy se dados incompletos
-        const deployBtn = document.getElementById('deploy-token-btn');
-        if (deployBtn) {
-            deployBtn.disabled = true;
-        }
-        
-        console.log('⏳ Campos ainda não completados');
-    }
+    console.log('📝 Dados atualizados - aguardando ação manual do usuário');
 }
 
 /**
@@ -1568,7 +1555,7 @@ function resetApp() {
     }
     
     // Reset apenas dos dados do token - MANTER CONEXÃO DA WALLET
-    const walletStatus = UniversalWallet.getStatus();
+    const walletStatus = Wallet.getStatus();
     AppState.tokenData = {};
     AppState.deployResult = null;
     
@@ -1587,8 +1574,8 @@ function resetApp() {
         };
     }
     
-    // Usar função de limpeza do UniversalWallet que mantém conexão
-    UniversalWallet.clearFormData();
+    // Usar função de limpeza do Wallet que mantém conexão
+    Wallet.clearFormData();
     
     // Resetar decimais para valor padrão
     const decimalsInput = document.getElementById('decimals');
@@ -1623,6 +1610,12 @@ function resetApp() {
         deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
     }
     
+    // Esconder botão "Próxima Seção"
+    const nextSectionBtn = document.getElementById('next-section-btn');
+    if (nextSectionBtn) {
+        nextSectionBtn.style.display = 'none';
+    }
+    
     // Limpar resultados de deploy
     document.querySelectorAll('.deploy-result').forEach(el => el.remove());
     
@@ -1639,10 +1632,18 @@ function resetApp() {
         `;
     }
     
-    // Mostrar apenas primeira seção (SEM SCROLL)
+    // Mostrar apenas primeira seção, mas habilitar segunda se conectado
     showOnlyFirstSection();
     
-    // Interface da wallet já é atualizada automaticamente pelo UniversalWallet
+    // Se carteira conectada, habilitar automaticamente seção básica
+    if (AppState.wallet.connected) {
+        setTimeout(() => {
+            enableSection('section-basic-info');
+            console.log('✅ Seção básica habilitada automaticamente (carteira conectada)');
+        }, 500);
+    }
+    
+    // Interface da wallet já é atualizada automaticamente pelo Wallet
     console.log('🔄 Reset completo (conexão preservada)');
     
     // Atualizar progresso visual
@@ -1657,8 +1658,8 @@ function resetApp() {
  * Verifica conexão existente usando sistema universal
  */
 async function checkWalletConnection() {
-    // O UniversalWallet já faz isso automaticamente no init()
-    const status = UniversalWallet.getStatus();
+    // O Wallet já faz isso automaticamente no init()
+    const status = Wallet.getStatus();
     
     if (status.connected) {
         AppState.wallet.connected = true;

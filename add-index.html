@@ -163,36 +163,27 @@
                       <div class="d-flex align-items-center">
                         <i class="bi bi-check-circle-fill me-3 text-success" style="font-size: 1.5rem;"></i>
                         <div class="flex-fill">
-                          <h6 class="mb-1 text-success">Todos os campos preenchidos!</h6>
-                          <small class="text-muted">Rolando para o resumo em <span id="countdown" class="fw-bold text-success">3</span> segundos...</small>
+                          <h6 class="mb-1 text-success">Pronto para próxima etapa!</h6>
+                          <small class="text-muted">Use o botão abaixo para continuar.</small>
                         </div>
-                        <button id="skip-countdown" class="btn btn-success btn-sm">
-                          <i class="bi bi-arrow-right me-1"></i>Ir Agora
-                        </button>
                       </div>
                     </div>
                     
-                    <div id="missing-fields" class="alert alert-warning">
-                      <h6 class="mb-2"><i class="bi bi-list-check me-2"></i>Complete os campos obrigatórios:</h6>
+                    <div id="missing-fields" class="alert alert-info" style="display: none;">
+                      <h6 class="mb-2"><i class="bi bi-info-circle me-2"></i>Informações sobre os campos:</h6>
                       <div class="row g-2">
-                        <div class="col-6">
-                          <small id="field-name" class="d-flex align-items-center">
-                            <i class="bi bi-circle me-2 text-warning"></i>Nome do Token
-                          </small>
-                          <small id="field-symbol" class="d-flex align-items-center">
-                            <i class="bi bi-circle me-2 text-warning"></i>Símbolo
-                          </small>
-                        </div>
-                        <div class="col-6">
-                          <small id="field-supply" class="d-flex align-items-center">
-                            <i class="bi bi-circle me-2 text-warning"></i>Supply Total
-                          </small>
-                          <small id="field-owner" class="d-flex align-items-center">
-                            <i class="bi bi-circle me-2 text-muted"></i>Endereço (opcional)
-                          </small>
+                        <div class="col-12">
+                          <small class="text-muted">Preencha os campos conforme necessário e use o botão "Próxima Seção" para continuar.</small>
                         </div>
                       </div>
                     </div>
+                  </div>
+                  
+                  <!-- Botão Próxima Seção -->
+                  <div class="mt-4 text-center">
+                    <button id="next-section-btn" type="button" class="btn btn-primary btn-lg" style="display: none;">
+                      <i class="bi bi-arrow-right me-2"></i>Próxima Seção: Resumo e Deploy
+                    </button>
                   </div>
                 </div>
               </div>

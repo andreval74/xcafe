@@ -256,6 +256,7 @@ class Wallet {
             // Atualiza UI da rede
             const currentNetworkSpan = document.getElementById('current-network');
             const chainIdSpan = document.getElementById('chain-id-value');
+            const networkDisplayInput = document.getElementById('network-display');
             
             if (currentNetworkSpan) {
                 currentNetworkSpan.textContent = networkData.name;
@@ -263,6 +264,12 @@ class Wallet {
             
             if (chainIdSpan) {
                 chainIdSpan.textContent = networkData.chainId;
+            }
+            
+            // Atualizar campo de rede de deploy
+            if (networkDisplayInput) {
+                networkDisplayInput.value = `${networkData.name} (Chain ID: ${networkData.chainId})`;
+                console.log('🌐 Campo de rede de deploy atualizado:', networkData.name);
             }
             
             console.log(`🌐 Rede detectada: ${networkData.name} (ID: ${networkData.chainId})`);
@@ -339,6 +346,12 @@ class Wallet {
             const ownerInput = document.getElementById('ownerAddress');
             if (ownerInput && !ownerInput.value) {
                 ownerInput.value = walletAddress;
+            }
+            
+            // Atualizar campo de rede de deploy
+            const networkDisplayInput = document.getElementById('network-display');
+            if (networkDisplayInput && networkData.name) {
+                networkDisplayInput.value = `${networkData.name} (Chain ID: ${networkData.chainId})`;
             }
             
             // Habilitar seções dependentes
