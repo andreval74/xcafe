@@ -189,66 +189,55 @@
               </div>
             </section>
 
-            <!-- Seção 3: Resumo e Deploy -->
-                        <!-- Seção 3: Deploy e Confirmação -->
+            <!-- Seção 3: Deploy -->
             <section id="section-deploy" class="creation-section">
               <div class="section-header">
                 <h4 class="text-success mb-3">
-                  <i class="bi bi-rocket-takeoff me-2"></i>3. Resumo e Deploy
+                  <i class="bi bi-rocket-takeoff me-2"></i>3. Deploy do Contrato
                 </h4>
-                <p class="text-muted">Revise os dados e implante seu token na blockchain.</p>
+                <p class="text-muted">Implante seu token na blockchain.</p>
               </div>
 
-              <!-- Resumo do Token -->
-              <div class="card bg-dark border-success shadow mb-4">
-                <div class="card-header bg-success text-white">
-                  <h5 class="mb-0">
-                    <i class="bi bi-check-circle me-2"></i>Confirmação dos Dados
-                  </h5>
+              <!-- Estimativa de Gas -->
+              <div class="card bg-dark border-info shadow mb-4">
+                <div class="card-header bg-info text-white">
+                  <h6 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>Estimativa de Gas
+                  </h6>
                 </div>
                 <div class="card-body">
-                  <div class="row g-4">
-                    <div class="col-md-8">
-                      <div class="row g-3">
-                        <div class="col-6">
-                          <label class="form-label text-muted small">Token</label>
-                          <div id="display-token-name" class="text-white fw-semibold">-</div>
-                        </div>
-                        <div class="col-6">
-                          <label class="form-label text-muted small">Símbolo</label>
-                          <div id="display-token-symbol" class="text-warning fw-semibold">-</div>
-                        </div>
-                        <div class="col-6">
-                          <label class="form-label text-muted small">Supply Total</label>
-                          <div id="display-total-supply" class="text-info fw-semibold">-</div>
-                        </div>
-                        <div class="col-6">
-                          <label class="form-label text-muted small">Decimais</label>
-                          <div id="display-decimals" class="text-info fw-semibold">-</div>
-                        </div>
-                      </div>
+                  <div class="row text-center">
+                    <div class="col-md-4">
+                      <div class="text-info h5 mb-1" id="gas-limit-display">-</div>
+                      <small class="text-muted">Gas Limit</small>
                     </div>
                     <div class="col-md-4">
-                      <label class="form-label text-muted small">Proprietário</label>
-                      <div id="display-owner" class="text-success small font-monospace break-all">-</div>
-                      <div id="network-details" class="text-muted small mt-2">
-                        <!-- Detalhes da rede -->
-                      </div>
+                      <div class="text-warning h5 mb-1" id="gas-price-display">-</div>
+                      <small class="text-muted">Gas Price (Gwei)</small>
                     </div>
+                    <div class="col-md-4">
+                      <div class="text-success h5 mb-1" id="estimated-cost-display">-</div>
+                      <small class="text-muted">Custo Estimado (BNB)</small>
+                    </div>
+                  </div>
+                  <div class="text-center mt-3">
+                    <button id="refresh-gas-btn" class="btn btn-outline-info btn-sm">
+                      <i class="bi bi-arrow-clockwise me-1"></i>Atualizar
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <!-- Status da API (simplificado) -->
+              <!-- Status da Rede Blockchain -->
               <div class="alert alert-info mb-4">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <i class="bi bi-cloud-check me-2"></i>
+                    <i class="bi bi-globe me-2"></i>
                     <small>
-                      <strong>API:</strong>
-                      <span id="api-status">
+                      <strong>Rede Blockchain:</strong>
+                      <span id="blockchain-status">
                         <i class="bi bi-hourglass-split text-muted me-1"></i>
-                        <span class="text-muted">Verificando...</span>
+                        <span class="text-muted">Verificando disponibilidade...</span>
                       </span>
                     </small>
                   </div>
@@ -278,55 +267,48 @@
                 <p class="text-muted">Seu token foi implantado na blockchain e está pronto para uso.</p>
               </div>
 
-              <!-- Informações Unificadas -->
+              <!-- Informações Principais -->
               <div class="card bg-dark border-success shadow mb-4">
-                <div class="card-body p-4">
-                  <div class="row g-4">
-                    <!-- Detalhes do Token -->
-                    <div class="col-md-4">
-                      <h6 class="text-success mb-3">
-                        <i class="bi bi-coin me-2"></i>Token
-                      </h6>
-                      <div id="token-details-result">
-                        <!-- Preenchido dinamicamente -->
+                <div class="card-header bg-success text-white">
+                  <h6 class="mb-0">
+                    <i class="bi bi-coin me-2"></i>Informações do Token
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <!-- Endereço do Contrato -->
+                    <div class="col-12">
+                      <label class="form-label text-muted small">Endereço do Contrato</label>
+                      <div class="input-group mb-2">
+                        <input type="text" class="form-control bg-dark text-success border-success" 
+                               id="contract-address-display" style="font-family: monospace;" readonly>
+                        <button class="btn btn-outline-success" type="button" id="copy-contract-btn" title="Copiar">
+                          <i class="bi bi-clipboard"></i>
+                        </button>
                       </div>
                     </div>
                     
-                    <!-- Informações da Blockchain -->
-                    <div class="col-md-4">
-                      <h6 class="text-info mb-3">
-                        <i class="bi bi-globe me-2"></i>Blockchain
-                      </h6>
-                      <div id="blockchain-details-result">
-                        <!-- Preenchido dinamicamente -->
+                    <!-- Transaction Hash -->
+                    <div class="col-12">
+                      <label class="form-label text-muted small">Transaction Hash</label>
+                      <div class="input-group mb-3">
+                        <input type="text" class="form-control bg-dark text-info border-info" 
+                               id="transaction-hash-display" style="font-family: monospace;" readonly>
+                        <button class="btn btn-outline-info" type="button" id="copy-hash-btn" title="Copiar">
+                          <i class="bi bi-clipboard"></i>
+                        </button>
                       </div>
                     </div>
                     
-                    <!-- Contrato -->
-                    <div class="col-md-4">
-                      <h6 class="text-warning mb-3">
-                        <i class="bi bi-code-square me-2"></i>Contrato
-                      </h6>
-                      <div>
-                        <label class="form-label text-muted small">Endereço</label>
-                        <div class="input-group input-group-sm mb-2">
-                          <input type="text" class="form-control bg-dark text-warning border-secondary" 
-                                 id="contract-address-display" style="font-family: monospace;" readonly>
-                          <button class="btn btn-outline-warning btn-sm" type="button" id="copy-contract-btn" title="Copiar">
-                            <i class="bi bi-clipboard"></i>
-                          </button>
-                        </div>
-                        <div class="d-flex gap-1">
-                          <button class="btn btn-success btn-sm flex-fill" id="add-to-metamask-btn" title="Adicionar ao MetaMask">
-                            <i class="bi bi-wallet2"></i>
-                          </button>
-                          <button class="btn btn-info btn-sm flex-fill" id="share-token-btn" title="Compartilhar">
-                            <i class="bi bi-share"></i>
-                          </button>
-                          <div id="explorer-links" class="flex-fill">
-                            <!-- Link do explorer -->
-                          </div>
-                        </div>
+                    <!-- Botões de Ação -->
+                    <div class="col-12">
+                      <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-primary" id="view-explorer-btn">
+                          <i class="bi bi-eye me-1"></i>Ver no Explorer
+                        </button>
+                        <button class="btn btn-success" id="add-to-metamask-btn">
+                          <i class="bi bi-wallet2 me-1"></i>Adicionar ao MetaMask
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -341,45 +323,63 @@
                   </h6>
                 </div>
                 <div class="card-body">
-                  <div class="row align-items-center">
+                  <div class="row align-items-center g-3">
                     <div class="col-md-6">
                       <button id="download-contract-btn" class="btn btn-outline-primary w-100">
                         <i class="bi bi-file-earmark-code me-2"></i>Baixar Código Solidity
                       </button>
                     </div>
                     <div class="col-md-6">
-                      <div class="text-center">
-                        <small class="text-muted d-block mb-2">Verificação no Explorer</small>
-                        <div class="text-muted small">
-                          <div>Versão: <code class="text-info">v0.8.26</code></div>
-                          <div>Otimização: <code class="text-success">200 runs</code></div>
-                        </div>
-                        <button id="open-verification-btn" class="btn btn-outline-success btn-sm mt-2">
-                          <i class="bi bi-shield-check me-1"></i>Verificar Contrato
-                        </button>
+                      <button id="open-verification-btn" class="btn btn-outline-success w-100">
+                        <i class="bi bi-shield-check me-2"></i>Verificar Contrato
+                      </button>
+                    </div>
+                    <div class="col-12">
+                      <div class="text-center text-muted small">
+                        <div>Versão Solidity: <code class="text-info">v0.8.26</code></div>
+                        <div>Otimização: <code class="text-success">200 runs</code></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Opção Mainnet -->
-              <div class="card bg-dark border-warning shadow mb-4">
-                <div class="card-header bg-warning text-dark">
-                  <h6 class="mb-0">
-                    <i class="bi bi-star me-2"></i>Deploy na Mainnet
-                  </h6>
+              <!-- Opções Finais -->
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <div class="card bg-dark border-warning shadow h-100">
+                    <div class="card-header bg-warning text-dark">
+                      <h6 class="mb-0">
+                        <i class="bi bi-star me-2"></i>Deploy na Mainnet
+                      </h6>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                      <p class="text-muted mb-3 flex-grow-1">
+                        Quer tornar este token oficial na rede principal? Use os mesmos dados já configurados.
+                      </p>
+                      <button id="deploy-mainnet-btn" class="btn btn-warning">
+                        <i class="bi bi-rocket me-2"></i>Deploy na Mainnet
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div class="card-body">
-                  <p class="text-muted mb-3">
-                    Quer tornar este token oficial na rede principal? Use os mesmos dados já configurados.
-                  </p>
-                  <button id="deploy-mainnet-btn" class="btn btn-warning">
-                    <i class="bi bi-rocket me-2"></i>Deploy na Mainnet
-                  </button>
-                  <small class="text-muted d-block mt-2">
-                    * Mesmo token, mesmos dados, mas na rede principal com custos reais
-                  </small>
+                
+                <div class="col-md-6">
+                  <div class="card bg-dark border-secondary shadow h-100">
+                    <div class="card-header bg-secondary text-white">
+                      <h6 class="mb-0">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Novo Token
+                      </h6>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                      <p class="text-muted mb-3 flex-grow-1">
+                        Limpar todos os dados e criar um novo token do zero.
+                      </p>
+                      <button id="clear-all-btn" class="btn btn-secondary">
+                        <i class="bi bi-trash me-2"></i>Limpar Tudo
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -387,23 +387,6 @@
             <!-- Campos ocultos para compatibilidade -->
             <input type="hidden" id="networkValue" name="network">
             <input type="hidden" id="networkDisplay" name="networkDisplay">
-          </div>
-        </div>
-        
-        <!-- Botão Limpar e Recomeçar -->
-        <div class="row mt-5">
-          <div class="col-12 text-center">
-            <div class="card bg-dark border-danger">
-              <div class="card-body">
-                <h5 class="text-danger">
-                  <i class="bi bi-trash me-2"></i>Limpar Dados
-                </h5>
-                <p class="text-muted">Apagar todos os dados preenchidos e recomeçar processo</p>
-                <button id="clear-all-btn" class="btn btn-danger">
-                  <i class="bi bi-arrow-counterclockwise me-2"></i>Limpar e Recomeçar
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

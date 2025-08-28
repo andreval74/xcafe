@@ -11,8 +11,128 @@ const AppState = {
         balance: '0.0000',
         network: null
     },
-    tokenData: {}
+    tokenData: {},
+    gasEstimate: null,
+    apiStatus: 'checking'
 };
+
+/**
+ * Verifica o status da API silenciosamente (apenas no console)
+ */
+async function checkApiStatusSilently() {
+    try {
+        console.log('🔍 Verificando status da API...');
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        
+        const response = await fetch('https://xcafe-token-api-hybrid.onrender.com/health', {
+            method: 'GET',
+            signal: controller.signal,
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            const data = await response.json();
+            AppState.apiStatus = 'online';
+            console.log('✅ API Status: ONLINE', data);
+            updateBlockchainStatus(true);
+        } else {
+            AppState.apiStatus = 'offline';
+            console.log('⚠️ API Status: OFFLINE - Response não OK:', response.status);
+            updateBlockchainStatus(false, `HTTP ${response.status}`);
+        }
+    } catch (error) {
+        AppState.apiStatus = 'error';
+        if (error.name === 'AbortError') {
+            console.log('⏰ API Status: TIMEOUT - Verificação cancelada por timeout');
+            updateBlockchainStatus(false, 'Timeout de conexão');
+        } else {
+            console.log('❌ API Status: ERROR -', error.message);
+            updateBlockchainStatus(false, 'Conexão indisponível');
+        }
+    }
+}
+
+/**
+ * Atualiza o status visual da rede blockchain
+ */
+function updateBlockchainStatus(available, errorMessage = '') {
+    const statusElement = document.getElementById('blockchain-status');
+    if (!statusElement) return;
+    
+    if (available) {
+        statusElement.innerHTML = `
+            <i class="bi bi-check-circle text-success me-1"></i>
+            <span class="text-success">Disponível</span>
+        `;
+        console.log('✅ Rede blockchain reportada como disponível');
+    } else {
+        statusElement.innerHTML = `
+            <i class="bi bi-exclamation-triangle text-warning me-1"></i>
+            <span class="text-warning">Indisponível</span>
+            ${errorMessage ? `<small class="text-muted ms-2">(${errorMessage})</small>` : ''}
+        `;
+        console.log('⚠️ Rede blockchain reportada como indisponível:', errorMessage);
+    }
+}
+
+/**
+ * Estima o gas necessário para deploy do contrato
+ */
+async function estimateGasForDeploy() {
+    try {
+        if (!window.ethereum || !AppState.wallet.connected) {
+            console.log('⚠️ Carteira não conectada para estimativa de gas');
+            return null;
+        }
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        
+        // Gas estimado para deploy de contrato ERC20 padrão (valores baseados em experiência)
+        const gasLimit = 800000; // ~800k gas units
+        
+        // Obter gas price atual da rede
+        const gasPrice = await provider.getGasPrice();
+        const gasPriceGwei = ethers.utils.formatUnits(gasPrice, 'gwei');
+        
+        // Calcular custo estimado
+        const estimatedCost = gasLimit * parseFloat(gasPriceGwei) / 1e9; // Em ETH/BNB
+        
+        const gasInfo = {
+            gasLimit: gasLimit.toLocaleString(),
+            gasPriceGwei: parseFloat(gasPriceGwei).toFixed(2),
+            estimatedCostETH: estimatedCost.toFixed(6)
+        };
+        
+        console.log('💰 Estimativa de Gas:', gasInfo);
+        AppState.gasEstimate = gasInfo;
+        
+        return gasInfo;
+    } catch (error) {
+        console.error('❌ Erro ao estimar gas:', error);
+        return null;
+    }
+}
+
+/**
+ * Atualiza a exibição da estimativa de gas na UI
+ */
+function updateGasDisplay(gasInfo) {
+    if (!gasInfo) {
+        // Mostrar valores padrão se não conseguir estimar
+        document.getElementById('gas-limit-display').textContent = '~800,000';
+        document.getElementById('gas-price-display').textContent = '--';
+        document.getElementById('estimated-cost-display').textContent = '--';
+        return;
+    }
+    
+    document.getElementById('gas-limit-display').textContent = gasInfo.gasLimit;
+    document.getElementById('gas-price-display').textContent = gasInfo.gasPriceGwei;
+    document.getElementById('estimated-cost-display').textContent = gasInfo.estimatedCostETH;
+}
 
 /**
  * Atualiza a barra de progresso visual baseada no progresso real
@@ -73,28 +193,66 @@ function updateVisualProgress() {
         }
     });
     
-    // Controlar botão "Próxima Seção" - só mostrar se tiver dados básicos
+    // Controlar botão "Próxima Seção" - apenas 3 campos obrigatórios
     const nextSectionBtn = document.getElementById('next-section-btn');
     if (nextSectionBtn) {
-        // Verificar se tem dados mínimos para avançar
-        const hasMinimumData = wallet.connected && 
-                              tokenData.name && tokenData.name.trim().length > 0 &&
-                              tokenData.symbol && tokenData.symbol.trim().length > 0 &&
-                              tokenData.totalSupply && tokenData.totalSupply.length > 0;
+        // Verificar estado da carteira em tempo real
+        const walletStatus = Wallet.getStatus();
+        const isWalletConnected = walletStatus.connected || wallet.connected;
         
-        if (hasMinimumData) {
+        // Verificar se tem apenas os 3 campos obrigatórios: nome, símbolo e supply
+        const hasRequiredFields = isWalletConnected && 
+                                 tokenData.name && tokenData.name.trim().length >= 3 &&
+                                 tokenData.symbol && tokenData.symbol.trim().length >= 2 &&
+                                 tokenData.totalSupply && tokenData.totalSupply.length > 0;
+        
+        if (hasRequiredFields) {
             nextSectionBtn.style.display = 'block';
-            console.log('✅ Botão "Próxima Seção" mostrado (dados mínimos presentes)');
+            console.log('✅ Botão "Próxima Seção" mostrado (3 campos obrigatórios preenchidos)');
             nextSectionBtn.onclick = () => {
                 console.log('🚀 Botão "Próxima Seção" clicado');
-                // Atualizar resumo antes de mostrar a seção
-                updateDeploySummary();
+                
+                // Garantir que campos automáticos estão preenchidos
+                const decimalsInput = document.getElementById('decimals');
+                const ownerInput = document.getElementById('ownerAddress');
+                
+                if (decimalsInput && !decimalsInput.value) {
+                    decimalsInput.value = '18';
+                }
+                
+                if (ownerInput && (!ownerInput.value || ownerInput.value.trim() === '')) {
+                    const currentWalletStatus = Wallet.getStatus();
+                    ownerInput.value = currentWalletStatus.address || wallet.address;
+                }
+                
+                // Atualizar dados com preenchimento automático
+                onTokenDataChange();
+                
+                // Estimar gas e mostrar seção
+                estimateGasForDeploy().then(gasInfo => {
+                    updateGasDisplay(gasInfo);
+                });
+                
+                // Inicializar seção de deploy
+                initializeDeploySection();
+                
                 enableSection('section-deploy');
-                nextSectionBtn.style.display = 'none'; // Esconder após usar
+                nextSectionBtn.style.display = 'none';
             };
         } else {
             nextSectionBtn.style.display = 'none';
-            console.log('❌ Botão "Próxima Seção" escondido - dados insuficientes');
+            const missing = [];
+            if (!isWalletConnected) missing.push('carteira');
+            if (!tokenData.name || tokenData.name.trim().length < 3) missing.push('nome');
+            if (!tokenData.symbol || tokenData.symbol.trim().length < 2) missing.push('símbolo'); 
+            if (!tokenData.totalSupply || tokenData.totalSupply.length === 0) missing.push('supply');
+            
+            console.log('❌ Botão escondido - faltam campos:', missing.join(', '));
+            console.log('🔍 Debug estado carteira:', { 
+                walletStatus: walletStatus.connected, 
+                appState: wallet.connected,
+                endereco: walletStatus.address || 'não conectado'
+            });
         }
     } else {
         console.log('⚠️ Botão next-section-btn não encontrado no DOM');
@@ -388,12 +546,20 @@ document.addEventListener('DOMContentLoaded', function() {
         AppState.wallet.address = walletData.address;
         AppState.wallet.network = walletData.network;
         
-        // Preencher owner se vazio
+        // Preencher campos automáticos
         const ownerInput = document.getElementById('ownerAddress');
+        const decimalsInput = document.getElementById('decimals');
+        
         if (ownerInput && !ownerInput.value) {
             ownerInput.value = walletData.address;
-            onTokenDataChange(); // Trigger data update
         }
+        
+        if (decimalsInput && !decimalsInput.value) {
+            decimalsInput.value = '18';
+        }
+        
+        // Trigger data update
+        onTokenDataChange();
         
         // Atualizar progresso visual
         updateVisualProgress();
@@ -419,13 +585,14 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initializeApp() {
     setupEventListeners();
-    checkWalletConnection();
+    
+    // Aguardar um pouco para o sistema de carteira inicializar completamente
+    setTimeout(() => {
+        checkWalletConnection();
+    }, 1000);
     
     // Mostrar apenas primeira seção inicialmente
     showOnlyFirstSection();
-    
-    // Verificar status da API após carregar a página
-    setTimeout(updateApiStatus, 2000);
 }
 
 /**
@@ -448,6 +615,91 @@ function setupEventListeners() {
     const deployBtn = document.getElementById('deploy-token-btn');
     if (deployBtn) {
         deployBtn.addEventListener('click', deployToken);
+    }
+    
+    // Botão refresh gas estimation
+    const refreshGasBtn = document.getElementById('refresh-gas-btn');
+    if (refreshGasBtn) {
+        refreshGasBtn.addEventListener('click', () => {
+            estimateGasForDeploy().then(gasInfo => {
+                updateGasDisplay(gasInfo);
+            });
+        });
+    }
+    
+    // Botões da seção de resultado
+    setupResultButtons();
+}
+
+/**
+ * Configura botões da seção de resultado
+ */
+function setupResultButtons() {
+    // Copiar endereço do contrato
+    const copyContractBtn = document.getElementById('copy-contract-btn');
+    if (copyContractBtn) {
+        copyContractBtn.addEventListener('click', () => {
+            const contractAddress = document.getElementById('contract-address-display').value;
+            if (contractAddress) {
+                navigator.clipboard.writeText(contractAddress);
+                showToast('Endereço copiado!', 'success');
+            }
+        });
+    }
+    
+    // Copiar transaction hash
+    const copyHashBtn = document.getElementById('copy-hash-btn');
+    if (copyHashBtn) {
+        copyHashBtn.addEventListener('click', () => {
+            const txHash = document.getElementById('transaction-hash-display').value;
+            if (txHash) {
+                navigator.clipboard.writeText(txHash);
+                showToast('Hash da transação copiado!', 'success');
+            }
+        });
+    }
+    
+    // Ver no explorer
+    const viewExplorerBtn = document.getElementById('view-explorer-btn');
+    if (viewExplorerBtn) {
+        viewExplorerBtn.addEventListener('click', () => {
+            const contractAddress = document.getElementById('contract-address-display').value;
+            if (contractAddress && AppState.deployResult) {
+                const explorerUrl = AppState.deployResult.explorerUrl || 
+                    `https://testnet.bscscan.com/address/${contractAddress}`;
+                window.open(explorerUrl, '_blank');
+            }
+        });
+    }
+    
+    // Adicionar ao MetaMask
+    const addToMetamaskBtn = document.getElementById('add-to-metamask-btn');
+    if (addToMetamaskBtn) {
+        addToMetamaskBtn.addEventListener('click', addTokenToMetaMask);
+    }
+    
+    // Download do contrato
+    const downloadContractBtn = document.getElementById('download-contract-btn');
+    if (downloadContractBtn) {
+        downloadContractBtn.addEventListener('click', downloadContractCode);
+    }
+    
+    // Verificar contrato
+    const openVerificationBtn = document.getElementById('open-verification-btn');
+    if (openVerificationBtn) {
+        openVerificationBtn.addEventListener('click', openContractVerification);
+    }
+    
+    // Deploy na mainnet
+    const deployMainnetBtn = document.getElementById('deploy-mainnet-btn');
+    if (deployMainnetBtn) {
+        deployMainnetBtn.addEventListener('click', deployToMainnet);
+    }
+    
+    // Limpar tudo
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', resetApp);
     }
 }
 
@@ -1872,8 +2124,303 @@ function shareToken() {
             btn.innerHTML = originalHtml;
         }, 2000);
         
-        alert('Informações copiadas para a área de transferência!');
     }
+}
+
+/**
+ * Funções para a nova interface simplificada
+ */
+
+/**
+ * Baixa o código do contrato Solidity
+ */
+async function downloadContractCode() {
+    try {
+        if (!AppState.deployResult) {
+            showToast('Deploy não realizado ainda', 'warning');
+            return;
+        }
+        
+        // Verificar se temos o código fonte da API (deploy real)
+        let contractCode;
+        if (AppState.deployResult.sourceCode) {
+            contractCode = AppState.deployResult.sourceCode;
+        } else {
+            // Gerar código básico para deploy simulado
+            const tokenData = AppState.deployResult.deployData;
+            contractCode = `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/*
+Token: ${tokenData.name || 'Token'}
+Símbolo: ${tokenData.symbol || 'TKN'}
+Supply Total: ${tokenData.totalSupply || '1000000'}
+Decimais: ${tokenData.decimals || '18'}
+Proprietário: ${tokenData.owner || 'N/A'}
+
+Gerado por: Smart Contract Cafe
+https://smartcontract.cafe
+*/
+
+contract ${tokenData.symbol || 'Token'} {
+    string public name = "${tokenData.name || 'Token'}";
+    string public symbol = "${tokenData.symbol || 'TKN'}";
+    uint8 public decimals = ${tokenData.decimals || '18'};
+    uint256 public totalSupply = ${tokenData.totalSupply || '1000000'} * 10**decimals;
+    
+    mapping(address => uint256) public balanceOf;
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    
+    constructor() {
+        balanceOf[msg.sender] = totalSupply;
+        emit Transfer(address(0), msg.sender, totalSupply);
+    }
+    
+    function transfer(address to, uint256 value) public returns (bool) {
+        require(balanceOf[msg.sender] >= value, "Insufficient balance");
+        balanceOf[msg.sender] -= value;
+        balanceOf[to] += value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+}`;
+        }
+        
+        const fileName = `${AppState.deployResult.deployData.symbol || 'Token'}_Contract.sol`;
+        
+        const blob = new Blob([contractCode], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showToast('Código do contrato baixado!', 'success');
+    } catch (error) {
+        console.error('Erro ao baixar contrato:', error);
+        showToast('Erro ao baixar o código', 'error');
+    }
+}
+
+/**
+ * Abre a URL de verificação do contrato
+ */
+function openContractVerification() {
+    if (!AppState.deployResult?.contractAddress) {
+        showToast('Endereço do contrato não disponível', 'warning');
+        return;
+    }
+    
+    const chainId = AppState.wallet.network?.chainId || 97;
+    let verificationUrl;
+    
+    switch (chainId) {
+        case 1:
+            verificationUrl = `https://etherscan.io/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        case 56:
+            verificationUrl = `https://bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        case 97:
+            verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        case 137:
+            verificationUrl = `https://polygonscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        default:
+            verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+    }
+    
+    window.open(verificationUrl, '_blank');
+    showToast('Página de verificação aberta!', 'info');
+}
+
+/**
+ * Deploy na mainnet usando os mesmos dados
+ */
+async function deployToMainnet() {
+    try {
+        if (!AppState.deployResult?.deployData) {
+            showToast('Dados do deploy não disponíveis', 'warning');
+            return;
+        }
+        
+        // Verificar se já está na mainnet
+        const currentChainId = AppState.wallet.network?.chainId;
+        if (currentChainId === 1 || currentChainId === 56) {
+            showToast('Você já está em uma rede principal', 'info');
+            return;
+        }
+        
+        // Confirmar deploy na mainnet
+        const confirmed = confirm(
+            'Deseja fazer deploy na rede principal (mainnet)?\n\n' +
+            '⚠️ ATENÇÃO:\n' +
+            '- Isso custará gas real (BNB/ETH)\n' +
+            '- A transação não pode ser revertida\n' +
+            '- Você será direcionado para trocar de rede\n\n' +
+            'Continuar?'
+        );
+        
+        if (!confirmed) return;
+        
+        // Detectar rede principal correspondente
+        let targetChainId;
+        if (currentChainId === 97) { // BSC Testnet -> BSC Mainnet
+            targetChainId = 56;
+        } else {
+            targetChainId = 1; // Default para Ethereum Mainnet
+        }
+        
+        // Solicitar troca para mainnet
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: ethers.utils.hexValue(targetChainId) }]
+            });
+            
+            // Aguardar troca de rede
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Fazer novo deploy com os mesmos dados
+            AppState.tokenData = { ...AppState.deployResult.deployData };
+            
+            showToast('Rede alterada! Fazendo deploy na mainnet...', 'info');
+            
+            // Chamar função de deploy
+            await deployToken();
+            
+        } catch (switchError) {
+            console.error('Erro ao trocar rede:', switchError);
+            showToast('Erro ao trocar para mainnet', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Erro no deploy mainnet:', error);
+        showToast('Erro ao preparar deploy na mainnet', 'error');
+    }
+}
+
+/**
+ * Exibe o resultado do deploy na nova interface simplificada
+ */
+function showDeployResult(success, errorMessage = '') {
+    const resultSection = document.getElementById('section-result');
+    if (!resultSection) return;
+    
+    if (success && AppState.deployResult) {
+        const { contractAddress, transactionHash, deployData, explorerUrl } = AppState.deployResult;
+        
+        // Preencher endereço do contrato
+        const contractAddressInput = document.getElementById('contract-address-display');
+        if (contractAddressInput) {
+            contractAddressInput.value = contractAddress;
+        }
+        
+        // Preencher transaction hash
+        const txHashInput = document.getElementById('transaction-hash-display');
+        if (txHashInput) {
+            txHashInput.value = transactionHash;
+        }
+        
+        // Configurar botão explorer com URL correta
+        const viewExplorerBtn = document.getElementById('view-explorer-btn');
+        if (viewExplorerBtn && contractAddress) {
+            const chainId = AppState.wallet.network?.chainId || 97;
+            const explorerUrl = getExplorerContractUrl(contractAddress, chainId);
+            viewExplorerBtn.onclick = () => window.open(explorerUrl, '_blank');
+        }
+        
+        console.log('✅ Interface de resultado atualizada com sucesso');
+    } else {
+        console.error('❌ Falha no deploy:', errorMessage);
+        showToast(`Erro no deploy: ${errorMessage}`, 'error');
+    }
+}
+
+/**
+ * Inicializar verificações quando a seção de deploy for ativada
+ */
+function initializeDeploySection() {
+    // Mostrar status inicial
+    const statusElement = document.getElementById('blockchain-status');
+    if (statusElement) {
+        statusElement.innerHTML = `
+            <i class="bi bi-hourglass-split text-muted me-1"></i>
+            <span class="text-muted">Verificando disponibilidade...</span>
+        `;
+    }
+    
+    // Habilitar botão de deploy
+    const deployBtn = document.getElementById('deploy-token-btn');
+    if (deployBtn) {
+        deployBtn.disabled = false;
+        console.log('✅ Botão CRIAR TOKEN habilitado');
+    } else {
+        console.warn('⚠️ Botão deploy-token-btn não encontrado');
+    }
+    
+    // Verificar API e atualizar status da rede blockchain
+    checkApiStatusSilently();
+    
+    // Estimar gas
+    estimateGasForDeploy().then(gasInfo => {
+        updateGasDisplay(gasInfo);
+    });
+    
+    console.log('✅ Seção de deploy inicializada');
+}
+
+/**
+ * Exibe toast notification
+ */
+function showToast(message, type = 'info') {
+    // Criar elemento toast se não existir
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Cores baseadas no tipo
+    const colorClass = {
+        'success': 'bg-success',
+        'error': 'bg-danger',
+        'warning': 'bg-warning text-dark',
+        'info': 'bg-info'
+    }[type] || 'bg-info';
+    
+    // Criar toast
+    const toastId = 'toast-' + Date.now();
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white ${colorClass} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    
+    // Ativar toast do Bootstrap
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+    toast.show();
+    
+    // Remover element após ser ocultado
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
 }
 
 // Utilitários para URLs de explorers
