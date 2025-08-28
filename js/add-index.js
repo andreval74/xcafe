@@ -366,6 +366,31 @@ async function copyToClipboard(text) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 xcafe Token Creator - Tela Única iniciado');
     
+    // Configurar callbacks para o UniversalWallet
+    window.onWalletConnected = function(walletData) {
+        console.log('📡 Callback: Wallet conectada', walletData);
+        
+        // Atualizar estado global
+        AppState.wallet.connected = true;
+        AppState.wallet.address = walletData.address;
+        AppState.wallet.network = walletData.network;
+        
+        // Atualizar progresso visual
+        updateVisualProgress();
+    };
+    
+    window.onWalletDisconnected = function() {
+        console.log('📡 Callback: Wallet desconectada');
+        
+        // Atualizar estado global
+        AppState.wallet.connected = false;
+        AppState.wallet.address = '';
+        AppState.wallet.network = null;
+        
+        // Atualizar progresso visual
+        updateVisualProgress();
+    };
+    
     initializeApp();
 });
 
@@ -490,181 +515,51 @@ function formatSupplyInput(event) {
 }
 
 /**
- * Conecta com MetaMask
+ * Conecta com MetaMask usando sistema universal
  */
 async function connectWallet() {
-    const connectBtn = document.getElementById('connect-metamask-btn');
-    const originalText = connectBtn?.innerHTML || 'CONECTAR';
-    
     try {
-        if (typeof window.ethereum === 'undefined') {
-            alert('MetaMask não detectado! Por favor, instale a extensão MetaMask.');
-            return;
-        }
+        const result = await UniversalWallet.connect();
         
-        // Atualizar botão
-        if (connectBtn) {
-            connectBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Conectando...';
-            connectBtn.disabled = true;
-        }
-        
-        console.log('🔗 Iniciando conexão com MetaMask...');
-        
-        // Solicitar conexão
-        const accounts = await window.ethereum.request({
-            method: 'eth_requestAccounts'
-        });
-        
-        if (accounts.length > 0) {
-            AppState.wallet.address = accounts[0];
-            AppState.wallet.connected = true;
-            
-            // Detectar rede
-            await detectNetwork();
-            
-            // Obter saldo
-            await getWalletBalance();
-            
-            // Atualizar UI
-            updateWalletUI();
-            
-            // Auto-scroll para próxima seção após um delay
-            setTimeout(() => {
-                enableSection('section-basic-info');
-                scrollToSection('section-basic-info');
-            }, 1500);
+        if (result) {
+            // Atualizar estado global com dados do UniversalWallet
+            const status = UniversalWallet.getStatus();
+            AppState.wallet.connected = status.connected;
+            AppState.wallet.address = status.address;
+            AppState.wallet.network = status.network;
             
             console.log('✅ Wallet conectada:', AppState.wallet.address);
             console.log('🌐 Rede detectada:', AppState.wallet.network?.name);
+            
+            // Atualizar progresso visual
+            updateVisualProgress();
         }
         
     } catch (error) {
         console.error('❌ Erro ao conectar wallet:', error);
         alert('Erro ao conectar: ' + error.message);
-        
-        // Restaurar botão
-        if (connectBtn) {
-            connectBtn.innerHTML = originalText;
-            connectBtn.disabled = false;
-        }
     }
 }
 
 /**
- * Detecta a rede da MetaMask
+ * Detecta a rede da MetaMask - REMOVIDO: Usar WalletManager.detectNetwork()
  */
-async function detectNetwork() {
-    try {
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        AppState.wallet.network = getNetworkInfo(chainId);
-        
-    } catch (error) {
-        console.error('❌ Erro ao detectar rede:', error);
-        AppState.wallet.network = { name: 'Desconhecida', chainId: 0, currency: 'ETH' };
-    }
-}
+// async function detectNetwork() - Substituído pelo sistema padrão
 
 /**
- * Obtém informações da rede
+ * Obtém informações da rede - REMOVIDO: Usar WalletManager.getNetworkInfo()
  */
-function getNetworkInfo(chainId) {
-    const networks = {
-        '0x1': { name: 'Ethereum Mainnet', chainId: 1, currency: 'ETH' },
-        '0x89': { name: 'Polygon Mainnet', chainId: 137, currency: 'MATIC' },
-        '0x38': { name: 'BSC Mainnet', chainId: 56, currency: 'BNB' },
-        '0x61': { name: 'BSC Testnet', chainId: 97, currency: 'tBNB' },
-        '0x2105': { name: 'Base Mainnet', chainId: 8453, currency: 'ETH' },
-        '0xaa36a7': { name: 'Sepolia Testnet', chainId: 11155111, currency: 'ETH' }
-    };
-    
-    return networks[chainId] || { 
-        name: 'Rede Desconhecida', 
-        chainId: parseInt(chainId, 16),
-        currency: 'ETH'
-    };
-}
+// function getNetworkInfo(chainId) - Substituído pelo sistema padrão
 
 /**
- * Obtém saldo da carteira
+ * Obtém saldo da carteira - REMOVIDO: Usar WalletManager.updateBalance()
  */
-async function getWalletBalance() {
-    try {
-        const balance = await window.ethereum.request({
-            method: 'eth_getBalance',
-            params: [AppState.wallet.address, 'latest']
-        });
-        
-        AppState.wallet.balance = (parseInt(balance, 16) / 1e18).toFixed(4);
-        
-    } catch (error) {
-        console.error('❌ Erro ao obter saldo:', error);
-        AppState.wallet.balance = '0.0000';
-    }
-}
+// async function getWalletBalance() - Substituído pelo sistema padrão
 
 /**
- * Atualiza interface da carteira
+ * Atualiza interface da carteira - REMOVIDO: Usar WalletManager.updateWalletUI()
  */
-function updateWalletUI() {
-    const { wallet } = AppState;
-    
-    // Status da conexão
-    const statusInput = document.getElementById('wallet-status');
-    if (statusInput && wallet.connected) {
-        statusInput.value = `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
-    }
-    
-    // Endereço completo
-    const addressDisplay = document.getElementById('connected-address');
-    if (addressDisplay) {
-        addressDisplay.textContent = wallet.address;
-    }
-    
-    // Saldo
-    const balanceDisplay = document.getElementById('wallet-balance');
-    if (balanceDisplay) {
-        balanceDisplay.textContent = `${wallet.balance} ${wallet.network?.currency || 'ETH'}`;
-    }
-    
-    // Rede
-    const networkDisplay = document.getElementById('current-network');
-    if (networkDisplay) {
-        networkDisplay.textContent = wallet.network?.name || 'Desconhecida';
-    }
-    
-    // Chain ID
-    const chainDisplay = document.getElementById('chain-id-value');
-    if (chainDisplay) {
-        chainDisplay.textContent = wallet.network?.chainId || 'N/A';
-    }
-    
-    // Auto-preencher endereço do proprietário
-    const ownerInput = document.getElementById('ownerAddress');
-    if (ownerInput && !ownerInput.value) {
-        ownerInput.value = wallet.address;
-    }
-    
-    // Preencher rede de deploy
-    const networkDeployInput = document.getElementById('network-display');
-    if (networkDeployInput) {
-        networkDeployInput.value = wallet.network?.name || 'Detectando...';
-    }
-    
-    // Mostrar info da carteira e atualizar botão conectar
-    const walletInfo = document.getElementById('wallet-connection-info');
-    const connectBtn = document.getElementById('connect-metamask-btn');
-    
-    if (walletInfo) walletInfo.style.display = 'block';
-    if (connectBtn) {
-        connectBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Conectado!';
-        connectBtn.classList.add('btn-success');
-        connectBtn.classList.remove('btn-warning');
-        connectBtn.disabled = true;
-    }
-    
-    // Habilitar seção de informações do token
-    enableSection('section-basic-info');
-}
+// function updateWalletUI() - Substituído pelo sistema padrão
 
 /**
  * Detecta mudanças nos dados do token
@@ -1686,34 +1581,28 @@ function resetApp() {
         window.countdownTimer = null;
     }
     
-    // Reset completo do estado
-    AppState.wallet = {
-        connected: false,
-        address: '',
-        balance: '0.0000',
-        network: null
-    };
+    // Reset apenas dos dados do token - MANTER CONEXÃO DA WALLET
+    const walletStatus = UniversalWallet.getStatus();
     AppState.tokenData = {};
     AppState.deployResult = null;
     
-    // Limpar todos os campos de input
-    const inputs = [
-        '#tokenName',
-        '#tokenSymbol', 
-        '#totalSupply',
-        '#decimals',
-        '#ownerAddress',
-        '#tokenImage',
-        '#network-display'
-    ];
+    // Manter dados da wallet se estiver conectada
+    if (walletStatus.connected) {
+        AppState.wallet = {
+            connected: true,
+            address: walletStatus.address,
+            network: walletStatus.network
+        };
+    } else {
+        AppState.wallet = {
+            connected: false,
+            address: '',
+            network: null
+        };
+    }
     
-    inputs.forEach(selector => {
-        const input = document.querySelector(selector);
-        if (input) {
-            input.value = '';
-            input.classList.remove('is-valid', 'is-invalid');
-        }
-    });
+    // Usar função de limpeza do UniversalWallet que mantém conexão
+    UniversalWallet.clearFormData();
     
     // Resetar decimais para valor padrão
     const decimalsInput = document.getElementById('decimals');
@@ -1740,19 +1629,6 @@ function resetApp() {
         const element = document.getElementById(fieldId);
         if (element) element.textContent = '-';
     });
-    
-    // Reset botão conectar
-    const connectBtn = document.getElementById('connect-metamask-btn');
-    if (connectBtn) {
-        connectBtn.innerHTML = '<i class="bi bi-wallet2 me-2"></i>CONECTAR';
-        connectBtn.classList.remove('btn-success');
-        connectBtn.classList.add('btn-warning');
-        connectBtn.disabled = false;
-    }
-    
-    // Esconder info da carteira
-    const walletInfo = document.getElementById('wallet-connection-info');
-    if (walletInfo) walletInfo.style.display = 'none';
     
     // Reset botão de deploy
     const deployBtn = document.getElementById('deploy-token-btn');
@@ -1781,28 +1657,33 @@ function resetApp() {
     scrollToSection('section-wallet');
     showOnlyFirstSection();
     
+    // Interface da wallet já é atualizada automaticamente pelo UniversalWallet
+    console.log('🔄 Reset completo (conexão preservada)');
+    
+    // Atualizar progresso visual
+    if (typeof updateVisualProgress === 'function') {
+        updateVisualProgress();
+    }
+    
     console.log('✅ Reset completo finalizado');
 }
 
+/**
+ * Verifica conexão existente usando sistema universal
+ */
 async function checkWalletConnection() {
-    if (typeof window.ethereum !== 'undefined') {
-        try {
-            const accounts = await window.ethereum.request({
-                method: 'eth_accounts'
-            });
-            
-            if (accounts.length > 0) {
-                AppState.wallet.address = accounts[0];
-                AppState.wallet.connected = true;
-                await detectNetwork();
-                await getWalletBalance();
-                updateWalletUI();
-                
-                console.log('✅ Conexão existente detectada');
-            }
-        } catch (error) {
-            console.log('Nenhuma conexão prévia detectada');
-        }
+    // O UniversalWallet já faz isso automaticamente no init()
+    const status = UniversalWallet.getStatus();
+    
+    if (status.connected) {
+        AppState.wallet.connected = true;
+        AppState.wallet.address = status.address;
+        AppState.wallet.network = status.network;
+        
+        console.log('🔗 Conexão existente detectada:', status.address);
+        
+        // Atualizar progresso visual
+        updateVisualProgress();
     }
 }
 
