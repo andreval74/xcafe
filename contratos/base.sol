@@ -26,7 +26,7 @@ interface IBTCBROriginal {
     function allowance(address tokenOwner, address spender) external view returns (uint256);
 }
 
-contract SCCAFE {
+contract {{TOKEN_SYMBOL}} {
     // VARIÁVEIS PRINCIPAIS
     string public name = TOKEN_NAME;
     string public symbol = TOKEN_SYMBOL;
