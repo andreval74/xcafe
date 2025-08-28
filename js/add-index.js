@@ -73,20 +73,28 @@ function updateVisualProgress() {
         }
     });
     
-    // Controlar botão "Próxima Seção" - sempre mostrar se conectado
+    // Controlar botão "Próxima Seção" - só mostrar se tiver dados básicos
     const nextSectionBtn = document.getElementById('next-section-btn');
     if (nextSectionBtn) {
-        if (wallet.connected) {
+        // Verificar se tem dados mínimos para avançar
+        const hasMinimumData = wallet.connected && 
+                              tokenData.name && tokenData.name.trim().length > 0 &&
+                              tokenData.symbol && tokenData.symbol.trim().length > 0 &&
+                              tokenData.totalSupply && tokenData.totalSupply.length > 0;
+        
+        if (hasMinimumData) {
             nextSectionBtn.style.display = 'block';
-            console.log('✅ Botão "Próxima Seção" mostrado (carteira conectada)');
+            console.log('✅ Botão "Próxima Seção" mostrado (dados mínimos presentes)');
             nextSectionBtn.onclick = () => {
                 console.log('🚀 Botão "Próxima Seção" clicado');
+                // Atualizar resumo antes de mostrar a seção
+                updateDeploySummary();
                 enableSection('section-deploy');
                 nextSectionBtn.style.display = 'none'; // Esconder após usar
             };
         } else {
             nextSectionBtn.style.display = 'none';
-            console.log('❌ Botão "Próxima Seção" escondido - carteira não conectada');
+            console.log('❌ Botão "Próxima Seção" escondido - dados insuficientes');
         }
     } else {
         console.log('⚠️ Botão next-section-btn não encontrado no DOM');
@@ -484,9 +492,6 @@ function setupTokenInputs() {
             // Máscara para Supply Total
             if (inputId === 'totalSupply') {
                 input.addEventListener('input', formatSupplyInput);
-                input.addEventListener('blur', checkProgressAndScroll);
-            } else {
-                input.addEventListener('blur', checkProgressAndScroll);
             }
         }
     });
@@ -623,31 +628,8 @@ function onTokenDataChange(event) {
  * Verifica progresso - versão simplificada sem scroll automático
  */
 function checkProgressAndScroll() {
-    // Atualizar dados primeiro
+    // Função legada - apenas atualiza dados sem verificações
     onTokenDataChange();
-    
-    // Apenas verificar se pode habilitar seções - sem validação de campos
-    // O botão "Próxima Seção" controla o fluxo manualmente
-    
-    const { tokenData, wallet } = AppState;
-    
-    const progressData = {
-        connected: wallet.connected,
-        name: tokenData.name || '',
-        symbol: tokenData.symbol || '',
-        supply: tokenData.totalSupply || '',
-        owner: tokenData.owner || ''
-    };
-    
-    console.log('🔍 Verificando progresso:', {
-        conectado: progressData.connected,
-        nome: progressData.name,
-        simbolo: progressData.symbol,
-        supply: progressData.supply,
-        owner: progressData.owner?.slice(0,10) + '...'
-    });
-    
-    console.log('📝 Dados atualizados - aguardando ação manual do usuário');
 }
 
 /**
@@ -1556,7 +1538,15 @@ function resetApp() {
     
     // Reset apenas dos dados do token - MANTER CONEXÃO DA WALLET
     const walletStatus = Wallet.getStatus();
-    AppState.tokenData = {};
+    
+    // Limpar COMPLETAMENTE os dados do token
+    AppState.tokenData = {
+        name: '',
+        symbol: '',
+        totalSupply: '',
+        decimals: '18',
+        owner: ''
+    };
     AppState.deployResult = null;
     
     // Manter dados da wallet se estiver conectada
@@ -1640,6 +1630,8 @@ function resetApp() {
         setTimeout(() => {
             enableSection('section-basic-info');
             console.log('✅ Seção básica habilitada automaticamente (carteira conectada)');
+            // Atualizar progresso visual para esconder botão até ter dados
+            updateVisualProgress();
         }, 500);
     }
     

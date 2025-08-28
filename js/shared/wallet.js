@@ -466,11 +466,6 @@ class Wallet {
                 contractInput.classList.add('border-success');
             }
         }
-        
-        // Atualizar progresso visual se existir
-        if (typeof updateVisualProgress === 'function') {
-            updateVisualProgress();
-        }
     }
     
     /**
