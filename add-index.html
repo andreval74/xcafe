@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Criador              </div>
-            </section> xcafe</title>
+  <title>Criador de Tokens - xcafe</title>
   
-  <!-- F              </div>
-            </section>
-
-            <!-- Seção 3: Deploy e Confirmação -->
+  <!-- Meta tags SEO -->
+  <meta name="description" content="Crie tokens ERC-20 personalizados na blockchain com a xcafe. Interface simples, segura e auditada.">
+  <meta name="keywords" content="criar token, ERC-20, ethereum, blockchain, smart contract, xcafe">
+  
+  <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="16x16" href="imgs/xcafe-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="imgs/xcafe-32x32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="imgs/xcafe-192x192.png">
@@ -21,7 +21,7 @@
   
   <!-- xcafe Global CSS Unificado -->
   <link href="styles/globals.css" rel="stylesheet">
-    <!-- Estilos customizados -->
+  <!-- Estilos customizados -->
   <link href="styles/progressive-flow.css" rel="stylesheet">
   <style>
     .spin {
@@ -32,9 +32,9 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-  </style>
-</head>
   
+  </style>
+ 
   <!-- Meta tags SEO -->
   <meta name="description" content="Crie tokens ERC-20 personalizados na blockchain com a xcafe. Interface simples, segura e auditada.">
   <meta name="keywords" content="criar token, ERC-20, ethereum, blockchain, smart contract, xcafe">
@@ -66,81 +66,7 @@
               
             <!-- Seção 1: Conexão da Carteira -->
             <section id="section-wallet" class="creation-section active section-enabled">
-              <div class="section-header">
-                <h4 class="text-primary mb-3">
-                  <i class="bi bi-wallet2 me-2"></i>1. Conexão da Carteira
-                </h4>
-                <p class="text-muted">Conecte sua carteira Web3 para continuar com a criação do token.</p>
-              </div>
-
-              <div class="card bg-dark border-warning shadow mb-4">
-                <div class="card-body">
-                  <div class="row g-3 align-items-center">
-                    <div class="col-lg-8">
-                      <label for="wallet-status" class="form-label text-white">Status da Conexão</label>
-                      <input type="text" class="form-control bg-dark text-white border-secondary" id="wallet-status" 
-                             placeholder="Clique em 'Conectar' para iniciar" style="font-family: monospace;" readonly>
-                    </div>
-                    <div class="col-lg-4">
-                      <label class="form-label text-white d-none d-lg-block">&nbsp;</label>
-                      <button id="connect-metamask-btn" type="button" class="btn btn-warning w-100 fw-bold">
-                        <i class="bi bi-wallet2 me-2"></i>CONECTAR
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <!-- Informações detalhadas da carteira (quando conectado) -->
-                  <div id="wallet-connection-info" style="display: none;">
-                    <div class="row mt-4 pt-3 border-top border-secondary">
-                      <div class="col-md-6">
-                        <h6 class="text-success mb-3"><i class="bi bi-check-circle me-2"></i>Carteira Conectada</h6>
-                        <p class="mb-2">
-                          <strong class="text-white">Endereço:</strong><br>
-                          <code id="connected-address" class="text-warning"></code>
-                        </p>
-                        <p class="mb-2">
-                          <strong class="text-white">Saldo BNB:</strong>
-                          <span id="wallet-balance" class="text-success ms-2">Carregando...</span>
-                        </p>
-                      </div>
-                      <div class="col-md-6">
-                        <h6 class="text-info mb-3"><i class="bi bi-wifi me-2"></i>Rede Atual</h6>
-                        <p class="mb-2">
-                          <strong class="text-white">Nome:</strong>
-                          <span id="current-network" class="text-info ms-2">-</span>
-                        </p>
-                        <p class="mb-2">
-                          <strong class="text-white">Chain ID:</strong>
-                          <span id="chain-id-value" class="text-info ms-2">-</span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="row mt-3" id="network-info-section" style="display: none;">
-                    <div class="col-12">
-                      <div class="alert alert-info mb-0">
-                        <i class="bi bi-wifi me-2"></i>
-                        <strong>Rede:</strong> <span id="current-network-simple" class="fw-bold">-</span>
-                        <span class="ms-3">
-                          <i class="bi bi-link-45deg me-1"></i>
-                          <strong>Chain ID:</strong> <span id="chain-id-value-simple" class="fw-bold">-</span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Botão de Navegação para Próximo (quando já conectado) -->
-              <div class="d-flex justify-content-between align-items-center mt-4">
-                <button id="wallet-prev-btn" type="button" class="btn btn-outline-secondary" disabled>
-                  <i class="bi bi-arrow-left me-2"></i>Anterior
-                </button>
-                <button id="wallet-next-btn" type="button" class="btn btn-primary" style="display: none;">
-                  Próximo <i class="bi bi-arrow-right ms-2"></i>
-                </button>
-              </div>
+              <div data-component="wallet-connection"></div>
             </section>
 
             <!-- Seção 2: Informações Básicas do Token -->
@@ -508,9 +434,11 @@
   <script src="js/shared/blockchain-utils.js"></script>
   <script src="js/shared/state-manager.js"></script>
   <script src="js/shared/ui-manager.js"></script>
+  
+  <!-- Sistema de Carteira DEVE carregar antes do template-loader -->
   <script src="js/shared/wallet-universal.js"></script>
   
-  <!-- Template Loader -->
+  <!-- Template Loader (carrega componentes incluindo wallet-connection) -->
   <script src="js/template-loader.js"></script>
   
   <!-- Nova API Híbrida (usuário paga deploy via MetaMask) -->
@@ -518,5 +446,42 @@
   
   <!-- Main Token Creation Script -->
   <script src="js/add-index.js"></script>
+  
+  <!-- Script de inicialização simplificado -->
+  <script>
+    // Inicialização básica sem scroll automático
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 add-index.html carregado');
+        
+        // Aguardar templates carregarem
+        setTimeout(() => {
+            console.log('🔄 Verificando componente wallet-connection...');
+            
+            const walletSection = document.getElementById('section-wallet');
+            const walletComponent = document.querySelector('[data-component="wallet-connection"]');
+            
+            if (walletSection && walletComponent) {
+                console.log('✅ Seção wallet encontrada');
+                console.log('✅ Componente wallet-connection encontrado');
+                
+                // Verificar se UniversalWallet está disponível
+                if (typeof UniversalWallet !== 'undefined') {
+                    console.log('✅ UniversalWallet disponível');
+                    
+                    // Re-inicializar se necessário
+                    setTimeout(() => {
+                        UniversalWallet.setupEventListeners();
+                        const status = UniversalWallet.getStatus();
+                        console.log('🔍 Status atual da wallet:', status);
+                    }, 1000);
+                } else {
+                    console.error('❌ UniversalWallet não encontrado');
+                }
+            } else {
+                console.error('❌ Seção wallet ou componente não encontrado');
+            }
+        }, 2000);
+    });
+  </script>
 </body>
 </html>

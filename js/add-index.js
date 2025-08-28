@@ -1653,8 +1653,7 @@ function resetApp() {
         `;
     }
     
-    // Voltar ao início
-    scrollToSection('section-wallet');
+    // Mostrar apenas primeira seção (SEM SCROLL)
     showOnlyFirstSection();
     
     // Interface da wallet já é atualizada automaticamente pelo UniversalWallet
