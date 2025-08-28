@@ -1,20 +1,21 @@
 /**
- * SISTEMA DE CONEXÃO DE CARTEIRA UNIVERSAL - xcafe
+ * SISTEMA DE CARTEIRA UNIFICADO - xcafe
  * 
- * ✅ Extraído do compra-token.html que está funcionando perfeitamente
+ * ✅ Sistema unificado de conexão MetaMask
  * 
  * 🎯 FUNCIONALIDADES:
  * - Conexão com MetaMask
  * - Detecção automática de rede com Chain ID
- * - Atualização de saldo
+ * - Atualização de saldo em tempo real
  * - Interface responsiva e profissional
  * - Botão de limpar que mantém conexão
  * - Event listeners para mudanças de conta/rede
+ * - Suporte a múltiplas blockchains
  * 
  * 📦 USO:
- * 1. Incluir script: <script src="js/shared/wallet-universal.js"></script>
- * 2. Chamar: UniversalWallet.init()
- * 3. Usar: UniversalWallet.connect()
+ * 1. Incluir script: <script src="js/shared/wallet.js"></script>
+ * 2. Chamar: Wallet.init()
+ * 3. Usar: Wallet.connect()
  */
 
 // ==================== VARIÁVEIS GLOBAIS ====================
@@ -23,14 +24,29 @@ let walletAddress = '';
 let networkData = {};
 let balanceUpdateInProgress = false;
 
+// ==================== CONFIGURAÇÕES ====================
+const WALLET_CONFIG = {
+    supportedChains: [56, 97, 1, 5, 137, 80001, 11155111, 8453], // BSC, Ethereum, Polygon, Base
+    defaultTimeout: 10000,
+    balanceUpdateInterval: 30000, // 30 segundos
+    networks: {
+        '0x38': { name: 'BSC Mainnet', chainId: '56', currency: 'BNB', explorer: 'https://bscscan.com' },
+        '0x61': { name: 'BSC Testnet', chainId: '97', currency: 'tBNB', explorer: 'https://testnet.bscscan.com' },
+        '0x1': { name: 'Ethereum Mainnet', chainId: '1', currency: 'ETH', explorer: 'https://etherscan.io' },
+        '0x89': { name: 'Polygon Mainnet', chainId: '137', currency: 'MATIC', explorer: 'https://polygonscan.com' },
+        '0xaa36a7': { name: 'Sepolia Testnet', chainId: '11155111', currency: 'ETH', explorer: 'https://sepolia.etherscan.io' },
+        '0x2105': { name: 'Base Mainnet', chainId: '8453', currency: 'ETH', explorer: 'https://basescan.org' }
+    }
+};
+
 // ==================== CLASSE PRINCIPAL ====================
-class UniversalWallet {
+class Wallet {
     
     /**
      * Inicializa o sistema de carteira
      */
     static init() {
-        console.log('🚀 Inicializando Sistema Universal de Carteira...');
+        console.log('🚀 Inicializando Sistema de Carteira...');
         
         // Configurar event listeners
         this.setupEventListeners();
@@ -38,7 +54,7 @@ class UniversalWallet {
         // Verificar conexão existente
         this.checkExistingConnection();
         
-        console.log('✅ Sistema Universal de Carteira inicializado');
+        console.log('✅ Sistema de Carteira inicializado');
     }
     
     /**
@@ -78,7 +94,7 @@ class UniversalWallet {
      */
     static async connect() {
         try {
-            if (typeof window.ethereum === 'undefined') {
+            if (!this.isMetaMaskAvailable()) {
                 alert('MetaMask não detectado! Por favor, instale a MetaMask.');
                 return false;
             }
@@ -131,7 +147,7 @@ class UniversalWallet {
     }
     
     /**
-     * Desconecta wallet (apenas interface, não desconecta MetaMask)
+     * Desconecta wallet (apenas interface)
      */
     static disconnect() {
         walletConnected = false;
@@ -149,10 +165,17 @@ class UniversalWallet {
     }
     
     /**
+     * Verifica se MetaMask está disponível
+     */
+    static isMetaMaskAvailable() {
+        return typeof window.ethereum !== 'undefined';
+    }
+    
+    /**
      * Verifica conexão existente
      */
     static async checkExistingConnection() {
-        if (typeof window.ethereum === 'undefined') return false;
+        if (!this.isMetaMaskAvailable()) return false;
         
         try {
             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -216,19 +239,11 @@ class UniversalWallet {
      * Obtém informações da rede baseado no chainId
      */
     static getNetworkInfo(chainId) {
-        const networks = {
-            '0x38': { name: 'BSC Mainnet', chainId: '56', currency: 'BNB' },
-            '0x61': { name: 'BSC Testnet', chainId: '97', currency: 'tBNB' },
-            '0x1': { name: 'Ethereum Mainnet', chainId: '1', currency: 'ETH' },
-            '0x89': { name: 'Polygon Mainnet', chainId: '137', currency: 'MATIC' },
-            '0xaa36a7': { name: 'Sepolia Testnet', chainId: '11155111', currency: 'ETH' },
-            '0x2105': { name: 'Base Mainnet', chainId: '8453', currency: 'ETH' }
-        };
-        
-        return networks[chainId] || { 
+        return WALLET_CONFIG.networks[chainId] || { 
             name: 'Rede Desconhecida', 
             chainId: parseInt(chainId, 16).toString(),
-            currency: 'ETH'
+            currency: 'ETH',
+            explorer: ''
         };
     }
     
@@ -345,9 +360,6 @@ class UniversalWallet {
                 if (typeof enableSection === 'function') {
                     enableSection('section-basic-info');
                 }
-                if (typeof scrollToSection === 'function') {
-                    scrollToSection('section-basic-info');
-                }
             }, 1500);
         }
         
@@ -412,7 +424,8 @@ class UniversalWallet {
         return {
             connected: walletConnected,
             address: walletAddress,
-            network: networkData
+            network: networkData,
+            isConnected: walletConnected // Para compatibilidade
         };
     }
     
@@ -465,86 +478,93 @@ class UniversalWallet {
             button.innerHTML = newText || button.originalText || 'Botão';
         }
     }
+    
+    /**
+     * Função para inserir HTML da conexão em qualquer página
+     */
+    static insertConnectionHTML(containerId, options = {}) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error('❌ Container não encontrado:', containerId);
+            return;
+        }
+        
+        const {
+            title = '1. Conexão da Carteira',
+            description = 'Conecte sua carteira Web3 para acessar a funcionalidade',
+            cardClass = 'border-warning',
+            headerClass = 'bg-warning text-dark'
+        } = options;
+        
+        container.innerHTML = `
+            <div class="card bg-dark ${cardClass} shadow mb-4">
+                <div class="card-header ${headerClass}">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-wallet2 me-2"></i>${title}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-secondary mb-3">${description}</p>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-8">
+                            <label for="wallet-status" class="form-label text-white">Status da Conexão</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="wallet-status" 
+                                   placeholder="Clique em 'Conectar' para iniciar" style="font-family: monospace;" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <button id="connect-metamask-btn" type="button" class="btn btn-warning w-100 fw-bold">
+                                <i class="bi bi-wallet2 me-2"></i>CONECTAR
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-3" id="network-info-section" style="display: none;">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-wifi me-2"></i>
+                                <strong>Rede:</strong> <span id="current-network" class="fw-bold">-</span>
+                                <span class="ms-3">
+                                    <i class="bi bi-link-45deg me-1"></i>
+                                    <strong>Chain ID:</strong> <span id="chain-id-value" class="fw-bold">-</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Re-configurar event listeners após inserir HTML
+        setTimeout(() => {
+            this.setupEventListeners();
+        }, 100);
+    }
 }
 
 // ==================== INICIALIZAÇÃO AUTOMÁTICA ====================
 
 // Auto-inicializar quando DOM carregar
 document.addEventListener('DOMContentLoaded', () => {
-    UniversalWallet.init();
+    Wallet.init();
 });
 
 // ==================== EXPORTS GLOBAIS ====================
 
 // Disponibilizar globalmente
-window.UniversalWallet = UniversalWallet;
+window.Wallet = Wallet;
 
-// Aliases para compatibilidade
-window.connectWallet = () => UniversalWallet.connect();
+// Aliases para compatibilidade com código existente
+window.UniversalWallet = Wallet;
+window.WalletManager = {
+    connect: () => Wallet.connect(),
+    disconnect: () => Wallet.disconnect(),
+    getStatus: () => Wallet.getStatus(),
+    updateWalletUI: () => Wallet.updateWalletUI()
+};
+
+// Funções globais para compatibilidade
+window.connectWallet = () => Wallet.connect();
 window.walletConnected = () => walletConnected;
 window.getWalletAddress = () => walletAddress;
 window.getWalletNetwork = () => networkData;
 
-// ==================== TEMPLATE HTML ====================
-
-/**
- * Função para inserir HTML da conexão em qualquer página
- */
-UniversalWallet.insertConnectionHTML = function(containerId, options = {}) {
-    const container = document.getElementById(containerId);
-    if (!container) {
-        console.error('❌ Container não encontrado:', containerId);
-        return;
-    }
-    
-    const {
-        title = '1. Conexão da Carteira',
-        description = 'Conecte sua carteira Web3 para acessar a funcionalidade',
-        cardClass = 'border-warning',
-        headerClass = 'bg-warning text-dark'
-    } = options;
-    
-    container.innerHTML = `
-        <div class="card bg-dark ${cardClass} shadow mb-4">
-            <div class="card-header ${headerClass}">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-wallet2 me-2"></i>${title}
-                </h5>
-            </div>
-            <div class="card-body">
-                <p class="text-secondary mb-3">${description}</p>
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-8">
-                        <label for="wallet-status" class="form-label text-white">Status da Conexão</label>
-                        <input type="text" class="form-control bg-dark text-white border-secondary" id="wallet-status" 
-                               placeholder="Clique em 'Conectar' para iniciar" style="font-family: monospace;" readonly>
-                    </div>
-                    <div class="col-md-4">
-                        <button id="connect-metamask-btn" type="button" class="btn btn-warning w-100 fw-bold">
-                            <i class="bi bi-wallet2 me-2"></i>CONECTAR
-                        </button>
-                    </div>
-                </div>
-                <div class="row mt-3" id="network-info-section" style="display: none;">
-                    <div class="col-12">
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-wifi me-2"></i>
-                            <strong>Rede:</strong> <span id="current-network" class="fw-bold">-</span>
-                            <span class="ms-3">
-                                <i class="bi bi-link-45deg me-1"></i>
-                                <strong>Chain ID:</strong> <span id="chain-id-value" class="fw-bold">-</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Re-configurar event listeners após inserir HTML
-    setTimeout(() => {
-        this.setupEventListeners();
-    }, 100);
-};
-
-console.log('🚀 Sistema Universal de Carteira carregado!');
+console.log('🚀 Sistema de Carteira Unificado carregado!');
