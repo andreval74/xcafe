@@ -627,6 +627,63 @@
                 </div>
               </div>
 
+              <!-- Arquivos e Verificação -->
+              <div class="card bg-gradient-dark border-primary shadow-lg mb-5">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-code me-2"></i>Arquivos e Verificação
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-lg-6 mb-4">
+                      <h6 class="text-white mb-3">
+                        <i class="bi bi-download me-2"></i>Arquivos do Contrato
+                      </h6>
+                      <div class="d-grid gap-2">
+                        <button id="download-contract-btn" class="btn btn-outline-primary">
+                          <i class="bi bi-file-earmark-text me-2"></i>Baixar Código Solidity (.sol)
+                        </button>
+                        <button id="download-abi-btn" class="btn btn-outline-info">
+                          <i class="bi bi-braces me-2"></i>Baixar ABI (.json)
+                        </button>
+                        <button id="download-bytecode-btn" class="btn btn-outline-warning">
+                          <i class="bi bi-code-slash me-2"></i>Baixar Bytecode (.txt)
+                        </button>
+                      </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                      <h6 class="text-white mb-3">
+                        <i class="bi bi-shield-check me-2"></i>Verificação do Contrato
+                      </h6>
+                      <div class="alert alert-info mb-3">
+                        <small>
+                          <i class="bi bi-info-circle me-1"></i>
+                          Para verificar seu contrato no explorer, use estas configurações:
+                        </small>
+                      </div>
+                      <div class="verification-config">
+                        <div class="mb-2">
+                          <label class="form-label text-muted small">Versão do Compilador:</label>
+                          <code class="text-warning">v0.8.26+commit</code>
+                        </div>
+                        <div class="mb-2">
+                          <label class="form-label text-muted small">Otimização:</label>
+                          <code class="text-success">Habilitada (200 runs)</code>
+                        </div>
+                        <div class="mb-2">
+                          <label class="form-label text-muted small">Licença:</label>
+                          <code class="text-info">MIT</code>
+                        </div>
+                      </div>
+                      <button id="open-verification-btn" class="btn btn-outline-success w-100 mt-3">
+                        <i class="bi bi-shield-check me-2"></i>Verificar no Explorer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Ações Finais -->
               <div class="row">
                 <div class="col-md-4 mb-3">

@@ -847,143 +847,6 @@ function closeModal(modalId) {
 }
 
 /**
- * Diagnóstico avançado da API
- */
-async function diagnoseApiProblem(deployData) {
-    console.log('🔍 Iniciando diagnóstico da API...');
-    
-    const api = new TokenDeployAPI();
-    const issues = [];
-    
-    // 1. Verificar campos obrigatórios
-    const requiredFields = ['tokenName', 'tokenSymbol', 'totalSupply', 'decimals', 'ownerAddress', 'chainId'];
-    for (const field of requiredFields) {
-        if (!deployData[field] || deployData[field] === '') {
-            issues.push(`❌ Campo obrigatório faltando: ${field}`);
-        }
-    }
-    
-    // 2. Validar tipos de dados
-    if (deployData.decimals && (isNaN(deployData.decimals) || deployData.decimals < 0 || deployData.decimals > 18)) {
-        issues.push(`❌ Decimals inválido: ${deployData.decimals} (deve ser 0-18)`);
-    }
-    
-    if (deployData.chainId && isNaN(deployData.chainId)) {
-        issues.push(`❌ ChainId inválido: ${deployData.chainId}`);
-    }
-    
-    if (deployData.totalSupply && (isNaN(deployData.totalSupply) || Number(deployData.totalSupply) <= 0)) {
-        issues.push(`❌ TotalSupply inválido: ${deployData.totalSupply}`);
-    }
-    
-    if (deployData.ownerAddress && (!deployData.ownerAddress.startsWith('0x') || deployData.ownerAddress.length !== 42)) {
-        issues.push(`❌ OwnerAddress inválido: ${deployData.ownerAddress}`);
-    }
-    
-    // 3. Testar diferentes formatos
-    const testFormats = [
-        {
-            name: 'Formato Original',
-            data: { ...deployData }
-        },
-        {
-            name: 'Formato com Strings',
-            data: {
-                ...deployData,
-                decimals: String(deployData.decimals),
-                chainId: String(deployData.chainId),
-                totalSupply: String(deployData.totalSupply)
-            }
-        },
-        {
-            name: 'Formato Simplificado',
-            data: {
-                name: deployData.tokenName,
-                symbol: deployData.tokenSymbol,
-                supply: deployData.totalSupply,
-                decimals: deployData.decimals,
-                owner: deployData.ownerAddress,
-                chain: deployData.chainId
-            }
-        }
-    ];
-    
-    console.log('📊 Relatório de Diagnóstico:');
-    console.log('========================');
-    
-    if (issues.length > 0) {
-        console.log('⚠️ Problemas encontrados:');
-        issues.forEach(issue => console.log(issue));
-    } else {
-        console.log('✅ Validação básica passou');
-    }
-    
-    console.log('\n🧪 Testando formatos diferentes:');
-    
-    for (const format of testFormats) {
-        console.log(`\n📝 ${format.name}:`);
-        console.log(JSON.stringify(format.data, null, 2));
-        
-        try {
-            const response = await fetch(`${api.baseUrl}/deploy-token`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(format.data)
-            });
-            
-            const responseText = await response.text();
-            
-            if (response.ok) {
-                console.log(`✅ ${format.name} funcionou!`);
-                console.log('📋 Resposta:', responseText);
-            } else {
-                console.log(`❌ ${format.name} falhou - Status: ${response.status}`);
-                console.log('📋 Erro:', responseText);
-            }
-            
-        } catch (error) {
-            console.log(`💥 ${format.name} - Erro de rede: ${error.message}`);
-        }
-    }
-    
-    console.log('\n========================');
-    console.log('🎯 Recomendações:');
-    
-    if (issues.length > 0) {
-        console.log('1. Corrija os problemas de validação listados');
-    }
-    
-    console.log('2. Se todos os formatos falharem com 500, o problema é no servidor da API');
-    console.log('3. Considere contatar o administrador da API');
-    console.log('4. Use o modo simulação como alternativa');
-}
-
-/**
- * Executa diagnóstico manual da API
- */
-async function runApiDiagnostic() {
-    console.log('🧪 Executando diagnóstico manual da API...');
-    
-    // Preparar dados de teste realísticos
-    const testData = {
-        tokenName: 'xcafe Test Token',
-        tokenSymbol: 'XCT',
-        totalSupply: '1000000',
-        decimals: 18,
-        ownerAddress: '0x1234567890123456789012345678901234567890',
-        chainId: 97,
-        deployerPrivateKey: 'auto'
-    };
-    
-    console.log('📊 Dados de teste preparados:', testData);
-    
-    await diagnoseApiProblem(testData);
-}
-
-/**
  * Escapa HTML para exibição segura
  */
 function escapeHtml(text) {
@@ -1528,128 +1391,123 @@ function updateDeployStatus(message) {
  * Mostra resultado do deploy
  */
 function showDeployResult(success, errorMessage = '') {
-    const resultSection = document.getElementById('section-result');
+    if (!success) {
+        // Mostrar erro
+        console.error('Deploy falhou:', errorMessage);
+        return;
+    }
     
-    if (!resultSection) return;
-    
-    let resultHTML = '';
-    
-    if (success && AppState.deployResult) {
+    // Preencher detalhes do token
+    const tokenDetails = document.getElementById('token-details-result');
+    if (tokenDetails && AppState.deployResult) {
         const { deployResult } = AppState;
-        const contractAddress = deployResult.contractAddress;
-        const txHash = deployResult.transactionHash;
-        const isSimulated = deployResult.isSimulated;
-        
-        resultHTML = `
-            <div class="alert ${isSimulated ? 'alert-warning' : 'alert-success'} mb-4">
-                <h4><i class="bi bi-${isSimulated ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
-                    ${isSimulated ? 'Deploy Simulado' : 'Deploy Realizado com Sucesso!'}
-                </h4>
-                <p>${isSimulated ? 
-                    'API temporariamente indisponível. Deploy simulado para demonstração.' : 
-                    'Seu token foi criado na blockchain com sucesso.'
-                }</p>
-                ${isSimulated ? 
-                    '<small class="text-muted">⚠️ Este é um resultado simulado. Para deploy real, tente novamente mais tarde.</small>' : 
-                    ''
-                }
-            </div>
-            
-            <div class="card bg-dark border-success mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Token Criado</h5>
+        tokenDetails.innerHTML = `
+            <div class="row text-white">
+                <div class="col-12 mb-3">
+                    <label class="text-muted">Nome do Token</label>
+                    <div class="fw-bold fs-5">${deployResult.deployData.name}</div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Nome:</strong> ${deployResult.deployData.name}</p>
-                            <p><strong>Símbolo:</strong> ${deployResult.deployData.symbol}</p>
-                            <p><strong>Supply:</strong> ${parseInt(deployResult.deployData.totalSupply).toLocaleString('pt-BR')} tokens</p>
-                            <p><strong>Decimais:</strong> ${deployResult.deployData.decimals}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Contrato:</strong> 
-                                <code class="text-primary">${contractAddress}</code>
-                                <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyToClipboard('${contractAddress}')">
-                                    <i class="bi bi-clipboard"></i>
-                                </button>
-                            </p>
-                            <p><strong>Transaction:</strong> 
-                                <a href="${getExplorerTxUrl(txHash, AppState.wallet.network?.chainId)}" target="_blank" class="text-info">
-                                    ${txHash?.slice(0, 10)}...${txHash?.slice(-8)}
-                                </a>
-                            </p>
-                        </div>
-                    </div>
+                <div class="col-6 mb-3">
+                    <label class="text-muted">Símbolo</label>
+                    <div class="fw-bold">${deployResult.deployData.symbol}</div>
                 </div>
-            </div>
-        `;
-    } else if (success) {
-        // Fallback para deploy simulado
-        const contractAddress = '0x' + Math.random().toString(16).substring(2, 42);
-        
-        resultHTML = `
-            <div class="alert alert-success mb-4">
-                <h4><i class="bi bi-check-circle me-2"></i>Deploy Realizado com Sucesso!</h4>
-                <p>Seu token foi criado na blockchain com sucesso.</p>
-            </div>
-            
-            <div class="card bg-dark border-success">
-                <div class="card-body">
-                    <h5 class="text-success mb-3">Detalhes do Token Criado</h5>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Nome:</strong> ${AppState.tokenData.name}</p>
-                            <p><strong>Símbolo:</strong> ${AppState.tokenData.symbol}</p>
-                            <p><strong>Supply:</strong> ${AppState.tokenData.totalSupply} tokens</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Decimais:</strong> ${AppState.tokenData.decimals}</p>
-                            <p><strong>Rede:</strong> ${AppState.wallet.network?.name}</p>
-                        </div>
-                    </div>
-                    
-                    <hr class="my-3">
-                    
-                    <p><strong>Endereço do Contrato:</strong></p>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control bg-dark text-success border-success" 
-                               value="${contractAddress}" readonly id="contract-address">
-                        <button class="btn btn-outline-success" onclick="copyContractAddress('${contractAddress}')">
-                            <i class="bi bi-copy"></i> Copiar
-                        </button>
-                    </div>
-                    
-                    <div class="d-flex gap-2 mt-4">
-                        <button class="btn btn-primary" onclick="resetApp()">
-                            <i class="bi bi-plus-circle me-2"></i>Criar Novo Token
-                        </button>
-                        <button class="btn btn-outline-primary" onclick="scrollToSection('section-wallet')">
-                            <i class="bi bi-arrow-up me-2"></i>Voltar ao Início
-                        </button>
-                    </div>
+                <div class="col-6 mb-3">
+                    <label class="text-muted">Decimais</label>
+                    <div class="fw-bold">${deployResult.deployData.decimals}</div>
                 </div>
-            </div>
-        `;
-    } else {
-        resultHTML = `
-            <div class="alert alert-danger mb-4">
-                <h4><i class="bi bi-x-circle me-2"></i>Erro no Deploy</h4>
-                <p>${errorMessage || 'Ocorreu um erro durante o deploy do token.'}</p>
-                
-                <button class="btn btn-outline-danger mt-2" onclick="scrollToSection('section-basic-info')">
-                    <i class="bi bi-arrow-left me-2"></i>Corrigir Dados
-                </button>
+                <div class="col-12 mb-3">
+                    <label class="text-muted">Supply Total</label>
+                    <div class="fw-bold fs-5 text-success">${parseInt(deployResult.deployData.totalSupply).toLocaleString('pt-BR')}</div>
+                </div>
+                <div class="col-12">
+                    <label class="text-muted">Proprietário</label>
+                    <div class="fw-bold" style="font-family: monospace; font-size: 0.85rem;">${deployResult.deployData.owner}</div>
+                </div>
             </div>
         `;
     }
     
-    // Adicionar resultado ao final da seção
-    const resultDiv = document.createElement('div');
-    resultDiv.className = 'deploy-result mt-4';
-    resultDiv.innerHTML = resultHTML;
+    // Preencher informações da blockchain
+    const blockchainDetails = document.getElementById('blockchain-details-result');
+    if (blockchainDetails && AppState.deployResult) {
+        const { deployResult } = AppState;
+        const networkName = AppState.wallet.network?.name || 'Rede Desconhecida';
+        const isSimulated = deployResult.isSimulated;
+        
+        blockchainDetails.innerHTML = `
+            <div class="row text-white">
+                <div class="col-12 mb-3">
+                    <label class="text-muted">Rede</label>
+                    <div class="fw-bold">${networkName}</div>
+                </div>
+                <div class="col-12 mb-3">
+                    <label class="text-muted">Status</label>
+                    <div class="fw-bold ${isSimulated ? 'text-warning' : 'text-success'}">
+                        <i class="bi bi-${isSimulated ? 'exclamation-triangle' : 'check-circle'} me-1"></i>
+                        ${isSimulated ? 'Simulado' : 'Confirmado'}
+                    </div>
+                </div>
+                <div class="col-12 mb-3">
+                    <label class="text-muted">Transaction Hash</label>
+                    <div class="fw-bold" style="font-family: monospace; font-size: 0.8rem;">
+                        <a href="${getExplorerTxUrl(deployResult.transactionHash, AppState.wallet.network?.chainId)}" 
+                           target="_blank" class="text-info text-decoration-none">
+                           ${deployResult.transactionHash}
+                        </a>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="text-muted">Data/Hora</label>
+                    <div class="fw-bold">${new Date().toLocaleString('pt-BR')}</div>
+                </div>
+            </div>
+        `;
+    }
     
-    resultSection.appendChild(resultDiv);
+    // Preencher endereço do contrato
+    const contractAddressDisplay = document.getElementById('contract-address-display');
+    if (contractAddressDisplay && AppState.deployResult) {
+        contractAddressDisplay.value = AppState.deployResult.contractAddress;
+    }
+    
+    // Preencher estatísticas
+    const gasUsedDisplay = document.getElementById('gas-used-display');
+    if (gasUsedDisplay && AppState.deployResult) {
+        gasUsedDisplay.textContent = AppState.deployResult.gasUsed || '-';
+    }
+    
+    const blockNumberDisplay = document.getElementById('block-number-display');
+    if (blockNumberDisplay && AppState.deployResult) {
+        blockNumberDisplay.textContent = AppState.deployResult.blockNumber || '-';
+    }
+    
+    // Preencher links do explorer
+    const explorerLinks = document.getElementById('explorer-links');
+    if (explorerLinks && AppState.deployResult) {
+        const contractUrl = getExplorerContractUrl(AppState.deployResult.contractAddress, AppState.wallet.network?.chainId);
+        explorerLinks.innerHTML = `
+            <a href="${contractUrl}" target="_blank" class="btn btn-outline-warning">
+                <i class="bi bi-search me-1"></i>Ver no Explorer
+            </a>
+        `;
+    }
+    
+    // Configurar botão de copiar
+    const copyContractBtn = document.getElementById('copy-contract-btn');
+    if (copyContractBtn) {
+        copyContractBtn.onclick = () => {
+            navigator.clipboard.writeText(AppState.deployResult.contractAddress);
+            copyContractBtn.innerHTML = '<i class="bi bi-check"></i>';
+            setTimeout(() => {
+                copyContractBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+            }, 2000);
+        };
+    }
+    
+    // Configurar downloads após o deploy
+    downloadContractFiles();
+}
+    }
 }
 
 /**
@@ -1867,6 +1725,159 @@ function copyContractAddress(address) {
         document.execCommand('copy');
         alert('Endereço copiado!');
     });
+}
+
+/**
+ * Funções de Download e Verificação
+ */
+function downloadContractFiles() {
+    if (!AppState.deployResult || !AppState.deployResult.sourceCode) {
+        alert('Nenhum contrato disponível para download');
+        return;
+    }
+    
+    // Configurar botões de download
+    const downloadContractBtn = document.getElementById('download-contract-btn');
+    const downloadAbiBtn = document.getElementById('download-abi-btn');
+    const downloadBytecodeBtn = document.getElementById('download-bytecode-btn');
+    const openVerificationBtn = document.getElementById('open-verification-btn');
+    
+    if (downloadContractBtn) {
+        downloadContractBtn.onclick = () => downloadSolidityFile();
+    }
+    
+    if (downloadAbiBtn) {
+        downloadAbiBtn.onclick = () => downloadABI();
+    }
+    
+    if (downloadBytecodeBtn) {
+        downloadBytecodeBtn.onclick = () => downloadBytecode();
+    }
+    
+    if (openVerificationBtn) {
+        openVerificationBtn.onclick = () => openVerificationUrl();
+    }
+}
+
+function downloadSolidityFile() {
+    if (!AppState.deployResult?.sourceCode) {
+        alert('Código Solidity não disponível');
+        return;
+    }
+    
+    const filename = `${AppState.tokenData.symbol}_Token.sol`;
+    const content = AppState.deployResult.sourceCode;
+    
+    downloadFile(filename, content, 'text/plain');
+}
+
+function downloadABI() {
+    if (!AppState.deployResult?.compilation?.abi) {
+        alert('ABI não disponível');
+        return;
+    }
+    
+    const filename = `${AppState.tokenData.symbol}_ABI.json`;
+    const content = JSON.stringify(AppState.deployResult.compilation.abi, null, 2);
+    
+    downloadFile(filename, content, 'application/json');
+}
+
+function downloadBytecode() {
+    if (!AppState.deployResult?.compilation?.bytecode) {
+        alert('Bytecode não disponível');
+        return;
+    }
+    
+    const filename = `${AppState.tokenData.symbol}_Bytecode.txt`;
+    const content = AppState.deployResult.compilation.bytecode;
+    
+    downloadFile(filename, content, 'text/plain');
+}
+
+function downloadFile(filename, content, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    window.URL.revokeObjectURL(url);
+    
+    // Feedback visual
+    const btn = event.target.closest('button');
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check me-2"></i>Baixado!';
+    btn.disabled = true;
+    
+    setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+    }, 2000);
+}
+
+function openVerificationUrl() {
+    if (!AppState.deployResult?.contractAddress) {
+        alert('Endereço do contrato não disponível');
+        return;
+    }
+    
+    const chainId = AppState.wallet.network?.chainId || 97;
+    let verificationUrl = '';
+    
+    switch (chainId) {
+        case 1: // Ethereum Mainnet
+            verificationUrl = `https://etherscan.io/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        case 56: // BSC Mainnet
+            verificationUrl = `https://bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        case 97: // BSC Testnet
+            verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        case 137: // Polygon
+            verificationUrl = `https://polygonscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        case 8453: // Base
+            verificationUrl = `https://basescan.org/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            break;
+        default:
+            verificationUrl = `https://etherscan.io/verifyContract?a=${AppState.deployResult.contractAddress}`;
+    }
+    
+    window.open(verificationUrl, '_blank');
+}
+
+// Utilitários para URLs de explorers
+function getExplorerTxUrl(txHash, chainId) {
+    if (!txHash) return '#';
+    
+    switch (chainId) {
+        case 1: return `https://etherscan.io/tx/${txHash}`;
+        case 56: return `https://bscscan.com/tx/${txHash}`;
+        case 97: return `https://testnet.bscscan.com/tx/${txHash}`;
+        case 137: return `https://polygonscan.com/tx/${txHash}`;
+        case 8453: return `https://basescan.org/tx/${txHash}`;
+        default: return `https://etherscan.io/tx/${txHash}`;
+    }
+}
+
+function getExplorerContractUrl(contractAddress, chainId) {
+    if (!contractAddress) return '#';
+    
+    switch (chainId) {
+        case 1: return `https://etherscan.io/address/${contractAddress}`;
+        case 56: return `https://bscscan.com/address/${contractAddress}`;
+        case 97: return `https://testnet.bscscan.com/address/${contractAddress}`;
+        case 137: return `https://polygonscan.com/address/${contractAddress}`;
+        case 8453: return `https://basescan.org/address/${contractAddress}`;
+        default: return `https://etherscan.io/address/${contractAddress}`;
+    }
+}
 }
 
 // Exportar funções globais

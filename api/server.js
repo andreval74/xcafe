@@ -46,7 +46,7 @@ app.get('/health', (req, res) => {
 // Função auxiliar para compilar contratos
 async function compileContract(sourceCode, contractName, optimization = true) {
     try {
-        const solcVersion = process.env.SOLC_VERSION || '0.8.19';
+        const solcVersion = process.env.SOLC_VERSION || '0.8.26'; // Versão mais moderna
         
         // Preparar input para solc
         const input = {
@@ -160,7 +160,7 @@ app.post('/api/generate-token', async (req, res) => {
         
         const sourceCode = `
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.26;
 
 contract ${contractName} {
     string public name = "${name}";
