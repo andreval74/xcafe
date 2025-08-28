@@ -15,6 +15,188 @@ const AppState = {
 };
 
 /**
+ * Gera o código Solidity do contrato
+ */
+function generateSolidityContract(tokenData) {
+    const contractCode = `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+/**
+ * @title ${tokenData.name} (${tokenData.symbol})
+ * @dev Token ERC-20 padrão gerado pelo xcafe Token Creator
+ * @custom:website https://xcafe.com
+ */
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract ${tokenData.symbol} is ERC20, Ownable {
+    
+    /**
+     * @dev Constructor que cria o token
+     * @param initialOwner Endereço que receberá todos os tokens
+     */
+    constructor(address initialOwner) 
+        ERC20("${tokenData.name}", "${tokenData.symbol}") 
+        Ownable(initialOwner) 
+    {
+        // Mint total supply para o owner
+        _mint(initialOwner, ${tokenData.totalSupply} * 10**${tokenData.decimals});
+    }
+    
+    /**
+     * @dev Retorna o número de decimais do token
+     */
+    function decimals() public pure override returns (uint8) {
+        return ${tokenData.decimals};
+    }
+    
+    /**
+     * @dev Permite ao owner mintar novos tokens (opcional)
+     * @param to Endereço que receberá os tokens
+     * @param amount Quantidade de tokens a serem mintados
+     */
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+    
+    /**
+     * @dev Permite ao owner queimar tokens de sua própria carteira
+     * @param amount Quantidade de tokens a serem queimados
+     */
+    function burn(uint256 amount) public onlyOwner {
+        _burn(msg.sender, amount);
+    }
+    
+    /**
+     * @dev Informações do token para verificação
+     */
+    function tokenInfo() public view returns (
+        string memory name,
+        string memory symbol,
+        uint256 totalSupply,
+        uint8 tokenDecimals,
+        address owner
+    ) {
+        return (
+            name(),
+            symbol(),
+            totalSupply(),
+            decimals(),
+            owner()
+        );
+    }
+}
+
+/**
+ * Token gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+ * Rede: ${AppState.wallet.network?.name || 'Não detectada'}
+ * Criado por: ${tokenData.owner}
+ * 
+ * Para fazer deploy:
+ * 1. Instale as dependências: npm install @openzeppelin/contracts
+ * 2. Compile o contrato: npx hardhat compile
+ * 3. Faça o deploy para a rede desejada
+ * 
+ * Gerado pelo xcafe Token Creator
+ * https://xcafe.com
+ */`;
+
+    return contractCode;
+}
+
+/**
+ * Faz download do arquivo .sol
+ */
+function downloadSolidityFile() {
+    const { tokenData } = AppState;
+    
+    if (!tokenData.name || !tokenData.symbol) {
+        alert('Preencha os dados do token antes de fazer o download');
+        return;
+    }
+    
+    try {
+        console.log('📥 Gerando arquivo Solidity...');
+        
+        const contractCode = generateSolidityContract(tokenData);
+        const fileName = `${tokenData.symbol}.sol`;
+        
+        // Criar blob e download
+        const blob = new Blob([contractCode], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Criar link temporário para download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = fileName;
+        downloadLink.style.display = 'none';
+        
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // Limpar URL
+        window.URL.revokeObjectURL(url);
+        
+        console.log(`✅ Arquivo ${fileName} baixado com sucesso`);
+        
+        // Feedback visual
+        showDownloadSuccess(fileName);
+        
+    } catch (error) {
+        console.error('❌ Erro ao gerar arquivo:', error);
+        alert('Erro ao gerar arquivo Solidity: ' + error.message);
+    }
+}
+
+/**
+ * Mostra feedback visual do download
+ */
+function showDownloadSuccess(fileName) {
+    const toast = document.createElement('div');
+    toast.className = 'position-fixed top-0 end-0 p-3';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        <div class="toast show" role="alert">
+            <div class="toast-header bg-success text-white">
+                <i class="bi bi-download me-2"></i>
+                <strong class="me-auto">Download Concluído</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                Arquivo <code>${fileName}</code> baixado com sucesso!
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remover após 5 segundos
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 5000);
+}
+
+/**
+ * Atualiza texto do botão de download
+ */
+function updateDownloadButtonText() {
+    const downloadFilename = document.getElementById('download-filename');
+    const { tokenData } = AppState;
+    
+    if (downloadFilename) {
+        if (tokenData.symbol && tokenData.symbol.length >= 2) {
+            downloadFilename.textContent = `Baixar ${tokenData.symbol}.sol`;
+        } else {
+            downloadFilename.textContent = 'Baixar Contrato.sol';
+        }
+    }
+}
+
+/**
  * Gera URL do explorer para transação
  */
 function getExplorerTxUrl(txHash, chainId) {
@@ -555,6 +737,108 @@ function startCountdown(callback) {
 }
 
 /**
+ * Mostra preview do contrato em modal
+ */
+function previewContract() {
+    const { tokenData } = AppState;
+    
+    if (!tokenData.name || !tokenData.symbol) {
+        alert('Preencha os dados do token antes de visualizar o código');
+        return;
+    }
+    
+    const contractCode = generateSolidityContract(tokenData);
+    
+    // Criar modal de preview
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'contractPreviewModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-code me-2"></i>
+                        Preview: ${tokenData.symbol}.sol
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Token: ${tokenData.name} (${tokenData.symbol})
+                        </small>
+                        <button class="btn btn-sm btn-outline-info" onclick="copyContractCode()">
+                            <i class="bi bi-clipboard me-1"></i>Copiar Código
+                        </button>
+                    </div>
+                    <pre class="bg-black p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code id="contract-code">${escapeHtml(contractCode)}</code></pre>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-info" onclick="downloadSolidityFile(); closeModal('contractPreviewModal')">
+                        <i class="bi bi-download me-2"></i>Baixar Arquivo
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Mostrar modal (usando Bootstrap se disponível, senão CSS puro)
+    if (typeof bootstrap !== 'undefined') {
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    } else {
+        modal.style.display = 'block';
+        modal.classList.add('show');
+    }
+    
+    // Remover modal quando fechar
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+/**
+ * Copia código do contrato para clipboard
+ */
+function copyContractCode() {
+    const codeElement = document.getElementById('contract-code');
+    if (codeElement) {
+        const contractCode = codeElement.textContent;
+        copyToClipboard(contractCode);
+    }
+}
+
+/**
+ * Fecha modal programaticamente
+ */
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        if (typeof bootstrap !== 'undefined') {
+            const bootstrapModal = bootstrap.Modal.getInstance(modal);
+            if (bootstrapModal) bootstrapModal.hide();
+        } else {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    }
+}
+
+/**
+ * Escapa HTML para exibição segura
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
  * Atualiza o resumo para deploy
  */
 function updateDeploySummary() {
@@ -606,6 +890,9 @@ function updateDeploySummary() {
     if (deployBtn) {
         deployBtn.disabled = false;
     }
+    
+    // Atualizar nome do arquivo de download
+    updateDownloadButtonText();
 }
 
 /**
@@ -780,19 +1067,45 @@ async function performRealDeploy() {
             totalSupply: tokenData.totalSupply,
             decimals: parseInt(tokenData.decimals),
             ownerAddress: tokenData.owner,
-            chainId: wallet.network?.chainId || 1,
+            chainId: wallet.network?.chainId || 97, // BSC Testnet como padrão
             deployerPrivateKey: 'auto' // API gerará chave temporária
         };
+        
+        // Validar dados antes do envio
+        if (!deployData.tokenName || deployData.tokenName.length < 3) {
+            throw new Error('Nome do token deve ter pelo menos 3 caracteres');
+        }
+        
+        if (!deployData.tokenSymbol || deployData.tokenSymbol.length < 2) {
+            throw new Error('Símbolo do token deve ter pelo menos 2 caracteres');
+        }
+        
+        if (!deployData.totalSupply || isNaN(deployData.totalSupply) || deployData.totalSupply <= 0) {
+            throw new Error('Supply total deve ser um número válido maior que zero');
+        }
+        
+        if (!deployData.ownerAddress || !deployData.ownerAddress.startsWith('0x') || deployData.ownerAddress.length !== 42) {
+            throw new Error('Endereço do proprietário deve ser um endereço Ethereum válido');
+        }
         
         updateDeployStatus('📝 Compilando contrato...');
         
         console.log('📤 Dados para API:', JSON.stringify(deployData, null, 2));
+        console.log('🌐 URL da API:', api.baseUrl);
+        console.log('🔗 ChainId:', deployData.chainId);
         
         // Fazer deploy via API com fallback
         let result;
         try {
+            console.log('🚀 Enviando requisição para API...');
             result = await api.deployToken(deployData);
+            console.log('✅ Resposta da API recebida:', result);
         } catch (apiError) {
+            console.error('💥 Erro detalhado da API:', {
+                message: apiError.message,
+                name: apiError.name,
+                stack: apiError.stack
+            });
             console.warn('⚠️ API falhou, usando simulação:', apiError.message);
             
             // Fallback: Simular deploy
@@ -1243,6 +1556,10 @@ window.connectWallet = connectWallet;
 window.resetApp = resetApp;
 window.scrollToSection = scrollToSection;
 window.copyContractAddress = copyContractAddress;
+window.downloadSolidityFile = downloadSolidityFile;
+window.previewContract = previewContract;
+window.copyContractCode = copyContractCode;
+window.closeModal = closeModal;
 
 console.log('✅ xcafe Token Creator - Tela Única carregado');
 

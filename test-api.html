@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste API xcafe</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #222; color: white; }
+        .result { background: #333; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #111; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste da API xcafe Token</h1>
+    
+    <div>
+        <h2>1. Status da API</h2>
+        <button onclick="testApiStatus()">Verificar Status</button>
+        <div id="status-result" class="result"></div>
+    </div>
+
+    <div>
+        <h2>2. Redes Suportadas</h2>
+        <button onclick="testNetworks()">Listar Redes</button>
+        <div id="networks-result" class="result"></div>
+    </div>
+
+    <div>
+        <h2>3. Teste de Deploy</h2>
+        <button onclick="testDeploy()">Testar Deploy Token</button>
+        <div id="deploy-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://xcafe-token-api.onrender.com';
+
+        async function testApiStatus() {
+            const resultDiv = document.getElementById('status-result');
+            try {
+                const response = await fetch(API_BASE);
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ API Online</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Erro</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        async function testNetworks() {
+            const resultDiv = document.getElementById('networks-result');
+            try {
+                const response = await fetch(API_BASE + '/networks');
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Redes Carregadas</h3>
+                    <p>Total: ${data.networks.length} redes</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Erro</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+
+        async function testDeploy() {
+            const resultDiv = document.getElementById('deploy-result');
+            
+            // Dados de teste
+            const testData = {
+                tokenName: "TesteToken",
+                tokenSymbol: "TEST",
+                totalSupply: "1000000",
+                decimals: 18,
+                ownerAddress: "0x742d35Cc6C8D9E8E6E0B7c6fD7Cc6CF11f1111111",
+                chainId: 97, // BSC Testnet
+                deployerPrivateKey: "auto"
+            };
+
+            try {
+                resultDiv.innerHTML = '<h3>⏳ Enviando requisição...</h3>';
+                
+                console.log('📤 Enviando dados:', testData);
+                
+                const response = await fetch(API_BASE + '/deploy-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                console.log('📥 Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('✅ Response data:', data);
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Deploy Teste Concluído</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('❌ Erro no deploy:', error);
+                
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Erro no Deploy</h3>
+                    <p>${error.message}</p>
+                    <h4>Dados Enviados:</h4>
+                    <pre>${JSON.stringify(testData, null, 2)}</pre>
+                `;
+            }
+        }
+
+        // Testes automáticos na carga
+        window.onload = function() {
+            console.log('🧪 Iniciando testes da API...');
+            testApiStatus();
+        };
+    </script>
+</body>
+</html>
