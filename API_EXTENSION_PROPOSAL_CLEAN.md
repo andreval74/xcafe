@@ -1,13 +1,15 @@
 # Proposta de Extensão da API xcafe - Funcionalidades de Compilação e Deploy
 
-## 📋 **Funcionalidades Necessárias para Adicionar na API**
+## Funcionalidades Necessárias para Adicionar na API
 
-### 🔨 **1. Endpoint de Compilação**
-```
+### 1. Endpoint de Compilação
+
+```http
 POST /compile
 ```
 
 **Entrada:**
+
 ```json
 {
   "sourceCode": "pragma solidity ^0.8.0; contract MyToken { ... }",
@@ -19,6 +21,7 @@ POST /compile
 ```
 
 **Saída:**
+
 ```json
 {
   "success": true,
@@ -31,12 +34,14 @@ POST /compile
 }
 ```
 
-### 🚀 **2. Endpoint de Deploy Compilado**
-```
+### 2. Endpoint de Deploy Compilado
+
+```http
 POST /deploy-compiled
 ```
 
 **Entrada:**
+
 ```json
 {
   "bytecode": "0x608060405234801561001057600080fd5b50...",
@@ -49,12 +54,14 @@ POST /deploy-compiled
 }
 ```
 
-### 🛠️ **3. Endpoint de Compilação + Deploy (Fluxo Completo)**
-```
+### 3. Endpoint de Compilação + Deploy (Fluxo Completo)
+
+```http
 POST /compile-and-deploy
 ```
 
 **Entrada:**
+
 ```json
 {
   "sourceCode": "pragma solidity ^0.8.0; ...",
@@ -67,12 +74,14 @@ POST /compile-and-deploy
 }
 ```
 
-### 🔍 **4. Endpoint de Verificação**
-```
+### 4. Endpoint de Verificação
+
+```http
 POST /verify-contract
 ```
 
 **Entrada:**
+
 ```json
 {
   "contractAddress": "0x...",
@@ -82,12 +91,14 @@ POST /verify-contract
 }
 ```
 
-### 📊 **5. Endpoint de Debug/Análise**
-```
+### 5. Endpoint de Debug/Análise
+
+```http
 POST /analyze-contract
 ```
 
 **Entrada:**
+
 ```json
 {
   "sourceCode": "pragma solidity ^0.8.0; ...",
@@ -95,16 +106,18 @@ POST /analyze-contract
 }
 ```
 
-## 🏗️ **Implementação Técnica Sugerida**
+## Implementação Técnica Sugerida
 
-### **Dependências Necessárias:**
+### Dependências Necessárias
+
 - `solc` (Solidity Compiler)
 - `web3` ou `ethers.js` para deploy
 - `@openzeppelin/contracts` para padrões seguros
 - Integração com exploradores de blockchain para verificação
 
-### **Estrutura de Pastas Sugerida para API:**
-```
+### Estrutura de Pastas Sugerida para API
+
+```text
 api/
 ├── routes/
 │   ├── compile.js
@@ -123,76 +136,84 @@ api/
     └── validator.js
 ```
 
-## 📝 **Especificação Detalhada dos Endpoints**
+## Especificação Detalhada dos Endpoints
 
-### **1. Compilação (/compile)**
+### 1. Compilação (/compile)
+
 - Validar código Solidity
 - Compilar com versão específica do solc
 - Retornar bytecode, ABI e metadata
 - Calcular estimativa de gas
 - Detectar erros e warnings
 
-### **2. Deploy (/deploy-compiled)**
+### 2. Deploy (/deploy-compiled)
+
 - Receber bytecode compilado
 - Fazer deploy na rede especificada
 - Configurar parâmetros do construtor
 - Retornar endereço do contrato e hash da transação
 
-### **3. Fluxo Completo (/compile-and-deploy)**
+### 3. Fluxo Completo (/compile-and-deploy)
+
 - Combinar compilação + deploy em uma chamada
 - Otimizar para casos de uso comuns
 - Reduzir número de requisições
 
-### **4. Verificação (/verify-contract)**
+### 4. Verificação (/verify-contract)
+
 - Verificar contratos em exploradores (Etherscan, BSCScan, etc.)
 - Submeter código fonte para verificação
 - Retornar status da verificação
 
-### **5. Análise (/analyze-contract)**
+### 5. Análise (/analyze-contract)
+
 - Análise de segurança básica
 - Otimização de gas
 - Verificação de padrões
 - Sugestões de melhorias
 
-## 🔧 **Benefícios da Implementação**
+## Benefícios da Implementação
 
-### **Para o Sistema xcafe:**
+### Para o Sistema xcafe
+
 1. **Padronização**: Toda lógica de compilação centralizada na API
 2. **Flexibilidade**: Suporte a contratos personalizados além de tokens
 3. **Confiabilidade**: Compilação consistente em ambiente controlado
 4. **Escalabilidade**: Fácil adicionar novas funcionalidades
 
-### **Para os Usuários:**
+### Para os Usuários
+
 1. **Transparência**: Ver exatamente o que está sendo compilado
 2. **Customização**: Possibilidade de ajustar código antes do deploy
 3. **Segurança**: Análise automática de possíveis problemas
 4. **Verificação**: Contratos automaticamente verificados nos exploradores
 
-## 🚦 **Implementação Gradual Sugerida**
+## Implementação Gradual Sugerida
 
-### **Fase 1: Funcionalidades Básicas**
-- ✅ Endpoint de compilação simples
-- ✅ Deploy de contratos compilados
-- ✅ Integração com redes existentes
+### Fase 1: Funcionalidades Básicas
 
-### **Fase 2: Funcionalidades Avançadas**
-- ✅ Fluxo completo compile-and-deploy
-- ✅ Verificação automática em exploradores
-- ✅ Análise básica de segurança
+- Endpoint de compilação simples
+- Deploy de contratos compilados
+- Integração com redes existentes
 
-### **Fase 3: Melhorias e Otimizações**
-- ✅ Cache de compilações
-- ✅ Suporte a múltiplas versões do Solidity
-- ✅ Análise avançada de gas e segurança
+### Fase 2: Funcionalidades Avançadas
 
-## 📞 **Próximos Passos**
+- Fluxo completo compile-and-deploy
+- Verificação automática em exploradores
+- Análise básica de segurança
+
+### Fase 3: Melhorias e Otimizações
+
+- Cache de compilações
+- Suporte a múltiplas versões do Solidity
+- Análise avançada de gas e segurança
+
+## Próximos Passos
 
 1. **Validar arquitetura** com desenvolvedor da API
 2. **Implementar endpoints básicos** (compile + deploy-compiled)
 3. **Testar integração** com sistema xcafe atual
-4. **Expandir funcionalidades** conforme necessidade
+4. **Expandar funcionalidades** conforme necessidade
 5. **Documentar APIs** para facilitar manutenção
 
----
-
-💡 **Esta extensão tornaria a API xcafe uma solução completa para desenvolvimento e deploy de contratos, não apenas tokens ERC-20!**
+Esta extensão tornaria a API xcafe uma solução completa para desenvolvimento e deploy de contratos, não apenas tokens ERC-20!
