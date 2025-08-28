@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Capacidades da API xcafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <div class="container py-4">
+        <h1 class="mb-4"><i class="bi bi-gear-fill me-2"></i>Teste de Capacidades da API xcafe</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card bg-secondary">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle me-2"></i>Informações da API</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary w-100 mb-3" onclick="testApiStatus()">
+                            <i class="bi bi-cloud-check me-2"></i>Testar Status da API
+                        </button>
+                        <div id="api-status-result"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card bg-secondary">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-task me-2"></i>Endpoints Disponíveis</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-warning w-100 mb-3" onclick="testEndpoints()">
+                            <i class="bi bi-search me-2"></i>Descobrir Endpoints
+                        </button>
+                        <div id="endpoints-result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-secondary">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Teste de Funcionalidades</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-success w-100 mb-3" onclick="testCompileEndpoint()">
+                                    <i class="bi bi-hammer me-2"></i>Testar Compilação
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-info w-100 mb-3" onclick="testDebugEndpoint()">
+                                    <i class="bi bi-bug me-2"></i>Testar Debug
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-secondary w-100 mb-3" onclick="testVerifyEndpoint()">
+                                    <i class="bi bi-shield-check me-2"></i>Testar Verificação
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-danger w-100 mb-3" onclick="testDeployCapabilities()">
+                                    <i class="bi bi-rocket me-2"></i>Analisar Deploy
+                                </button>
+                            </div>
+                        </div>
+                        <div id="functionality-result" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-dark border-primary">
+                    <div class="card-header bg-primary">
+                        <h5 class="mb-0"><i class="bi bi-terminal me-2"></i>Log de Resultados</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre id="log-output" class="text-light" style="height: 300px; overflow-y: auto; background: #000; padding: 15px; border-radius: 5px;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://xcafe-token-api.onrender.com';
+        
+        function log(message) {
+            const logElement = document.getElementById('log-output');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function testApiStatus() {
+            log('🔍 Testando status da API...');
+            try {
+                const response = await fetch(API_BASE);
+                const data = await response.json();
+                
+                document.getElementById('api-status-result').innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>✅ API Online</strong><br>
+                        Versão: ${data.version}<br>
+                        Redes: ${data.totalNetworks}<br>
+                        Deploy: ${data.deploySupportedNetworks} redes
+                    </div>
+                `;
+                
+                log(`✅ API Online - Versão ${data.version}`);
+                log(`📊 Redes suportadas: ${data.totalNetworks}`);
+                log(`🚀 Deploy disponível em: ${data.deploySupportedNetworks} redes`);
+                
+            } catch (error) {
+                document.getElementById('api-status-result').innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>❌ Erro:</strong> ${error.message}
+                    </div>
+                `;
+                log(`❌ Erro: ${error.message}`);
+            }
+        }
+
+        async function testEndpoints() {
+            log('🔍 Descobrindo endpoints...');
+            const commonEndpoints = [
+                '/compile', '/debug', '/verify', '/validate', '/contract',
+                '/source', '/bytecode', '/abi', '/metadata', '/analyze',
+                '/networks', '/tokens', '/status', '/health', '/docs'
+            ];
+            
+            const results = [];
+            
+            for (const endpoint of commonEndpoints) {
+                try {
+                    const response = await fetch(API_BASE + endpoint, { method: 'GET' });
+                    if (response.status !== 404) {
+                        results.push(`✅ ${endpoint} - Status: ${response.status}`);
+                        log(`✅ Encontrado: ${endpoint} (${response.status})`);
+                    }
+                } catch (error) {
+                    // Ignorar erros de rede
+                }
+            }
+            
+            document.getElementById('endpoints-result').innerHTML = 
+                results.length > 0 ? 
+                `<div class="alert alert-info"><strong>Endpoints encontrados:</strong><br>${results.join('<br>')}</div>` :
+                `<div class="alert alert-warning">Nenhum endpoint adicional encontrado</div>`;
+            
+            if (results.length === 0) {
+                log('⚠️ Apenas /deploy-token confirmado como disponível');
+            }
+        }
+
+        async function testCompileEndpoint() {
+            log('🔨 Testando capacidades de compilação...');
+            
+            const testContract = `
+                pragma solidity ^0.8.0;
+                contract TestToken {
+                    string public name = "Test";
+                    string public symbol = "TEST";
+                    uint256 public totalSupply = 1000000;
+                }
+            `;
+            
+            const testData = { source: testContract };
+            
+            try {
+                const response = await fetch(API_BASE + '/compile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (response.status === 404) {
+                    log('❌ Endpoint /compile não existe');
+                    updateFunctionalityResult('compile', false, 'Endpoint não encontrado');
+                } else {
+                    const data = await response.json();
+                    log(`✅ Compilação disponível - Status: ${response.status}`);
+                    updateFunctionalityResult('compile', true, 'Disponível');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro na compilação: ${error.message}`);
+                updateFunctionalityResult('compile', false, error.message);
+            }
+        }
+
+        async function testDebugEndpoint() {
+            log('🐛 Testando capacidades de debug...');
+            
+            const testData = { 
+                contractAddress: '0x1234567890123456789012345678901234567890',
+                transactionHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
+            };
+            
+            try {
+                const response = await fetch(API_BASE + '/debug', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                if (response.status === 404) {
+                    log('❌ Endpoint /debug não existe');
+                    updateFunctionalityResult('debug', false, 'Endpoint não encontrado');
+                } else {
+                    const data = await response.json();
+                    log(`✅ Debug disponível - Status: ${response.status}`);
+                    updateFunctionalityResult('debug', true, 'Disponível');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro no debug: ${error.message}`);
+                updateFunctionalityResult('debug', false, error.message);
+            }
+        }
+
+        async function testVerifyEndpoint() {
+            log('🛡️ Testando verificação de contratos...');
+            
+            try {
+                const response = await fetch(API_BASE + '/verify', { method: 'GET' });
+                
+                if (response.status === 404) {
+                    log('❌ Endpoint /verify não existe');
+                    updateFunctionalityResult('verify', false, 'Endpoint não encontrado');
+                } else {
+                    log(`✅ Verificação disponível - Status: ${response.status}`);
+                    updateFunctionalityResult('verify', true, 'Disponível');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro na verificação: ${error.message}`);
+                updateFunctionalityResult('verify', false, error.message);
+            }
+        }
+
+        async function testDeployCapabilities() {
+            log('🚀 Analisando capacidades de deploy...');
+            
+            // Teste com dados mínimos para ver resposta detalhada
+            const testData = {
+                tokenName: "AnalysisToken",
+                tokenSymbol: "ANALYSIS"
+            };
+            
+            try {
+                const response = await fetch(API_BASE + '/deploy-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 400) {
+                    log(`📊 Deploy requer: ${data.error}`);
+                    updateFunctionalityResult('deploy', true, `Campos obrigatórios identificados`);
+                } else if (response.status === 429) {
+                    log(`⏳ Rate limit ativo: ${data.error}`);
+                    updateFunctionalityResult('deploy', true, 'Rate limit configurado');
+                } else {
+                    log(`✅ Deploy funcionando - Status: ${response.status}`);
+                    updateFunctionalityResult('deploy', true, 'Totalmente funcional');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro no deploy: ${error.message}`);
+                updateFunctionalityResult('deploy', false, error.message);
+            }
+        }
+
+        function updateFunctionalityResult(feature, available, details) {
+            const resultDiv = document.getElementById('functionality-result');
+            const icon = available ? '✅' : '❌';
+            const className = available ? 'success' : 'danger';
+            
+            resultDiv.innerHTML += `
+                <div class="alert alert-${className} mb-2">
+                    ${icon} <strong>${feature.toUpperCase()}:</strong> ${details}
+                </div>
+            `;
+        }
+
+        // Auto-executar teste de status ao carregar
+        window.addEventListener('load', () => {
+            log('🚀 Iniciando análise de capacidades da API xcafe...');
+            testApiStatus();
+        });
+    </script>
+</body>
+</html>

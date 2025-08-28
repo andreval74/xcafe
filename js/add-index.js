@@ -1485,12 +1485,32 @@ async function performRealDeploy() {
             console.log('🔧 Executando diagnóstico da API...');
             await diagnoseApiProblem(deployData);
             
-            console.warn('⚠️ API falhou, usando simulação:', apiError.message);
-            
-            // Fallback: Simular deploy
-            updateDeployStatus('🔄 API indisponível - simulando deploy...');
-            
-            result = await simulateDeployForFallback(deployData);
+            // Tentar API estendida se disponível
+            try {
+                console.log('🔄 Tentando API estendida...');
+                updateDeployStatus('🔄 Tentando API com compilação...');
+                
+                const extendedAPI = new XcafeExtendedAPI();
+                result = await extendedAPI.deployToken({
+                    name: deployData.tokenName,
+                    symbol: deployData.tokenSymbol,
+                    totalSupply: deployData.totalSupply,
+                    decimals: deployData.decimals,
+                    owner: deployData.ownerAddress,
+                    chainId: deployData.chainId
+                });
+                
+                console.log('✅ API estendida funcionou!');
+                
+            } catch (extendedError) {
+                console.warn('⚠️ API estendida também falhou:', extendedError.message);
+                console.warn('⚠️ Usando simulação como último recurso');
+                
+                // Fallback: Simular deploy
+                updateDeployStatus('🔄 APIs indisponíveis - simulando deploy...');
+                
+                result = await simulateDeployForFallback(deployData);
+            }
         }
         
         updateDeployStatus('🔍 Verificando contrato...');
