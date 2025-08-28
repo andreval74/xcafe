@@ -23,14 +23,15 @@ ProgressiveFlow.prototype.deployTokenContract = async function(tokenData) {
         if (this.api && this.currentNetwork.supported) {
             console.log('Tentando deploy via API...');
             
-            // Preparar dados para API
+            // Preparar dados para API com todos os parâmetros obrigatórios
             const deployData = {
-                name: tokenData.name,
-                symbol: tokenData.symbol,
-                decimals: parseInt(tokenData.decimals),
+                tokenName: tokenData.name,
+                tokenSymbol: tokenData.symbol,
+                decimals: parseInt(tokenData.decimals) || 18,
                 totalSupply: tokenData.totalSupply.toString(),
-                owner: tokenData.owner,
-                chainId: selectedChainId
+                ownerAddress: tokenData.owner,
+                chainId: selectedChainId,
+                deployerPrivateKey: this.generateDeployerPrivateKey()
             };
             
             console.log('Enviando para API:', deployData);
@@ -75,6 +76,16 @@ ProgressiveFlow.prototype.deployTokenContract = async function(tokenData) {
             transactionHash: null
         };
     }
+};
+
+// Método auxiliar para gerar chave privada temporária
+ProgressiveFlow.prototype.generateDeployerPrivateKey = function() {
+    if (typeof ethers === 'undefined') {
+        throw new Error('Ethers.js não carregado');
+    }
+    
+    const wallet = ethers.Wallet.createRandom();
+    return wallet.privateKey;
 };
 
 console.log('✅ Progressive Flow Multi-Chain carregado');
