@@ -442,9 +442,17 @@
                           <strong>Status da API:</strong>
                         </small>
                       </div>
-                      <div id="api-status" class="small">
-                        <i class="bi bi-hourglass-split text-muted me-2"></i>
-                        <span class="text-muted">Verificando...</span>
+                      <div class="d-flex align-items-center">
+                        <div id="api-status" class="small me-2">
+                          <i class="bi bi-hourglass-split text-muted me-2"></i>
+                          <span class="text-muted">Verificando...</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-info btn-sm me-1" onclick="testApiStatus()" title="Testar API">
+                          <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="runApiDiagnostic()" title="Diagnóstico Detalhado">
+                          <i class="bi bi-gear"></i>
+                        </button>
                       </div>
                     </div>
                     <small>

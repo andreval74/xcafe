@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API - xcafe</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: monospace;
+        }
+        
+        button:hover { background: #0056b3; }
+        button:disabled { background: #666; cursor: not-allowed; }
+        
+        .result {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        
+        h2 { color: #007bff; }
+        h3 { color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug da API xcafe Token Deploy</h1>
+    
+    <div class="test-section">
+        <h2>1. Status da API</h2>
+        <button onclick="testApiStatus()">🔍 Testar Status</button>
+        <button onclick="getApiInfo()">📋 Info da API</button>
+        <div id="status-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Teste de Dados - Formatos Diferentes</h2>
+        <button onclick="testFormat1()">📝 Formato 1 (Atual)</button>
+        <button onclick="testFormat2()">📝 Formato 2 (Strings)</button>
+        <button onclick="testFormat3()">📝 Formato 3 (Minimal)</button>
+        <button onclick="testFormat4()">📝 Formato 4 (Extended)</button>
+        <div id="format-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Análise de Headers</h2>
+        <button onclick="testHeaders()">🔗 Testar Headers</button>
+        <button onclick="testCors()">🌐 Testar CORS</button>
+        <div id="headers-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Validação de Campos</h2>
+        <button onclick="testValidation()">✅ Testar Validações</button>
+        <button onclick="testEdgeCases()">⚠️ Casos Extremos</button>
+        <div id="validation-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://xcafe-token-api.onrender.com';
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+        
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function testApiStatus() {
+            clearLog('status-result');
+            log('status-result', '🔍 Testando status da API...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/`);
+                const data = await response.json();
+                
+                log('status-result', `✅ Status: ${response.status}`, 'success');
+                log('status-result', `📊 Dados: ${JSON.stringify(data, null, 2)}`, 'info');
+                
+            } catch (error) {
+                log('status-result', `❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        async function getApiInfo() {
+            clearLog('status-result');
+            log('status-result', '📋 Obtendo informações da API...', 'info');
+            
+            try {
+                // Testar diferentes endpoints
+                const endpoints = ['/', '/health', '/status', '/info', '/networks'];
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(`${API_BASE}${endpoint}`);
+                        log('status-result', `🔗 ${endpoint}: ${response.status}`, response.ok ? 'success' : 'warning');
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            log('status-result', `   └─ ${JSON.stringify(data).substring(0, 100)}...`, 'info');
+                        }
+                    } catch (e) {
+                        log('status-result', `❌ ${endpoint}: ${e.message}`, 'error');
+                    }
+                }
+                
+            } catch (error) {
+                log('status-result', `❌ Erro geral: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFormat1() {
+            clearLog('format-result');
+            log('format-result', '📝 Testando Formato 1 (Atual)...', 'info');
+            
+            const testData = {
+                tokenName: "TestToken",
+                tokenSymbol: "TEST",
+                totalSupply: "1000000",
+                decimals: 18,
+                ownerAddress: "0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4",
+                chainId: 97,
+                deployerPrivateKey: "auto"
+            };
+            
+            await testDeploy('format-result', testData, 'Formato 1');
+        }
+
+        async function testFormat2() {
+            clearLog('format-result');
+            log('format-result', '📝 Testando Formato 2 (Strings)...', 'info');
+            
+            const testData = {
+                tokenName: "TestToken",
+                tokenSymbol: "TEST",
+                totalSupply: "1000000",
+                decimals: "18",
+                ownerAddress: "0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4",
+                chainId: "97",
+                deployerPrivateKey: "auto"
+            };
+            
+            await testDeploy('format-result', testData, 'Formato 2');
+        }
+
+        async function testFormat3() {
+            clearLog('format-result');
+            log('format-result', '📝 Testando Formato 3 (Minimal)...', 'info');
+            
+            const testData = {
+                name: "TestToken",
+                symbol: "TEST",
+                supply: "1000000",
+                decimals: 18,
+                owner: "0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4",
+                network: 97
+            };
+            
+            await testDeploy('format-result', testData, 'Formato 3');
+        }
+
+        async function testFormat4() {
+            clearLog('format-result');
+            log('format-result', '📝 Testando Formato 4 (Extended)...', 'info');
+            
+            const testData = {
+                token: {
+                    name: "TestToken",
+                    symbol: "TEST",
+                    totalSupply: "1000000",
+                    decimals: 18
+                },
+                deployment: {
+                    ownerAddress: "0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4",
+                    chainId: 97,
+                    deployerPrivateKey: "auto"
+                }
+            };
+            
+            await testDeploy('format-result', testData, 'Formato 4');
+        }
+
+        async function testDeploy(logElement, data, formatName) {
+            try {
+                log(logElement, `📤 Enviando ${formatName}:`, 'info');
+                log(logElement, JSON.stringify(data, null, 2), 'info');
+                
+                const response = await fetch(`${API_BASE}/deploy-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const responseText = await response.text();
+                
+                if (response.ok) {
+                    log(logElement, `✅ ${formatName} funcionou! Status: ${response.status}`, 'success');
+                    log(logElement, `📋 Resposta: ${responseText}`, 'success');
+                } else {
+                    log(logElement, `❌ ${formatName} falhou! Status: ${response.status}`, 'error');
+                    log(logElement, `📋 Erro: ${responseText}`, 'error');
+                }
+                
+            } catch (error) {
+                log(logElement, `💥 Erro no ${formatName}: ${error.message}`, 'error');
+            }
+        }
+
+        async function testHeaders() {
+            clearLog('headers-result');
+            log('headers-result', '🔗 Testando diferentes headers...', 'info');
+            
+            const testData = {
+                tokenName: "TestToken",
+                tokenSymbol: "TEST",
+                totalSupply: "1000000",
+                decimals: 18,
+                ownerAddress: "0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4",
+                chainId: 97,
+                deployerPrivateKey: "auto"
+            };
+            
+            const headerCombinations = [
+                { 'Content-Type': 'application/json' },
+                { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                { 'Content-Type': 'application/json', 'User-Agent': 'xcafe-client/1.0' },
+                { 'Content-Type': 'application/json', 'Origin': 'https://xcafe.com' }
+            ];
+            
+            for (let i = 0; i < headerCombinations.length; i++) {
+                const headers = headerCombinations[i];
+                log('headers-result', `🔗 Testando headers ${i + 1}: ${JSON.stringify(headers)}`, 'info');
+                
+                try {
+                    const response = await fetch(`${API_BASE}/deploy-token`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(testData)
+                    });
+                    
+                    const responseText = await response.text();
+                    log('headers-result', `   └─ Status: ${response.status}`, response.ok ? 'success' : 'error');
+                    log('headers-result', `   └─ Response: ${responseText.substring(0, 200)}...`, 'info');
+                    
+                } catch (error) {
+                    log('headers-result', `   └─ Erro: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testCors() {
+            clearLog('headers-result');
+            log('headers-result', '🌐 Testando CORS...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/`, {
+                    method: 'OPTIONS'
+                });
+                
+                log('headers-result', `📋 Headers de resposta:`, 'info');
+                for (const [key, value] of response.headers.entries()) {
+                    log('headers-result', `   ${key}: ${value}`, 'info');
+                }
+                
+            } catch (error) {
+                log('headers-result', `❌ Erro CORS: ${error.message}`, 'error');
+            }
+        }
+
+        async function testValidation() {
+            clearLog('validation-result');
+            log('validation-result', '✅ Testando validações...', 'info');
+            
+            const testCases = [
+                { name: 'Nome muito curto', data: { tokenName: 'A', tokenSymbol: 'TEST', totalSupply: '1000', decimals: 18, ownerAddress: '0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4', chainId: 97 }},
+                { name: 'Símbolo muito curto', data: { tokenName: 'TestToken', tokenSymbol: 'T', totalSupply: '1000', decimals: 18, ownerAddress: '0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4', chainId: 97 }},
+                { name: 'Supply zero', data: { tokenName: 'TestToken', tokenSymbol: 'TEST', totalSupply: '0', decimals: 18, ownerAddress: '0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4', chainId: 97 }},
+                { name: 'Endereço inválido', data: { tokenName: 'TestToken', tokenSymbol: 'TEST', totalSupply: '1000', decimals: 18, ownerAddress: '0xinvalid', chainId: 97 }},
+                { name: 'ChainId inválido', data: { tokenName: 'TestToken', tokenSymbol: 'TEST', totalSupply: '1000', decimals: 18, ownerAddress: '0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4', chainId: 999999 }}
+            ];
+            
+            for (const testCase of testCases) {
+                log('validation-result', `🧪 Testando: ${testCase.name}`, 'warning');
+                await testDeploy('validation-result', testCase.data, testCase.name);
+            }
+        }
+
+        async function testEdgeCases() {
+            clearLog('validation-result');
+            log('validation-result', '⚠️ Testando casos extremos...', 'info');
+            
+            const testCases = [
+                { name: 'Supply muito grande', data: { tokenName: 'TestToken', tokenSymbol: 'TEST', totalSupply: '999999999999999999999999999999', decimals: 18, ownerAddress: '0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4', chainId: 97 }},
+                { name: 'Caracteres especiais', data: { tokenName: 'Test Token ✨', tokenSymbol: 'TEST💎', totalSupply: '1000', decimals: 18, ownerAddress: '0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4', chainId: 97 }},
+                { name: 'Dados em branco', data: { tokenName: '', tokenSymbol: '', totalSupply: '', decimals: '', ownerAddress: '', chainId: '' }}
+            ];
+            
+            for (const testCase of testCases) {
+                log('validation-result', `🧪 Testando: ${testCase.name}`, 'warning');
+                await testDeploy('validation-result', testCase.data, testCase.name);
+            }
+        }
+
+        // Auto-executar teste de status
+        window.addEventListener('load', () => {
+            setTimeout(testApiStatus, 1000);
+        });
+    </script>
+</body>
+</html>

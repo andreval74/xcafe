@@ -847,6 +847,143 @@ function closeModal(modalId) {
 }
 
 /**
+ * Diagnóstico avançado da API
+ */
+async function diagnoseApiProblem(deployData) {
+    console.log('🔍 Iniciando diagnóstico da API...');
+    
+    const api = new TokenDeployAPI();
+    const issues = [];
+    
+    // 1. Verificar campos obrigatórios
+    const requiredFields = ['tokenName', 'tokenSymbol', 'totalSupply', 'decimals', 'ownerAddress', 'chainId'];
+    for (const field of requiredFields) {
+        if (!deployData[field] || deployData[field] === '') {
+            issues.push(`❌ Campo obrigatório faltando: ${field}`);
+        }
+    }
+    
+    // 2. Validar tipos de dados
+    if (deployData.decimals && (isNaN(deployData.decimals) || deployData.decimals < 0 || deployData.decimals > 18)) {
+        issues.push(`❌ Decimals inválido: ${deployData.decimals} (deve ser 0-18)`);
+    }
+    
+    if (deployData.chainId && isNaN(deployData.chainId)) {
+        issues.push(`❌ ChainId inválido: ${deployData.chainId}`);
+    }
+    
+    if (deployData.totalSupply && (isNaN(deployData.totalSupply) || Number(deployData.totalSupply) <= 0)) {
+        issues.push(`❌ TotalSupply inválido: ${deployData.totalSupply}`);
+    }
+    
+    if (deployData.ownerAddress && (!deployData.ownerAddress.startsWith('0x') || deployData.ownerAddress.length !== 42)) {
+        issues.push(`❌ OwnerAddress inválido: ${deployData.ownerAddress}`);
+    }
+    
+    // 3. Testar diferentes formatos
+    const testFormats = [
+        {
+            name: 'Formato Original',
+            data: { ...deployData }
+        },
+        {
+            name: 'Formato com Strings',
+            data: {
+                ...deployData,
+                decimals: String(deployData.decimals),
+                chainId: String(deployData.chainId),
+                totalSupply: String(deployData.totalSupply)
+            }
+        },
+        {
+            name: 'Formato Simplificado',
+            data: {
+                name: deployData.tokenName,
+                symbol: deployData.tokenSymbol,
+                supply: deployData.totalSupply,
+                decimals: deployData.decimals,
+                owner: deployData.ownerAddress,
+                chain: deployData.chainId
+            }
+        }
+    ];
+    
+    console.log('📊 Relatório de Diagnóstico:');
+    console.log('========================');
+    
+    if (issues.length > 0) {
+        console.log('⚠️ Problemas encontrados:');
+        issues.forEach(issue => console.log(issue));
+    } else {
+        console.log('✅ Validação básica passou');
+    }
+    
+    console.log('\n🧪 Testando formatos diferentes:');
+    
+    for (const format of testFormats) {
+        console.log(`\n📝 ${format.name}:`);
+        console.log(JSON.stringify(format.data, null, 2));
+        
+        try {
+            const response = await fetch(`${api.baseUrl}/deploy-token`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(format.data)
+            });
+            
+            const responseText = await response.text();
+            
+            if (response.ok) {
+                console.log(`✅ ${format.name} funcionou!`);
+                console.log('📋 Resposta:', responseText);
+            } else {
+                console.log(`❌ ${format.name} falhou - Status: ${response.status}`);
+                console.log('📋 Erro:', responseText);
+            }
+            
+        } catch (error) {
+            console.log(`💥 ${format.name} - Erro de rede: ${error.message}`);
+        }
+    }
+    
+    console.log('\n========================');
+    console.log('🎯 Recomendações:');
+    
+    if (issues.length > 0) {
+        console.log('1. Corrija os problemas de validação listados');
+    }
+    
+    console.log('2. Se todos os formatos falharem com 500, o problema é no servidor da API');
+    console.log('3. Considere contatar o administrador da API');
+    console.log('4. Use o modo simulação como alternativa');
+}
+
+/**
+ * Executa diagnóstico manual da API
+ */
+async function runApiDiagnostic() {
+    console.log('🧪 Executando diagnóstico manual da API...');
+    
+    // Preparar dados de teste realísticos
+    const testData = {
+        tokenName: 'xcafe Test Token',
+        tokenSymbol: 'XCT',
+        totalSupply: '1000000',
+        decimals: 18,
+        ownerAddress: '0x1234567890123456789012345678901234567890',
+        chainId: 97,
+        deployerPrivateKey: 'auto'
+    };
+    
+    console.log('📊 Dados de teste preparados:', testData);
+    
+    await diagnoseApiProblem(testData);
+}
+
+/**
  * Escapa HTML para exibição segura
  */
 function escapeHtml(text) {
@@ -1102,19 +1239,47 @@ async function simulateDeployForFallback(deployData) {
  */
 async function checkApiStatus() {
     try {
+        console.log('🔍 Verificando status da API...');
         const api = new TokenDeployAPI();
-        const response = await fetch(`${api.baseUrl}/health`, { 
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        
+        const response = await fetch(`${api.baseUrl}/`, { 
             method: 'GET',
-            timeout: 5000 
+            signal: controller.signal,
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
         
+        clearTimeout(timeoutId);
+        
         if (response.ok) {
-            return { available: true, status: 'online', message: 'API disponível' };
+            const data = await response.json();
+            console.log('✅ API Status:', data);
+            return { 
+                available: true, 
+                status: 'online', 
+                message: 'API disponível',
+                version: data.version || 'N/A',
+                networks: data.totalNetworks || 0
+            };
         } else {
-            return { available: false, status: 'error', message: `HTTP ${response.status}` };
+            console.warn('⚠️ API respondeu com erro:', response.status);
+            return { 
+                available: false, 
+                status: 'error', 
+                message: `HTTP ${response.status}` 
+            };
         }
     } catch (error) {
-        return { available: false, status: 'offline', message: 'API indisponível' };
+        console.error('❌ Erro ao verificar API:', error.message);
+        return { 
+            available: false, 
+            status: 'offline', 
+            message: error.name === 'AbortError' ? 'Timeout' : 'API indisponível' 
+        };
     }
 }
 
@@ -1123,7 +1288,16 @@ async function checkApiStatus() {
  */
 async function updateApiStatus() {
     const statusElement = document.getElementById('api-status');
-    if (!statusElement) return;
+    if (!statusElement) {
+        console.warn('⚠️ Elemento api-status não encontrado');
+        return;
+    }
+    
+    // Mostrar estado de carregamento
+    statusElement.innerHTML = `
+        <i class="bi bi-hourglass-split text-warning me-2"></i>
+        <span class="text-warning">Verificando API...</span>
+    `;
     
     const status = await checkApiStatus();
     
@@ -1131,20 +1305,114 @@ async function updateApiStatus() {
         statusElement.innerHTML = `
             <i class="bi bi-check-circle text-success me-2"></i>
             <span class="text-success">API Online</span>
-            <small class="text-muted ms-2">- Deploy real disponível</small>
+            <small class="text-muted ms-2">v${status.version} - ${status.networks} redes</small>
         `;
+        
+        console.log('✅ API está online e funcionando');
+        
+        // Garantir que modo real está disponível
+        const realRadio = document.getElementById('realDeploy');
+        if (realRadio) realRadio.disabled = false;
+        
     } else {
         statusElement.innerHTML = `
-            <i class="bi bi-x-circle text-warning me-2"></i>
-            <span class="text-warning">API Indisponível</span>
-            <small class="text-muted ms-2">- Use modo simulação</small>
+            <i class="bi bi-x-circle text-danger me-2"></i>
+            <span class="text-danger">API ${status.status}</span>
+            <small class="text-muted ms-2">${status.message}</small>
         `;
+        
+        console.warn('⚠️ API indisponível:', status.message);
         
         // Auto-selecionar simulação se API estiver offline
         const simulatedRadio = document.getElementById('simulatedDeploy');
         if (simulatedRadio) {
             simulatedRadio.checked = true;
+            console.log('🔄 Auto-selecionando modo simulação');
         }
+        
+        // Desabilitar modo real se API não funcionar
+        const realRadio = document.getElementById('realDeploy');
+        if (realRadio) realRadio.disabled = true;
+    }
+}
+
+/**
+ * Testa especificamente o endpoint de deploy
+ */
+async function testDeployEndpoint() {
+    try {
+        console.log('🧪 Testando endpoint de deploy...');
+        const api = new TokenDeployAPI();
+        
+        // Dados de teste mínimos
+        const testData = {
+            tokenName: "TestToken",
+            tokenSymbol: "TEST", 
+            totalSupply: "1000",
+            decimals: 18,
+            ownerAddress: "0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4",
+            chainId: 97,
+            deployerPrivateKey: "auto"
+        };
+        
+        const response = await fetch(`${api.baseUrl}/deploy-token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testData)
+        });
+        
+        const result = await response.text();
+        console.log('🧪 Resposta do teste:', {
+            status: response.status,
+            ok: response.ok,
+            response: result
+        });
+        
+        return response.ok;
+        
+    } catch (error) {
+        console.error('🧪 Erro no teste de deploy:', error);
+        return false;
+    }
+}
+
+/**
+ * Função para testar API manualmente (chamada pelo botão)
+ */
+async function testApiStatus() {
+    console.log('🔄 Teste manual da API iniciado...');
+    
+    const button = event.target.closest('button');
+    const originalHtml = button.innerHTML;
+    
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+    button.disabled = true;
+    
+    try {
+        // Teste básico da API
+        await updateApiStatus();
+        
+        // Teste avançado do endpoint de deploy
+        const deployWorks = await testDeployEndpoint();
+        
+        console.log('📊 Resultado dos testes:', {
+            apiOnline: true,
+            deployEndpoint: deployWorks
+        });
+        
+        if (deployWorks) {
+            console.log('✅ API totalmente funcional!');
+        } else {
+            console.log('⚠️ API online mas endpoint de deploy com problemas');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro durante teste:', error);
+    } finally {
+        button.innerHTML = originalHtml;
+        button.disabled = false;
     }
 }
 
@@ -1212,6 +1480,11 @@ async function performRealDeploy() {
                 name: apiError.name,
                 stack: apiError.stack
             });
+            
+            // Executar diagnóstico da API quando falhar
+            console.log('🔧 Executando diagnóstico da API...');
+            await diagnoseApiProblem(deployData);
+            
             console.warn('⚠️ API falhou, usando simulação:', apiError.message);
             
             // Fallback: Simular deploy
@@ -1666,6 +1939,7 @@ window.downloadSolidityFile = downloadSolidityFile;
 window.previewContract = previewContract;
 window.copyContractCode = copyContractCode;
 window.closeModal = closeModal;
+window.testApiStatus = testApiStatus;
 
 console.log('✅ xcafe Token Creator - Tela Única carregado');
 
