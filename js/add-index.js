@@ -17,98 +17,106 @@ const AppState = {
 /**
  * Gera o código Solidity do contrato
  */
-function generateSolidityContract(tokenData) {
-    const contractCode = `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
-
 /**
- * @title ${tokenData.name} (${tokenData.symbol})
- * @dev Token ERC-20 padrão gerado pelo xcafe Token Creator
- * @custom:website https://xcafe.com
+ * Carrega o template base.sol e substitui as variáveis
  */
+async function loadSolidityTemplate() {
+    try {
+        const response = await fetch('./contratos/base.sol');
+        if (!response.ok) {
+            throw new Error('Não foi possível carregar o template base.sol');
+        }
+        return await response.text();
+    } catch (error) {
+        console.warn('⚠️ Erro ao carregar template base.sol, usando template interno:', error);
+        // Template de fallback básico caso não consiga carregar o base.sol
+        return `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+/*
+Gerado por:
+Smart Contract Cafe - Fallback Template
+https://smartcontract.cafe
+*/
 
-contract ${tokenData.symbol} is ERC20, Ownable {
+// CONFIGURAÇÕES DO TOKEN
+string constant TOKEN_NAME = "{{TOKEN_NAME}}";
+string constant TOKEN_SYMBOL = "{{TOKEN_SYMBOL}}";
+uint8 constant TOKEN_DECIMALS = {{DECIMALS}};
+uint256 constant TOKEN_SUPPLY = {{TOKEN_SUPPLY}};
+address constant TOKEN_OWNER = {{OWNER_ADDRESS}};
+string constant TOKEN_LOGO_URI = "{{TOKEN_LOGO_URI}}";
+address constant BTCBR_ORIGINAL = {{TOKEN_ORIGINAL}};
+
+// Contrato ERC-20 básico
+contract {{TOKEN_SYMBOL}} {
+    string public name = TOKEN_NAME;
+    string public symbol = TOKEN_SYMBOL;
+    uint8 public decimals = TOKEN_DECIMALS;
+    uint256 public totalSupply = TOKEN_SUPPLY * (10 ** uint256(decimals));
     
-    /**
-     * @dev Constructor que cria o token
-     * @param initialOwner Endereço que receberá todos os tokens
-     */
-    constructor(address initialOwner) 
-        ERC20("${tokenData.name}", "${tokenData.symbol}") 
-        Ownable(initialOwner) 
-    {
-        // Mint total supply para o owner
-        _mint(initialOwner, ${tokenData.totalSupply} * 10**${tokenData.decimals});
+    mapping(address => uint256) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowances;
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    
+    constructor() {
+        _balances[TOKEN_OWNER] = totalSupply;
+        emit Transfer(address(0x0), TOKEN_OWNER, totalSupply);
     }
     
-    /**
-     * @dev Retorna o número de decimais do token
-     */
-    function decimals() public pure override returns (uint8) {
-        return ${tokenData.decimals};
+    function balanceOf(address account) public view returns (uint256) {
+        return _balances[account];
     }
     
-    /**
-     * @dev Permite ao owner mintar novos tokens (opcional)
-     * @param to Endereço que receberá os tokens
-     * @param amount Quantidade de tokens a serem mintados
-     */
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
+    function transfer(address recipient, uint256 amount) public returns (bool) {
+        require(_balances[msg.sender] >= amount, "Insufficient balance");
+        _balances[msg.sender] -= amount;
+        _balances[recipient] += amount;
+        emit Transfer(msg.sender, recipient, amount);
+        return true;
     }
-    
-    /**
-     * @dev Permite ao owner queimar tokens de sua própria carteira
-     * @param amount Quantidade de tokens a serem queimados
-     */
-    function burn(uint256 amount) public onlyOwner {
-        _burn(msg.sender, amount);
-    }
-    
-    /**
-     * @dev Informações do token para verificação
-     */
-    function tokenInfo() public view returns (
-        string memory name,
-        string memory symbol,
-        uint256 totalSupply,
-        uint8 tokenDecimals,
-        address owner
-    ) {
-        return (
-            name(),
-            symbol(),
-            totalSupply(),
-            decimals(),
-            owner()
-        );
+}
+
+/*
+Template de fallback gerado pelo xcafe Token Creator
+https://xcafe.com
+*/`;
     }
 }
 
 /**
- * Token gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
- * Rede: ${AppState.wallet.network?.name || 'Não detectada'}
- * Criado por: ${tokenData.owner}
- * 
- * Para fazer deploy:
- * 1. Instale as dependências: npm install @openzeppelin/contracts
- * 2. Compile o contrato: npx hardhat compile
- * 3. Faça o deploy para a rede desejada
- * 
- * Gerado pelo xcafe Token Creator
- * https://xcafe.com
- */`;
-
-    return contractCode;
+ * Gera contrato Solidity usando template base.sol
+ */
+async function generateSolidityContract(tokenData) {
+    try {
+        // Carregar template base.sol
+        const template = await loadSolidityTemplate();
+        
+        // Substituir variáveis do template
+        const contractCode = template
+            .replace(/{{TOKEN_NAME}}/g, tokenData.name)
+            .replace(/{{TOKEN_SYMBOL}}/g, tokenData.symbol)
+            .replace(/{{DECIMALS}}/g, tokenData.decimals || '18')
+            .replace(/{{TOKEN_SUPPLY}}/g, tokenData.totalSupply)
+            .replace(/{{OWNER_ADDRESS}}/g, tokenData.owner)
+            .replace(/{{TOKEN_LOGO_URI}}/g, '') // Logo URI vazio por padrão
+            .replace(/{{TOKEN_ORIGINAL}}/g, '0x80c09daC9dC95669B03C2d82967Af62e93d0Fe84'); // Endereço padrão BTCBR
+            
+        console.log('✅ Contrato Solidity gerado com sucesso usando template base.sol');
+        return contractCode;
+        
+    } catch (error) {
+        console.error('❌ Erro ao gerar contrato Solidity:', error);
+        throw error;
+    }
 }
 
 /**
  * Faz download do arquivo .sol
  */
-function downloadSolidityFile() {
+async function downloadSolidityFile() {
     const { tokenData } = AppState;
     
     if (!tokenData.name || !tokenData.symbol) {
@@ -119,7 +127,7 @@ function downloadSolidityFile() {
     try {
         console.log('📥 Gerando arquivo Solidity...');
         
-        const contractCode = generateSolidityContract(tokenData);
+        const contractCode = await generateSolidityContract(tokenData);
         const fileName = `${tokenData.symbol}.sol`;
         
         // Criar blob e download
@@ -739,7 +747,7 @@ function startCountdown(callback) {
 /**
  * Mostra preview do contrato em modal
  */
-function previewContract() {
+async function previewContract() {
     const { tokenData } = AppState;
     
     if (!tokenData.name || !tokenData.symbol) {
@@ -747,7 +755,8 @@ function previewContract() {
         return;
     }
     
-    const contractCode = generateSolidityContract(tokenData);
+    try {
+        const contractCode = await generateSolidityContract(tokenData);
     
     // Criar modal de preview
     const modal = document.createElement('div');
@@ -800,6 +809,11 @@ function previewContract() {
     modal.addEventListener('hidden.bs.modal', () => {
         document.body.removeChild(modal);
     });
+        
+    } catch (error) {
+        console.error('❌ Erro ao gerar preview do contrato:', error);
+        alert('Erro ao gerar preview do contrato. Tente novamente.');
+    }
 }
 
 /**
