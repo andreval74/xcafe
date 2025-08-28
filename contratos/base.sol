@@ -8,12 +8,12 @@ https://smartcontract.cafe
 */
 
 // CONFIGURAÇÕES DO TOKEN
-string constant TOKEN_NAME = "{{TOKEN_NAME}}";
+string constant TOKEN_NAME = {{TOKEN_NAME}};
 string constant TOKEN_SYMBOL = "{{TOKEN_SYMBOL}}";
 uint8 constant TOKEN_DECIMALS = {{DECIMALS}};
 uint256 constant TOKEN_SUPPLY = {{TOKEN_SUPPLY}};
 address constant TOKEN_OWNER = {{OWNER_ADDRESS}};
-string constant TOKEN_LOGO_URI = "{{TOKEN_LOGO_URI}}";
+string constant TOKEN_LOGO_URI = {{TOKEN_LOGO_URI}};
 address constant BTCBR_ORIGINAL = {{TOKEN_ORIGINAL}};
 
 // FIM CONFIGURAÇÕES DO TOKEN
