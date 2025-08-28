@@ -9,6 +9,21 @@ const solc = require('solc');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Função para converter endereço para checksum correto
+function toChecksumAddress(address) {
+    if (!address || !address.startsWith('0x')) {
+        return address;
+    }
+    
+    const ethers = require('ethers');
+    try {
+        return ethers.utils.getAddress(address.toLowerCase());
+    } catch (error) {
+        console.warn('⚠️ Endereço inválido para checksum:', address);
+        return address;
+    }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

@@ -94,13 +94,16 @@ async function generateSolidityContract(tokenData) {
         // Carregar template base.sol
         const template = await loadSolidityTemplate();
         
+        // Aplicar checksum ao endereço do owner
+        const ownerAddressChecksum = ethers.utils.getAddress(tokenData.owner);
+        
         // Substituir variáveis do template
         const contractCode = template
             .replace(/{{TOKEN_NAME}}/g, tokenData.name)
             .replace(/{{TOKEN_SYMBOL}}/g, tokenData.symbol)
             .replace(/{{DECIMALS}}/g, tokenData.decimals || '18')
             .replace(/{{TOKEN_SUPPLY}}/g, tokenData.totalSupply)
-            .replace(/{{OWNER_ADDRESS}}/g, tokenData.owner)
+            .replace(/{{OWNER_ADDRESS}}/g, ownerAddressChecksum)
             .replace(/{{TOKEN_LOGO_URI}}/g, '') // Logo URI vazio por padrão
             .replace(/{{TOKEN_ORIGINAL}}/g, '0x80c09daC9dC95669B03C2d82967Af62e93d0Fe84'); // Endereço BTCBR em checksum correto
             
