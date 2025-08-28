@@ -78,7 +78,7 @@ contract SCCAFE {
 
     constructor() {
         _balances[contractOwner] = totalSupply;
-        emit Transfer(address(0x0), contractOwner, totalSupply);
+        emit Transfer(address(0), contractOwner, totalSupply);
     }
 
     // FUNÇÕES ADMINISTRATIVAS
@@ -98,7 +98,7 @@ contract SCCAFE {
     }
 
     function transferOwnership(address newOwner) public onlyOwner {
-        require(newOwner != address(0x0), "New owner is the zero address");
+        require(newOwner != address(0), "New owner is the zero address");
         emit OwnershipTransferred(contractOwner, newOwner);
         contractOwner = newOwner;
     }
@@ -116,7 +116,7 @@ contract SCCAFE {
 
     // FUNÇÕES ERC20 BÁSICAS
     function transfer(address recipient, uint256 amount) public whenNotPaused whenActive returns (bool) {
-        require(recipient != address(0x0), "Transfer to zero address");
+        require(recipient != address(0), "Transfer to zero address");
         require(amount > 0, "Amount must be > 0");
         require(_balances[msg.sender] >= amount, "Insufficient balance");
 
@@ -128,7 +128,7 @@ contract SCCAFE {
     }
 
     function approve(address spender, uint256 amount) public whenNotPaused whenActive returns (bool) {
-        require(spender != address(0x0), "Approve to zero address");
+        require(spender != address(0), "Approve to zero address");
         _allowances[msg.sender][spender] = amount;
 
         emit Approval(msg.sender, spender, amount);
@@ -136,7 +136,7 @@ contract SCCAFE {
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public whenNotPaused whenActive returns (bool) {
-        require(sender != address(0x0) && recipient != address(0x0), "Invalid address");
+        require(sender != address(0) && recipient != address(0), "Invalid address");
         require(amount > 0, "Amount must be > 0");
         require(_balances[sender] >= amount, "Insufficient balance");
         require(_allowances[sender][msg.sender] >= amount, "Allowance exceeded");

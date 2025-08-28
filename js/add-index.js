@@ -102,7 +102,7 @@ async function generateSolidityContract(tokenData) {
             .replace(/{{TOKEN_SUPPLY}}/g, tokenData.totalSupply)
             .replace(/{{OWNER_ADDRESS}}/g, tokenData.owner)
             .replace(/{{TOKEN_LOGO_URI}}/g, '') // Logo URI vazio por padrão
-            .replace(/{{TOKEN_ORIGINAL}}/g, '0x80c09daC9dC95669B03C2d82967Af62e93d0Fe84'); // Endereço padrão BTCBR
+            .replace(/{{TOKEN_ORIGINAL}}/g, '0x80c09daC9dC95669B03C2d82967Af62e93d0Fe84'); // Endereço BTCBR em checksum correto
             
         console.log('✅ Contrato Solidity gerado com sucesso usando template base.sol');
         return contractCode;
