@@ -1239,13 +1239,13 @@ async function simulateDeployForFallback(deployData) {
  */
 async function checkApiStatus() {
     try {
-        console.log('🔍 Verificando status da API...');
-        const api = new TokenDeployAPI();
+        console.log('🔍 Verificando status da API híbrida...');
+        const api = new XcafeHybridAPI();
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
         
-        const response = await fetch(`${api.baseUrl}/`, { 
+        const response = await fetch(`${api.baseUrl}/health`, { 
             method: 'GET',
             signal: controller.signal,
             headers: {
@@ -1261,9 +1261,9 @@ async function checkApiStatus() {
             return { 
                 available: true, 
                 status: 'online', 
-                message: 'API disponível',
-                version: data.version || 'N/A',
-                networks: data.totalNetworks || 0
+                message: 'API híbrida disponível',
+                version: data.version || 'hybrid-1.0',
+                mode: 'hybrid'
             };
         } else {
             console.warn('⚠️ API respondeu com erro:', response.status);
@@ -1304,11 +1304,11 @@ async function updateApiStatus() {
     if (status.available) {
         statusElement.innerHTML = `
             <i class="bi bi-check-circle text-success me-2"></i>
-            <span class="text-success">API Online</span>
-            <small class="text-muted ms-2">v${status.version} - ${status.networks} redes</small>
+            <span class="text-success">API Híbrida Online</span>
+            <small class="text-muted ms-2">v${status.version} - ${status.mode}</small>
         `;
         
-        console.log('✅ API está online e funcionando');
+        console.log('✅ API híbrida está online e funcionando');
         
         // Garantir que modo real está disponível
         const realRadio = document.getElementById('realDeploy');
@@ -1337,25 +1337,22 @@ async function updateApiStatus() {
 }
 
 /**
- * Testa especificamente o endpoint de deploy
+ * Testa especificamente o endpoint de compilação
  */
 async function testDeployEndpoint() {
     try {
-        console.log('🧪 Testando endpoint de deploy...');
-        const api = new TokenDeployAPI();
+        console.log('🧪 Testando endpoint de compilação...');
+        const api = new XcafeHybridAPI();
         
         // Dados de teste mínimos
         const testData = {
-            tokenName: "TestToken",
-            tokenSymbol: "TEST", 
+            name: "TestToken",
+            symbol: "TEST", 
             totalSupply: "1000",
-            decimals: 18,
-            ownerAddress: "0x742d35Cc6623C29Dd2022f0c0d4e4a3a9E87B7B4",
-            chainId: 97,
-            deployerPrivateKey: "auto"
+            decimals: 18
         };
         
-        const response = await fetch(`${api.baseUrl}/deploy-token`, {
+        const response = await fetch(`${api.baseUrl}/api/generate-token`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1373,7 +1370,7 @@ async function testDeployEndpoint() {
         return response.ok;
         
     } catch (error) {
-        console.error('🧪 Erro no teste de deploy:', error);
+        console.error('🧪 Erro no teste de compilação:', error);
         return false;
     }
 }
@@ -1403,9 +1400,9 @@ async function testApiStatus() {
         });
         
         if (deployWorks) {
-            console.log('✅ API totalmente funcional!');
+            console.log('✅ API híbrida totalmente funcional!');
         } else {
-            console.log('⚠️ API online mas endpoint de deploy com problemas');
+            console.log('⚠️ API online mas endpoint de compilação com problemas');
         }
         
     } catch (error) {
@@ -1425,105 +1422,27 @@ async function performRealDeploy() {
     try {
         updateDeployStatus('📋 Preparando deploy...');
         
-        // Verificar se TokenDeployAPI está disponível
-        if (typeof TokenDeployAPI === 'undefined') {
-            throw new Error('API de deploy não carregada');
+        // Verificar se XcafeHybridAPI está disponível
+        if (typeof XcafeHybridAPI === 'undefined') {
+            throw new Error('API híbrida não carregada');
         }
         
-        const api = new TokenDeployAPI();
+        const api = new XcafeHybridAPI();
         
-        updateDeployStatus('🔗 Conectando com a rede...');
+        updateDeployStatus('🔗 Conectando com MetaMask...');
         
-        // Preparar dados para a API com os parâmetros corretos
-        const deployData = {
-            tokenName: tokenData.name,
-            tokenSymbol: tokenData.symbol,
+        // Usar a nova API híbrida - o método createToken gerencia todo o processo
+        console.log('� Usando API híbrida para criar token...');
+        
+        const result = await api.createToken({
+            name: tokenData.name,
+            symbol: tokenData.symbol,
             totalSupply: tokenData.totalSupply,
             decimals: parseInt(tokenData.decimals),
-            ownerAddress: tokenData.owner,
-            chainId: wallet.network?.chainId || 97, // BSC Testnet como padrão
-            deployerPrivateKey: 'auto' // API gerará chave temporária
-        };
+            owner: tokenData.owner
+        });
         
-        // Validar dados antes do envio
-        if (!deployData.tokenName || deployData.tokenName.length < 3) {
-            throw new Error('Nome do token deve ter pelo menos 3 caracteres');
-        }
-        
-        if (!deployData.tokenSymbol || deployData.tokenSymbol.length < 2) {
-            throw new Error('Símbolo do token deve ter pelo menos 2 caracteres');
-        }
-        
-        if (!deployData.totalSupply || isNaN(deployData.totalSupply) || deployData.totalSupply <= 0) {
-            throw new Error('Supply total deve ser um número válido maior que zero');
-        }
-        
-        if (!deployData.ownerAddress || !deployData.ownerAddress.startsWith('0x') || deployData.ownerAddress.length !== 42) {
-            throw new Error('Endereço do proprietário deve ser um endereço Ethereum válido');
-        }
-        
-        updateDeployStatus('📝 Compilando contrato...');
-        
-        console.log('📤 Dados para API:', JSON.stringify(deployData, null, 2));
-        console.log('🌐 URL da API:', api.baseUrl);
-        console.log('🔗 ChainId:', deployData.chainId);
-        
-        // Fazer deploy via API com fallback
-        let result;
-        try {
-            console.log('🚀 Enviando requisição para API...');
-            result = await api.deployToken(deployData);
-            console.log('✅ Resposta da API recebida:', result);
-        } catch (apiError) {
-            console.error('💥 Erro detalhado da API:', {
-                message: apiError.message,
-                name: apiError.name,
-                stack: apiError.stack
-            });
-            
-            // Executar diagnóstico da API quando falhar
-            console.log('🔧 Executando diagnóstico da API...');
-            await diagnoseApiProblem(deployData);
-            
-            // Tentar API estendida se disponível
-            try {
-                console.log('🔄 Tentando API estendida...');
-                updateDeployStatus('🔄 Tentando API com compilação...');
-                
-                const extendedAPI = new XcafeExtendedAPI();
-                result = await extendedAPI.deployToken({
-                    name: deployData.tokenName,
-                    symbol: deployData.tokenSymbol,
-                    totalSupply: deployData.totalSupply,
-                    decimals: deployData.decimals,
-                    owner: deployData.ownerAddress,
-                    chainId: deployData.chainId
-                });
-                
-                console.log('✅ API estendida funcionou!');
-                
-            } catch (extendedError) {
-                console.warn('⚠️ API estendida também falhou:', extendedError.message);
-                console.warn('⚠️ Usando simulação como último recurso');
-                
-                // Fallback: Simular deploy
-                updateDeployStatus('🔄 APIs indisponíveis - simulando deploy...');
-                
-                result = await simulateDeployForFallback(deployData);
-            }
-        }
-        
-        updateDeployStatus('🔍 Verificando contrato...');
-        
-        // Aguardar um pouco e tentar verificar o contrato
-        setTimeout(async () => {
-            try {
-                await verifyContract(result.contractAddress, deployData);
-            } catch (verifyError) {
-                console.warn('⚠️ Verificação de contrato falhou:', verifyError);
-                // Não interromper o fluxo se a verificação falhar
-            }
-        }, 5000);
+        console.log('✅ Token criado via API híbrida:', result);
         
         updateDeployStatus('✅ Deploy concluído!');
         
@@ -1532,7 +1451,7 @@ async function performRealDeploy() {
             success: true,
             contractAddress: result.contractAddress,
             transactionHash: result.transactionHash,
-            deployData: deployData,
+            deployData: tokenData,
             gasUsed: result.gasUsed || 'N/A',
             blockNumber: result.blockNumber || 'N/A'
         };
