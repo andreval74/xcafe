@@ -958,31 +958,10 @@ async function deployToken() {
             owner: AppState.tokenData.owner?.slice(0,10) + '...'
         });
         
-        // Verificar modo de deploy selecionado
-        const deployMode = document.querySelector('input[name="deployMode"]:checked')?.value || 'real';
-        console.log('🎯 Modo de deploy selecionado:', deployMode);
+        console.log('🚀 Iniciando deploy real via API híbrida');
         
-        if (deployMode === 'simulated') {
-            console.log('🎭 Deploy simulado solicitado pelo usuário');
-            updateDeployStatus('🎭 Executando deploy simulado...');
-            
-            const simulatedResult = await simulateDeployForFallback(AppState.tokenData);
-            
-            AppState.deployResult = {
-                success: true,
-                contractAddress: simulatedResult.contractAddress,
-                transactionHash: simulatedResult.transactionHash,
-                deployData: AppState.tokenData,
-                gasUsed: simulatedResult.gasUsed,
-                blockNumber: simulatedResult.blockNumber,
-                isSimulated: true
-            };
-            
-            updateDeployStatus('✅ Simulação concluída!');
-        } else {
-            // Deploy real usando API
-            await performRealDeploy();
-        }
+        // Deploy real usando API híbrida
+        await performRealDeploy();
         
         // Mostrar resultado
         setTimeout(() => {
@@ -1734,31 +1713,26 @@ function copyContractAddress(address) {
  * Funções de Download e Verificação
  */
 function downloadContractFiles() {
-    if (!AppState.deployResult || !AppState.deployResult.sourceCode) {
-        alert('Nenhum contrato disponível para download');
-        return;
-    }
-    
-    // Configurar botões de download
+    // Configurar botões de download silenciosamente
     const downloadContractBtn = document.getElementById('download-contract-btn');
-    const downloadAbiBtn = document.getElementById('download-abi-btn');
-    const downloadBytecodeBtn = document.getElementById('download-bytecode-btn');
     const openVerificationBtn = document.getElementById('open-verification-btn');
+    const addToMetamaskBtn = document.getElementById('add-to-metamask-btn');
+    const shareTokenBtn = document.getElementById('share-token-btn');
     
     if (downloadContractBtn) {
         downloadContractBtn.onclick = () => downloadSolidityFile();
     }
     
-    if (downloadAbiBtn) {
-        downloadAbiBtn.onclick = () => downloadABI();
-    }
-    
-    if (downloadBytecodeBtn) {
-        downloadBytecodeBtn.onclick = () => downloadBytecode();
-    }
-    
     if (openVerificationBtn) {
         openVerificationBtn.onclick = () => openVerificationUrl();
+    }
+    
+    if (addToMetamaskBtn) {
+        addToMetamaskBtn.onclick = () => addTokenToMetaMask();
+    }
+    
+    if (shareTokenBtn) {
+        shareTokenBtn.onclick = () => shareToken();
     }
 }
 
@@ -1855,6 +1829,78 @@ function openVerificationUrl() {
     window.open(verificationUrl, '_blank');
 }
 
+// Adicionar token ao MetaMask
+async function addTokenToMetaMask() {
+    if (!AppState.deployResult?.contractAddress) {
+        alert('Endereço do contrato não disponível');
+        return;
+    }
+    
+    try {
+        await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+                type: 'ERC20',
+                options: {
+                    address: AppState.deployResult.contractAddress,
+                    symbol: AppState.tokenData.symbol,
+                    decimals: parseInt(AppState.tokenData.decimals),
+                    image: '', // Pode adicionar logo se tiver
+                },
+            },
+        });
+        
+        // Feedback visual
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i>';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erro ao adicionar token ao MetaMask:', error);
+        alert('Erro ao adicionar token ao MetaMask');
+    }
+}
+
+// Compartilhar token
+function shareToken() {
+    if (!AppState.deployResult?.contractAddress) {
+        alert('Endereço do contrato não disponível');
+        return;
+    }
+    
+    const tokenInfo = `🎉 Criei meu token na blockchain!
+    
+📝 Nome: ${AppState.tokenData.name}
+🏷️ Símbolo: ${AppState.tokenData.symbol}
+📊 Supply: ${parseInt(AppState.tokenData.totalSupply).toLocaleString('pt-BR')}
+📍 Contrato: ${AppState.deployResult.contractAddress}
+🌐 Rede: ${AppState.wallet.network?.name || 'Ethereum'}
+
+🔗 Criado com xcafe Token Creator`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: `Token ${AppState.tokenData.symbol} Criado!`,
+            text: tokenInfo
+        });
+    } else {
+        navigator.clipboard.writeText(tokenInfo);
+        
+        // Feedback visual
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i>';
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+        }, 2000);
+        
+        alert('Informações copiadas para a área de transferência!');
+    }
+}
+
 // Utilitários para URLs de explorers
 function getExplorerTxUrl(txHash, chainId) {
     if (!txHash) return '#';
@@ -1896,6 +1942,8 @@ window.downloadContractFiles = downloadContractFiles;
 window.downloadABI = downloadABI;
 window.downloadBytecode = downloadBytecode;
 window.openVerificationUrl = openVerificationUrl;
+window.addTokenToMetaMask = addTokenToMetaMask;
+window.shareToken = shareToken;
 
 console.log('✅ xcafe Token Creator - Tela Única carregado');
 
