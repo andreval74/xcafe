@@ -62,6 +62,55 @@
                 </div>
               </div>
             </div>
+
+            <!-- Progress Steps Bar -->
+            <div class="progress-steps mb-4">
+              <div class="container-fluid px-0">
+                <div class="row g-0 align-items-center">
+                  <div class="col">
+                    <div class="step-item active" data-step="1">
+                      <div class="step-number">
+                        <i class="bi bi-wallet2"></i>
+                      </div>
+                      <div class="step-label d-none d-md-block">Carteira</div>
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <div class="step-connector"></div>
+                  </div>
+                  <div class="col">
+                    <div class="step-item" data-step="2">
+                      <div class="step-number">
+                        <i class="bi bi-info-circle"></i>
+                      </div>
+                      <div class="step-label d-none d-md-block">Informações</div>
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <div class="step-connector"></div>
+                  </div>
+                  <div class="col">
+                    <div class="step-item" data-step="3">
+                      <div class="step-number">
+                        <i class="bi bi-rocket-takeoff"></i>
+                      </div>
+                      <div class="step-label d-none d-md-block">Deploy</div>
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <div class="step-connector"></div>
+                  </div>
+                  <div class="col">
+                    <div class="step-item" data-step="4">
+                      <div class="step-number">
+                        <i class="bi bi-check-circle"></i>
+                      </div>
+                      <div class="step-label d-none d-md-block">Resultado</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
               
             <!-- Seção 1: Conexão da Carteira -->
             <section id="section-wallet" class="creation-section active section-enabled">
@@ -132,7 +181,10 @@
               </div>
               
               <!-- Botão de Navegação para Próximo (quando já conectado) -->
-              <div class="d-flex justify-content-end mt-4">
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <button id="wallet-prev-btn" type="button" class="btn btn-outline-secondary" disabled>
+                  <i class="bi bi-arrow-left me-2"></i>Anterior
+                </button>
                 <button id="wallet-next-btn" type="button" class="btn btn-primary" style="display: none;">
                   Próximo <i class="bi bi-arrow-right ms-2"></i>
                 </button>
@@ -270,6 +322,16 @@
                   </div>
                 </div>
               </div>
+              
+              <!-- Botões de Navegação -->
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <button id="basic-prev-btn" type="button" class="btn btn-outline-secondary">
+                  <i class="bi bi-arrow-left me-2"></i>Anterior
+                </button>
+                <button id="basic-next-btn" type="button" class="btn btn-primary" disabled>
+                  Próximo <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+              </div>
             </section>
 
             <!-- Seção 3: Resumo e Deploy -->
@@ -350,6 +412,14 @@
                     O deploy será feito na rede da carteira conectada
                   </small>
                 </div>
+              </div>
+              
+              <!-- Botões de Navegação -->
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <button id="deploy-prev-btn" type="button" class="btn btn-outline-secondary">
+                  <i class="bi bi-arrow-left me-2"></i>Anterior
+                </button>
+                <!-- Botão de Deploy já existe acima -->
               </div>
             </section>
 
@@ -464,6 +534,16 @@
                     * Mesmo token, mesmos dados, mas na rede principal com custos reais
                   </small>
                 </div>
+              </div>
+              
+              <!-- Botões de Navegação Final -->
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <button id="result-restart-btn" type="button" class="btn btn-outline-primary">
+                  <i class="bi bi-arrow-counterclockwise me-2"></i>Criar Novo Token
+                </button>
+                <button id="result-share-btn" type="button" class="btn btn-primary">
+                  <i class="bi bi-share me-2"></i>Compartilhar Token
+                </button>
               </div>
             </section>
 

@@ -1,6 +1,6 @@
 ﻿/**
- * xcafe Token Creator - Versão Tela Única
- * Sistema de criação de tokens com scroll progressivo
+ * xcafe Token Creator - Versão Step Navigation
+ * Sistema de criação de tokens com navegação step-by-step
  */
 
 // Estado global da aplicação
@@ -11,8 +11,153 @@ const AppState = {
         balance: '0.0000',
         network: null
     },
-    tokenData: {}
+    tokenData: {},
+    currentStep: 1,
+    totalSteps: 4
 };
+
+/**
+ * Sistema de Navegação Step-by-Step
+ */
+
+/**
+ * Atualiza a barra de progresso visual
+ */
+function updateStepProgress(currentStep) {
+    console.log(`📊 Atualizando progresso para step ${currentStep}`);
+    
+    // Atualizar indicadores de steps
+    document.querySelectorAll('.step-item').forEach((item, index) => {
+        const stepNumber = index + 1;
+        item.classList.remove('active', 'completed');
+        
+        if (stepNumber === currentStep) {
+            item.classList.add('active');
+        } else if (stepNumber < currentStep) {
+            item.classList.add('completed');
+        }
+    });
+    
+    // Atualizar conectores
+    document.querySelectorAll('.step-connector').forEach((connector, index) => {
+        connector.classList.remove('active');
+        if (index + 1 < currentStep) {
+            connector.classList.add('active');
+        }
+    });
+}
+
+/**
+ * Mostra apenas a seção do step atual
+ */
+function showStep(step) {
+    console.log(`👁️ Mostrando step ${step}`);
+    
+    AppState.currentStep = step;
+    updateStepProgress(step);
+    
+    // Ocultar todas as seções
+    document.querySelectorAll('.creation-section').forEach(section => {
+        section.style.display = 'none';
+        section.classList.remove('active', 'section-enabled');
+    });
+    
+    // Mostrar seção atual
+    const currentSection = document.querySelector(`#section-${getStepId(step)}`);
+    if (currentSection) {
+        currentSection.style.display = 'block';
+        currentSection.classList.add('active', 'section-enabled');
+        
+        // Scroll suave para o topo da seção
+        currentSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start' 
+        });
+    }
+}
+
+/**
+ * Converte número do step para ID da seção
+ */
+function getStepId(step) {
+    const stepIds = {
+        1: 'wallet',
+        2: 'basic-info',
+        3: 'deploy',
+        4: 'result'
+    };
+    return stepIds[step] || 'wallet';
+}
+
+/**
+ * Navega para o próximo step
+ */
+function nextStep() {
+    if (AppState.currentStep < AppState.totalSteps) {
+        // Validar step atual antes de avançar
+        if (validateCurrentStep()) {
+            showStep(AppState.currentStep + 1);
+        }
+    }
+}
+
+/**
+ * Navega para o step anterior
+ */
+function prevStep() {
+    if (AppState.currentStep > 1) {
+        showStep(AppState.currentStep - 1);
+    }
+}
+
+/**
+ * Valida se o step atual está completo
+ */
+function validateCurrentStep() {
+    switch (AppState.currentStep) {
+        case 1: // Wallet
+            return AppState.wallet.connected;
+            
+        case 2: // Basic Info
+            const requiredFields = ['tokenName', 'tokenSymbol', 'totalSupply'];
+            return requiredFields.every(field => {
+                const input = document.getElementById(field);
+                return input && input.value.trim() !== '';
+            });
+            
+        case 3: // Deploy
+            return true; // Deploy pode sempre ser tentado
+            
+        default:
+            return true;
+    }
+}
+
+/**
+ * Atualiza estado dos botões de navegação
+ */
+function updateNavigationButtons() {
+    const step = AppState.currentStep;
+    
+    // Botões de step 1 (Wallet)
+    const walletNext = document.getElementById('wallet-next-btn');
+    if (walletNext) {
+        walletNext.style.display = AppState.wallet.connected ? 'inline-block' : 'none';
+    }
+    
+    // Botões de step 2 (Basic Info)
+    const basicNext = document.getElementById('basic-next-btn');
+    if (basicNext) {
+        basicNext.disabled = !validateCurrentStep();
+    }
+    
+    // Botões de step 3 (Deploy)
+    const deployBtn = document.getElementById('deploy-token-btn');
+    if (deployBtn && step === 3) {
+        const isValid = validateCurrentStep();
+        deployBtn.disabled = !isValid;
+    }
+}
 
 /**
  * Gera o código Solidity do contrato
@@ -266,8 +411,9 @@ function initializeApp() {
     setupEventListeners();
     checkWalletConnection();
     
-    // Mostrar apenas primeira seção inicialmente
-    showOnlyFirstSection();
+    // Inicializar navegação step-by-step
+    showStep(1);
+    updateNavigationButtons();
     
     // Verificar status da API após carregar a página
     setTimeout(updateApiStatus, 2000);
@@ -283,6 +429,9 @@ function setupEventListeners() {
         connectBtn.addEventListener('click', connectWallet);
     }
     
+    // Botões de navegação step-by-step
+    setupNavigationButtons();
+    
     // Botões de limpeza/reinício
     setupUtilityButtons();
     
@@ -293,6 +442,48 @@ function setupEventListeners() {
     const deployBtn = document.getElementById('deploy-token-btn');
     if (deployBtn) {
         deployBtn.addEventListener('click', deployToken);
+    }
+}
+
+/**
+ * Configura botões de navegação step-by-step
+ */
+function setupNavigationButtons() {
+    // Step 1 - Wallet
+    const walletNext = document.getElementById('wallet-next-btn');
+    if (walletNext) {
+        walletNext.addEventListener('click', () => nextStep());
+    }
+    
+    // Step 2 - Basic Info
+    const basicPrev = document.getElementById('basic-prev-btn');
+    const basicNext = document.getElementById('basic-next-btn');
+    
+    if (basicPrev) {
+        basicPrev.addEventListener('click', () => prevStep());
+    }
+    if (basicNext) {
+        basicNext.addEventListener('click', () => nextStep());
+    }
+    
+    // Step 3 - Deploy
+    const deployPrev = document.getElementById('deploy-prev-btn');
+    if (deployPrev) {
+        deployPrev.addEventListener('click', () => prevStep());
+    }
+    
+    // Step 4 - Result
+    const resultRestart = document.getElementById('result-restart-btn');
+    const resultShare = document.getElementById('result-share-btn');
+    
+    if (resultRestart) {
+        resultRestart.addEventListener('click', () => {
+            resetApp();
+            showStep(1);
+        });
+    }
+    if (resultShare) {
+        resultShare.addEventListener('click', shareToken);
     }
 }
 
@@ -418,11 +609,8 @@ async function connectWallet() {
             // Atualizar UI
             updateWalletUI();
             
-            // Auto-scroll para próxima seção após um delay
-            setTimeout(() => {
-                enableSection('section-basic-info');
-                scrollToSection('section-basic-info');
-            }, 1500);
+            // Atualizar navegação e mostrar botão "Próximo"
+            updateNavigationButtons();
             
             console.log('✅ Wallet conectada:', AppState.wallet.address);
             console.log('🌐 Rede detectada:', AppState.wallet.network?.name);
@@ -605,6 +793,9 @@ function onTokenDataChange(event) {
 function checkProgressAndScroll() {
     // Atualizar dados primeiro
     onTokenDataChange();
+    
+    // Atualizar botões de navegação
+    updateNavigationButtons();
     
     const { tokenData, wallet } = AppState;
     
@@ -963,11 +1154,10 @@ async function deployToken() {
         // Deploy real usando API híbrida
         await performRealDeploy();
         
-        // Mostrar resultado
+        // Mostrar resultado - ir para step 4
         setTimeout(() => {
-            scrollToSection('section-result');
+            showStep(4);
             showDeployResult(true);
-            enableSection('section-result');
         }, 1000);
         
     } catch (error) {
@@ -994,9 +1184,8 @@ async function deployToken() {
             updateDeployStatus('✅ Simulação concluída!');
             
             setTimeout(() => {
-                scrollToSection('section-result');
+                showStep(4);
                 showDeployResult(true);
-                enableSection('section-result');
             }, 1000);
             
         } catch (simulationError) {

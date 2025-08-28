@@ -1,5 +1,98 @@
 /* Progressive Flow Styles - Estilos para o fluxo progressivo de criação de tokens */
 
+/* Progress Steps Bar */
+.progress-steps {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.5rem 1rem;
+    margin-bottom: 2rem;
+}
+
+.step-item {
+    text-align: center;
+    position: relative;
+}
+
+.step-number {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: #6c757d;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.step-item.active .step-number {
+    background: linear-gradient(45deg, #0d6efd, #0056b3);
+    border-color: #0d6efd;
+    color: white;
+    box-shadow: 0 0 20px rgba(13, 110, 253, 0.4);
+    transform: scale(1.1);
+}
+
+.step-item.completed .step-number {
+    background: linear-gradient(45deg, #198754, #157347);
+    border-color: #198754;
+    color: white;
+}
+
+.step-connector {
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 1rem;
+    position: relative;
+    top: -22px;
+    transition: all 0.3s ease;
+}
+
+.step-connector.active {
+    background: linear-gradient(to right, #198754, #0d6efd);
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.3);
+}
+
+.step-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.step-item.active .step-label {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.step-item.completed .step-label {
+    color: #198754;
+}
+
+/* Responsive Steps */
+@media (max-width: 768px) {
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .step-connector {
+        margin: 0 0.5rem;
+        top: -17px;
+    }
+    
+    .progress-steps {
+        padding: 1rem 0.5rem;
+    }
+}
+
 .creation-section {
     margin-bottom: 2rem;
     padding: 1.5rem 0;
@@ -46,6 +139,28 @@
 .progress-container .progress {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Navigation Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Section Styles */
+.creation-section {
+    transition: all 0.4s ease-in-out;
+}
+
+.creation-section:not(.active):not(.section-enabled) {
+    transform: translateY(-10px);
+    filter: blur(1px);
 }
 
 .progress-bar {
