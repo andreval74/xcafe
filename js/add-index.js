@@ -265,6 +265,9 @@ function initializeApp() {
     
     // Mostrar apenas primeira seção inicialmente
     showOnlyFirstSection();
+    
+    // Verificar status da API após carregar a página
+    setTimeout(updateApiStatus, 2000);
 }
 
 /**
@@ -952,8 +955,31 @@ async function deployToken() {
             owner: AppState.tokenData.owner?.slice(0,10) + '...'
         });
         
-        // Deploy real usando API
-        await performRealDeploy();
+        // Verificar modo de deploy selecionado
+        const deployMode = document.querySelector('input[name="deployMode"]:checked')?.value || 'real';
+        console.log('🎯 Modo de deploy selecionado:', deployMode);
+        
+        if (deployMode === 'simulated') {
+            console.log('🎭 Deploy simulado solicitado pelo usuário');
+            updateDeployStatus('🎭 Executando deploy simulado...');
+            
+            const simulatedResult = await simulateDeployForFallback(AppState.tokenData);
+            
+            AppState.deployResult = {
+                success: true,
+                contractAddress: simulatedResult.contractAddress,
+                transactionHash: simulatedResult.transactionHash,
+                deployData: AppState.tokenData,
+                gasUsed: simulatedResult.gasUsed,
+                blockNumber: simulatedResult.blockNumber,
+                isSimulated: true
+            };
+            
+            updateDeployStatus('✅ Simulação concluída!');
+        } else {
+            // Deploy real usando API
+            await performRealDeploy();
+        }
         
         // Mostrar resultado
         setTimeout(() => {
@@ -1038,22 +1064,88 @@ function validateTokenData() {
 async function simulateDeployForFallback(deployData) {
     console.log('🎭 Executando deploy simulado...');
     
-    // Simular delay de processamento
+    updateDeployStatus('🔨 Compilando contrato inteligente...');
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    updateDeployStatus('⛽ Calculando custos de gas...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    updateDeployStatus('📡 Enviando transação...');
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Gerar endereços mock realísticos
-    const contractAddress = '0x' + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    updateDeployStatus('⏳ Aguardando confirmação...');
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Gerar endereços mock realísticos baseados na rede
+    const networkPrefix = AppState.wallet.network?.chainId === 97 ? '0x024f' : '0x1a2b';
+    const contractAddress = networkPrefix + Array(36).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
     const transactionHash = '0x' + Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    
+    const gasUsed = Math.floor(Math.random() * 200000) + 500000;
+    const blockNumber = Math.floor(Math.random() * 1000000) + 15000000;
     
     return {
         success: true,
         contractAddress: contractAddress,
         transactionHash: transactionHash,
-        gasUsed: Math.floor(Math.random() * 200000) + 500000,
-        blockNumber: Math.floor(Math.random() * 1000000) + 15000000,
-        deploymentCost: '0.0024',
-        message: 'Deploy simulado - API indisponível'
+        gasUsed: gasUsed,
+        blockNumber: blockNumber,
+        deploymentCost: (gasUsed * 0.000000005).toFixed(6), // Custo estimado em ETH/BNB
+        message: 'Deploy simulado concluído com sucesso',
+        networkName: AppState.wallet.network?.name || 'Rede de Teste',
+        explorerUrl: `https://testnet.bscscan.com/tx/${transactionHash}`
     };
+}
+
+/**
+ * Verifica status da API
+ */
+async function checkApiStatus() {
+    try {
+        const api = new TokenDeployAPI();
+        const response = await fetch(`${api.baseUrl}/health`, { 
+            method: 'GET',
+            timeout: 5000 
+        });
+        
+        if (response.ok) {
+            return { available: true, status: 'online', message: 'API disponível' };
+        } else {
+            return { available: false, status: 'error', message: `HTTP ${response.status}` };
+        }
+    } catch (error) {
+        return { available: false, status: 'offline', message: 'API indisponível' };
+    }
+}
+
+/**
+ * Atualiza indicador de status da API
+ */
+async function updateApiStatus() {
+    const statusElement = document.getElementById('api-status');
+    if (!statusElement) return;
+    
+    const status = await checkApiStatus();
+    
+    if (status.available) {
+        statusElement.innerHTML = `
+            <i class="bi bi-check-circle text-success me-2"></i>
+            <span class="text-success">API Online</span>
+            <small class="text-muted ms-2">- Deploy real disponível</small>
+        `;
+    } else {
+        statusElement.innerHTML = `
+            <i class="bi bi-x-circle text-warning me-2"></i>
+            <span class="text-warning">API Indisponível</span>
+            <small class="text-muted ms-2">- Use modo simulação</small>
+        `;
+        
+        // Auto-selecionar simulação se API estiver offline
+        const simulatedRadio = document.getElementById('simulatedDeploy');
+        if (simulatedRadio) {
+            simulatedRadio.checked = true;
+        }
+    }
 }
 
 /**
