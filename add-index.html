@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Criador de Tokens - xcafe</title>
   
-  <!-- Favicons -->
+  <!-- F              </div>
+            </section>
+
+            <!-- Seção 3: Deploy e Confirmação -->
   <link rel="icon" type="image/png" sizes="16x16" href="imgs/xcafe-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="imgs/xcafe-32x32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="imgs/xcafe-192x192.png">
@@ -17,7 +20,19 @@
   
   <!-- xcafe Global CSS Unificado -->
   <link href="styles/globals.css" rel="stylesheet">
+    <!-- Estilos customizados -->
   <link href="styles/progressive-flow.css" rel="stylesheet">
+  <style>
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
   
   <!-- Meta tags SEO -->
   <meta name="description" content="Crie tokens ERC-20 personalizados na blockchain com a xcafe. Interface simples, segura e auditada.">
@@ -49,7 +64,7 @@
             </div>
               
             <!-- Seção 1: Conexão da Carteira -->
-            <section id="section-wallet" class="creation-section active">
+            <section id="section-wallet" class="creation-section active section-enabled">
               <div class="section-header">
                 <h4 class="text-primary mb-3">
                   <i class="bi bi-wallet2 me-2"></i>1. Conexão da Carteira
@@ -125,7 +140,7 @@
             </section>
 
             <!-- Seção 2: Informações Básicas do Token -->
-            <section id="section-basic-info" class="creation-section" style="display: none;">
+            <section id="section-basic-info" class="creation-section">
               <div class="section-header">
                 <h4 class="text-primary mb-3">
                   <i class="bi bi-info-circle me-2"></i>2. Informações Básicas do Token
@@ -215,22 +230,51 @@
                       <div class="form-text text-muted">Rede onde o contrato será implantado</div>
                     </div>
                   </div>
+                  
+                  <!-- Indicador de Progresso -->
+                  <div class="mt-4">
+                    <div id="progress-indicator" class="alert alert-success" style="display: none;">
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-3 text-success" style="font-size: 1.5rem;"></i>
+                        <div class="flex-fill">
+                          <h6 class="mb-1 text-success">Todos os campos preenchidos!</h6>
+                          <small class="text-muted">Rolando para o resumo em <span id="countdown" class="fw-bold text-success">3</span> segundos...</small>
+                        </div>
+                        <button id="skip-countdown" class="btn btn-success btn-sm">
+                          <i class="bi bi-arrow-right me-1"></i>Ir Agora
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div id="missing-fields" class="alert alert-warning">
+                      <h6 class="mb-2"><i class="bi bi-list-check me-2"></i>Complete os campos obrigatórios:</h6>
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <small id="field-name" class="d-flex align-items-center">
+                            <i class="bi bi-circle me-2 text-warning"></i>Nome do Token
+                          </small>
+                          <small id="field-symbol" class="d-flex align-items-center">
+                            <i class="bi bi-circle me-2 text-warning"></i>Símbolo
+                          </small>
+                        </div>
+                        <div class="col-6">
+                          <small id="field-supply" class="d-flex align-items-center">
+                            <i class="bi bi-circle me-2 text-warning"></i>Supply Total
+                          </small>
+                          <small id="field-owner" class="d-flex align-items-center">
+                            <i class="bi bi-circle me-2 text-muted"></i>Endereço (opcional)
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <!-- Botões de Navegação -->
-              <div class="d-flex justify-content-between mt-4">
-                <button id="basic-info-prev-btn" type="button" class="btn btn-outline-secondary">
-                  <i class="bi bi-arrow-left me-2"></i>Anterior
-                </button>
-                <button id="basic-info-next-btn" type="button" class="btn btn-primary" style="display: none;">
-                  <i class="bi bi-arrow-right me-2"></i>Próximo para Deploy
-                </button>
               </div>
             </section>
 
             <!-- Seção 3: Resumo e Deploy -->
-            <section id="section-deploy" class="creation-section" style="display: none;">
+                        <!-- Seção 3: Deploy e Confirmação -->
+            <section id="section-deploy" class="creation-section">
               <div class="section-header">
                 <h4 class="text-success mb-3">
                   <i class="bi bi-rocket-takeoff me-2"></i>3. Resumo e Deploy
@@ -246,8 +290,57 @@
                   </h5>
                 </div>
                 <div class="card-body">
-                  <div id="token-summary" class="row g-3">
-                    <!-- Será preenchido dinamicamente -->
+                  <!-- Estatísticas Visuais do Token -->
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                      <div class="card bg-secondary border-0 text-center p-3">
+                        <div class="card-body">
+                          <img src="imgs/xcafe-32x32.png" alt="Token" class="mb-2">
+                          <h6 class="text-white mb-1">Nome do Token</h6>
+                          <div id="display-token-name" class="text-success fs-5 fw-bold">-</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card bg-secondary border-0 text-center p-3">
+                        <div class="card-body">
+                          <i class="bi bi-tag text-warning mb-2" style="font-size: 1.8rem;"></i>
+                          <h6 class="text-white mb-1">Símbolo</h6>
+                          <div id="display-token-symbol" class="text-warning fs-5 fw-bold">-</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Supply e Decimais -->
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                      <div class="card bg-secondary border-0 text-center p-3">
+                        <div class="card-body">
+                          <i class="bi bi-cash-stack text-primary mb-2" style="font-size: 1.8rem;"></i>
+                          <h6 class="text-white mb-1">Supply Total</h6>
+                          <div id="display-total-supply" class="text-primary fs-6 fw-bold">-</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card bg-secondary border-0 text-center p-3">
+                        <div class="card-body">
+                          <i class="bi bi-123 text-info mb-2" style="font-size: 1.8rem;"></i>
+                          <h6 class="text-white mb-1">Decimais</h6>
+                          <div id="display-decimals" class="text-info fs-6 fw-bold">-</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Owner Info -->
+                  <div class="card bg-secondary border-0 p-3 mb-3">
+                    <div class="card-body text-center">
+                      <i class="bi bi-person-badge text-success mb-2" style="font-size: 1.8rem;"></i>
+                      <h6 class="text-white mb-1">Proprietário</h6>
+                      <div id="display-owner" class="text-success small font-monospace">-</div>
+                    </div>
                   </div>
                   
                   <div class="alert alert-warning mt-3">
@@ -290,31 +383,23 @@
                 </div>
               </div>
 
-              <!-- Botões de Navegação e Deploy -->
-              <div class="d-flex justify-content-between align-items-center">
-                <button id="deploy-prev-btn" type="button" class="btn btn-outline-secondary">
-                  <i class="bi bi-arrow-left me-2"></i>Anterior
+              <!-- Botão de Deploy Centralizado -->
+              <div class="text-center">
+                <button id="deploy-token-btn" class="btn btn-success btn-lg px-5 py-3 fw-bold" disabled>
+                  <i class="bi bi-rocket-takeoff me-2"></i>
+                  CRIAR TOKEN
                 </button>
-                
-                <div class="text-center flex-fill mx-4">
-                  <button id="deploy-token-btn" class="btn btn-success btn-lg px-5 py-3 fw-bold" disabled>
-                    <i class="bi bi-rocket-takeoff me-2"></i>
-                    CRIAR TOKEN
-                  </button>
-                  <div class="mt-3">
-                    <small class="text-muted">
-                      <i class="bi bi-info-circle me-1"></i>
-                      O deploy será feito na rede da carteira conectada
-                    </small>
-                  </div>
+                <div class="mt-3">
+                  <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    O deploy será feito na rede da carteira conectada
+                  </small>
                 </div>
-                
-                <div style="width: 120px;"></div> <!-- Espaçador para centralizar o botão de deploy -->
               </div>
             </section>
 
             <!-- Seção 4: Resultado do Deploy -->
-            <section id="section-result" class="creation-section" style="display: none;">
+            <section id="section-result" class="creation-section">
               <div class="section-header text-center mb-5">
                 <div class="success-animation mb-4">
                   <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem; animation: pulse 2s infinite;"></i>
@@ -506,7 +591,7 @@
   <script src="js/token-deploy-api.js"></script>
   
   <!-- Main Token Creation Script -->
-  <script type="module" src="js/add-index.js"></script>
+  <script src="js/add-index.js"></script>
   
   <!-- Progressive Flow Manager -->
   <!-- <script src="js/progressive-flow.js"></script> REMOVIDO: arquivo com defeito -->
@@ -524,9 +609,3 @@
   <!-- <script src="js/verification-simple.js"></script>  <!-- Arquivo nÃo encontrado --> -->
 </body>
 </html>
-
-
-
-
-
-
