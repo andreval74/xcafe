@@ -111,7 +111,7 @@ function setupUtilityButtons() {
         console.log('✅ Botão limpar encontrado');
     }
     
-    // Procurar por outros botões de limpeza
+    // Procurar por outros botões de limpeza e usar mesma função
     const clearSelectors = [
         '#clear-form', 
         '#limpar-form', 
@@ -121,7 +121,8 @@ function setupUtilityButtons() {
     clearSelectors.forEach(selector => {
         const btn = document.querySelector(selector);
         if (btn) {
-            btn.addEventListener('click', clearForm);
+            btn.addEventListener('click', resetApp); // Usar resetApp em vez de clearForm
+            console.log(`✅ Botão adicional encontrado: ${selector}`);
         }
     });
 }
@@ -388,7 +389,12 @@ function onTokenDataChange(event) {
     const hasChanged = JSON.stringify(AppState.tokenData) !== JSON.stringify(newTokenData);
     if (hasChanged) {
         AppState.tokenData = newTokenData;
-        console.log('📝 Dados atualizados:', AppState.tokenData);
+        console.log('📝 Dados atualizados:', {
+            nome: AppState.tokenData.name,
+            simbolo: AppState.tokenData.symbol,
+            supply: AppState.tokenData.totalSupply,
+            owner: AppState.tokenData.owner?.slice(0,10) + '...'
+        });
     }
     
     // Converter símbolo para maiúsculas em tempo real
@@ -414,7 +420,13 @@ function checkProgressAndScroll() {
         owner: tokenData.owner || ''
     };
     
-    console.log('🔍 Verificando progresso:', progressData);
+    console.log('🔍 Verificando progresso:', {
+        conectado: progressData.connected,
+        nome: progressData.name,
+        simbolo: progressData.symbol,
+        supply: progressData.supply,
+        owner: progressData.owner?.slice(0,10) + '...'
+    });
     
     // Atualizar indicadores visuais
     updateFieldIndicators(progressData);
@@ -631,7 +643,13 @@ async function deployToken() {
             throw new Error('Dados do token inválidos');
         }
         
-        console.log('🚀 Iniciando deploy do token:', AppState.tokenData);
+        console.log('🚀 Iniciando deploy do token:', {
+            nome: AppState.tokenData.name,
+            simbolo: AppState.tokenData.symbol,
+            supply: AppState.tokenData.totalSupply,
+            decimais: AppState.tokenData.decimals,
+            owner: AppState.tokenData.owner?.slice(0,10) + '...'
+        });
         
         // Deploy real usando API
         await performRealDeploy();
@@ -996,30 +1014,69 @@ function showOnlyFirstSection() {
     });
 }
 
-function clearForm() {
-    const inputs = ['tokenName', 'tokenSymbol', 'totalSupply'];
-    inputs.forEach(inputId => {
-        const input = document.getElementById(inputId);
-        if (input) input.value = '';
+function resetApp() {
+    console.log('🔄 Iniciando reset completo...');
+    
+    // Limpar timers
+    if (window.countdownTimer) {
+        clearInterval(window.countdownTimer);
+        window.countdownTimer = null;
+    }
+    
+    // Reset completo do estado
+    AppState.wallet = {
+        connected: false,
+        address: '',
+        balance: '0.0000',
+        network: null
+    };
+    AppState.tokenData = {};
+    AppState.deployResult = null;
+    
+    // Limpar todos os campos de input
+    const inputs = [
+        '#tokenName',
+        '#tokenSymbol', 
+        '#totalSupply',
+        '#decimals',
+        '#ownerAddress',
+        '#tokenImage',
+        '#network-display'
+    ];
+    
+    inputs.forEach(selector => {
+        const input = document.querySelector(selector);
+        if (input) {
+            input.value = '';
+            input.classList.remove('is-valid', 'is-invalid');
+        }
     });
     
-    AppState.tokenData = {};
-    scrollToSection('section-basic-info');
+    // Resetar decimais para valor padrão
+    const decimalsInput = document.getElementById('decimals');
+    if (decimalsInput) decimalsInput.value = '18';
     
-    console.log('🗑️ Formulário limpo');
-}
-
-function resetApp() {
-    // Reset completo
-    AppState.wallet.connected = false;
-    AppState.tokenData = {};
+    // Limpar indicadores de progresso
+    hideProgressIndicator();
     
-    // Remover resultados de deploy
-    document.querySelectorAll('.deploy-result').forEach(el => el.remove());
+    // Reset indicadores visuais dos campos
+    const fieldIndicators = ['field-name', 'field-symbol', 'field-supply', 'field-owner'];
+    fieldIndicators.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            const icon = element.querySelector('i');
+            if (icon) {
+                icon.className = 'bi bi-circle me-2 text-warning';
+            }
+        }
+    });
     
-    // Voltar ao início
-    scrollToSection('section-wallet');
-    showOnlyFirstSection();
+    // Limpar resumo de deploy
+    const summaryFields = ['display-token-name', 'display-token-symbol', 'display-total-supply', 'display-decimals', 'display-owner'];
+    summaryFields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) element.textContent = '-';
+    });
     
     // Reset botão conectar
     const connectBtn = document.getElementById('connect-metamask-btn');
@@ -1034,7 +1091,34 @@ function resetApp() {
     const walletInfo = document.getElementById('wallet-connection-info');
     if (walletInfo) walletInfo.style.display = 'none';
     
-    console.log('🔄 App reiniciado');
+    // Reset botão de deploy
+    const deployBtn = document.getElementById('deploy-token-btn');
+    if (deployBtn) {
+        deployBtn.disabled = true;
+        deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
+    }
+    
+    // Limpar resultados de deploy
+    document.querySelectorAll('.deploy-result').forEach(el => el.remove());
+    
+    // Limpar section result
+    const resultSection = document.getElementById('section-result');
+    if (resultSection) {
+        resultSection.innerHTML = `
+            <div class="section-header">
+                <h4 class="text-success mb-3">
+                    <i class="bi bi-check-circle me-2"></i>4. Resultado do Deploy
+                </h4>
+                <p class="text-muted">Informações sobre o token criado aparecerão aqui.</p>
+            </div>
+        `;
+    }
+    
+    // Voltar ao início
+    scrollToSection('section-wallet');
+    showOnlyFirstSection();
+    
+    console.log('✅ Reset completo finalizado');
 }
 
 async function checkWalletConnection() {
