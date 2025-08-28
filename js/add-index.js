@@ -1309,14 +1309,16 @@ async function performRealDeploy() {
         
         updateDeployStatus('✅ Deploy concluído!');
         
-        // Salvar resultado no estado
+        // Salvar resultado no estado com dados completos
         AppState.deployResult = {
             success: true,
-            contractAddress: result.contractAddress,
-            transactionHash: result.transactionHash,
+            contractAddress: result.contract?.address || result.contractAddress,
+            transactionHash: result.contract?.transactionHash || result.transactionHash,
             deployData: tokenData,
             gasUsed: result.gasUsed || 'N/A',
-            blockNumber: result.blockNumber || 'N/A'
+            blockNumber: result.blockNumber || 'N/A',
+            sourceCode: result.token?.sourceCode || null,
+            compilation: result.token?.compilation || null
         };
         
         console.log('✅ Deploy concluído:', AppState.deployResult);
@@ -1506,8 +1508,6 @@ function showDeployResult(success, errorMessage = '') {
     
     // Configurar downloads após o deploy
     downloadContractFiles();
-}
-    }
 }
 
 /**
@@ -1878,7 +1878,6 @@ function getExplorerContractUrl(contractAddress, chainId) {
         default: return `https://etherscan.io/address/${contractAddress}`;
     }
 }
-}
 
 // Exportar funções globais
 window.connectWallet = connectWallet;
@@ -1890,6 +1889,10 @@ window.previewContract = previewContract;
 window.copyContractCode = copyContractCode;
 window.closeModal = closeModal;
 window.testApiStatus = testApiStatus;
+window.downloadContractFiles = downloadContractFiles;
+window.downloadABI = downloadABI;
+window.downloadBytecode = downloadBytecode;
+window.openVerificationUrl = openVerificationUrl;
 
 console.log('✅ xcafe Token Creator - Tela Única carregado');
 
