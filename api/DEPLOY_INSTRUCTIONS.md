@@ -51,7 +51,7 @@ PORT=3000
 
 Após o deploy, sua API estará disponível em:
 ```
-https://xcafe-token-deploy-api.onrender.com
+https://xcafe-token-api.onrender.com
 ```
 
 ## 5. Atualizar o Frontend
@@ -60,7 +60,7 @@ No arquivo `js/token-deploy-api.js`, atualize a URL:
 
 ```javascript
 class TokenDeployAPI {
-    constructor(apiBaseUrl = 'https://xcafe-token-deploy-api.onrender.com') {
+    constructor(apiBaseUrl = 'https://xcafe-token-api.onrender.com') {
         this.baseUrl = apiBaseUrl;
         // ...
     }
@@ -71,12 +71,12 @@ class TokenDeployAPI {
 
 ### Teste básico:
 ```bash
-curl https://xcafe-token-deploy-api.onrender.com/
+curl https://xcafe-token-api.onrender.com/
 ```
 
 ### Teste de redes:
 ```bash
-curl https://xcafe-token-deploy-api.onrender.com/networks
+curl https://xcafe-token-api.onrender.com/networks
 ```
 
 ## 7. Monitoramento
@@ -127,7 +127,7 @@ Depois que a API estiver no ar, use esta URL no arquivo `token-deploy-api.js`:
 
 ```javascript
 // Produção
-const API_URL = 'https://xcafe-token-deploy-api.onrender.com';
+const API_URL = 'https://xcafe-token-api.onrender.com';
 
 // Local (para desenvolvimento)
 const API_URL = 'http://localhost:3000';

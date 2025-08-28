@@ -4,7 +4,7 @@
  */
 
 class TokenDeployAPI {
-    constructor(apiBaseUrl = 'https://xcafe-token-deploy-api.render.com') {
+    constructor(apiBaseUrl = 'https://xcafe-token-api.onrender.com') {
         this.baseUrl = apiBaseUrl;
         this.timeout = 60000; // 60 segundos
         this.supportedNetworks = null; // Cache das redes

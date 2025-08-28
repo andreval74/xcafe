@@ -95,7 +95,7 @@ GET /transaction/:hash/:chainId - Status da transação
 ### 🔗 URLs
 
 - **API Local:** http://localhost:3000
-- **API Produção:** https://xcafe-token-deploy-api.render.com
+- **API Produção:** https://xcafe-token-api.onrender.com
 - **Documentação:** Ver api/DEPLOY_INSTRUCTIONS.md
 
 ### 📊 Status
