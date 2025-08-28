@@ -34,10 +34,6 @@
     }
   
   </style>
- 
-  <!-- Meta tags SEO -->
-  <meta name="description" content="Crie tokens ERC-20 personalizados na blockchain com a xcafe. Interface simples, segura e auditada.">
-  <meta name="keywords" content="criar token, ERC-20, ethereum, blockchain, smart contract, xcafe">
 </head>
 <body>
   <!-- Header -->
@@ -424,7 +420,7 @@
   </main>
 
   <!-- Footer -->
-  <footer data-component="footer"></footer>
+  <footer data-component="footer"></footer> 
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -435,7 +431,7 @@
   <script src="js/shared/state-manager.js"></script>
   <script src="js/shared/ui-manager.js"></script>
   
-  <!-- Sistema de Carteira DEVE carregar antes do template-loader -->
+  <!-- Sistema de Carteira Universal -->
   <script src="js/shared/wallet-universal.js"></script>
   
   <!-- Template Loader (carrega componentes incluindo wallet-connection) -->
@@ -446,42 +442,5 @@
   
   <!-- Main Token Creation Script -->
   <script src="js/add-index.js"></script>
-  
-  <!-- Script de inicialização simplificado -->
-  <script>
-    // Inicialização básica sem scroll automático
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 add-index.html carregado');
-        
-        // Aguardar templates carregarem
-        setTimeout(() => {
-            console.log('🔄 Verificando componente wallet-connection...');
-            
-            const walletSection = document.getElementById('section-wallet');
-            const walletComponent = document.querySelector('[data-component="wallet-connection"]');
-            
-            if (walletSection && walletComponent) {
-                console.log('✅ Seção wallet encontrada');
-                console.log('✅ Componente wallet-connection encontrado');
-                
-                // Verificar se UniversalWallet está disponível
-                if (typeof UniversalWallet !== 'undefined') {
-                    console.log('✅ UniversalWallet disponível');
-                    
-                    // Re-inicializar se necessário
-                    setTimeout(() => {
-                        UniversalWallet.setupEventListeners();
-                        const status = UniversalWallet.getStatus();
-                        console.log('🔍 Status atual da wallet:', status);
-                    }, 1000);
-                } else {
-                    console.error('❌ UniversalWallet não encontrado');
-                }
-            } else {
-                console.error('❌ Seção wallet ou componente não encontrado');
-            }
-        }, 2000);
-    });
-  </script>
 </body>
 </html>

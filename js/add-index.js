@@ -111,20 +111,6 @@ function enableSection(sectionId) {
 }
 
 /**
- * Faz scroll suave para uma seção
- */
-function scrollToSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-        });
-        console.log(`📜 Scroll para: ${sectionId}`);
-    }
-}
-
-/**
  * Gera o código Solidity do contrato
  */
 /**

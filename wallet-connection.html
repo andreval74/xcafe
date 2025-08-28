@@ -1,4 +1,11 @@
 <!-- Componente de Conexão da Carteira - wallet-connection -->
+<div class="section-header">
+    <h4 class="text-primary mb-3">
+        <i class="bi bi-wallet2 me-2"></i>1. Conexão da Carteira
+    </h4>
+    <p class="text-muted">Conecte sua carteira Web3 para acessar a funcionalidade.</p>
+</div>
+
 <div class="card bg-dark border-warning shadow mb-4">
     <div class="card-header bg-warning text-dark">
         <h5 class="card-title mb-0">
@@ -10,7 +17,7 @@
             <div class="col-md-8">
                 <label for="wallet-status" class="form-label text-white">Status da Conexão</label>
                 <input type="text" class="form-control bg-dark text-white border-secondary" id="wallet-status"
-                    placeholder="Clique em 'Conectar' para iniciar" style="font-family: monospace;" readonly>
+                    placeholder="Verificando conexão..." style="font-family: monospace;" readonly>
             </div>
             <div class="col-md-4">
                 <button id="connect-metamask-btn" type="button" class="btn btn-warning w-100 fw-bold">
@@ -38,111 +45,3 @@
         </div>
     </div>
 </div>
-
-<script>
-/**
- * Inicialização do Componente wallet-connection
- * Integra com o UniversalWallet system
- */
-(function() {
-    console.log('🔌 Componente wallet-connection inicializando...');
-    
-    // Função para inicializar quando UniversalWallet estiver pronto
-    function initializeWalletComponent() {
-        if (typeof UniversalWallet === 'undefined') {
-            console.log('⏳ Aguardando UniversalWallet...');
-            setTimeout(initializeWalletComponent, 100);
-            return;
-        }
-        
-        console.log('✅ UniversalWallet detectado - verificando conexão existente...');
-        
-        // Mostrar loading enquanto verifica conexão
-        const loadingDiv = document.getElementById('wallet-loading');
-        if (loadingDiv) {
-            loadingDiv.style.display = 'block';
-        }
-        
-        // Verificar conexão existente IMEDIATAMENTE
-        setTimeout(() => {
-            // Verificar se MetaMask está conectado
-            if (typeof window.ethereum !== 'undefined') {
-                window.ethereum.request({ method: 'eth_accounts' })
-                    .then(accounts => {
-                        if (accounts.length > 0) {
-                            console.log('🔗 Conexão MetaMask detectada, inicializando...');
-                            
-                            // Forçar inicialização do UniversalWallet
-                            UniversalWallet.checkExistingConnection()
-                                .then(connected => {
-                                    if (connected) {
-                                        console.log('✅ Wallet reconectada automaticamente');
-                                    }
-                                    finalizarInicializacao();
-                                });
-                        } else {
-                            console.log('🔌 Nenhuma conexão MetaMask - botão conectar disponível');
-                            finalizarInicializacao();
-                        }
-                    })
-                    .catch(error => {
-                        console.log('⚠️ Erro ao verificar contas:', error);
-                        finalizarInicializacao();
-                    });
-            } else {
-                console.log('❌ MetaMask não detectado');
-                finalizarInicializacao();
-            }
-        }, 300);
-        
-        function finalizarInicializacao() {
-            // Ocultar loading
-            if (loadingDiv) {
-                loadingDiv.style.display = 'none';
-            }
-            
-            // Garantir que os event listeners estão configurados
-            UniversalWallet.setupEventListeners();
-            
-            console.log('✅ Componente wallet-connection inicializado');
-        }
-    }
-    
-    // Callback para quando wallet for conectada
-    window.onWalletConnected = function(data) {
-        console.log('🎯 Callback: Wallet conectada no componente', data.address);
-        
-        // Atualizar progresso visual se existir
-        if (typeof updateVisualProgress === 'function') {
-            updateVisualProgress();
-        }
-        
-        // Notificar outras partes da aplicação
-        if (typeof window.onWalletConnectionChange === 'function') {
-            window.onWalletConnectionChange(true, data);
-        }
-    };
-    
-    // Callback para quando wallet for desconectada
-    window.onWalletDisconnected = function() {
-        console.log('🔌 Callback: Wallet desconectada no componente');
-        
-        // Atualizar progresso visual se existir
-        if (typeof updateVisualProgress === 'function') {
-            updateVisualProgress();
-        }
-        
-        // Notificar outras partes da aplicação
-        if (typeof window.onWalletConnectionChange === 'function') {
-            window.onWalletConnectionChange(false, null);
-        }
-    };
-    
-    // Inicializar quando DOM estiver pronto
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeWalletComponent);
-    } else {
-        initializeWalletComponent();
-    }
-})();
-</script>
