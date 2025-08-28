@@ -504,16 +504,21 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   
+  <!-- Utilitários Compartilhados (carregar primeiro) -->
+  <script src="js/shared/blockchain-utils.js"></script>
+  <script src="js/shared/state-manager.js"></script>
+  <script src="js/shared/ui-manager.js"></script>
+  
   <!-- Template Loader -->
   <script src="js/template-loader.js"></script>
   
   <!-- Token Deploy API -->
   <script src="js/token-deploy-api.js"></script>
   
-  <!-- Main Token Creation Script PRIMEIRO -->
+  <!-- Main Token Creation Script -->
   <script type="module" src="js/add-index.js"></script>
   
-  <!-- Progressive Flow Manager DEPOIS -->
+  <!-- Progressive Flow Manager -->
   <script src="js/progressive-flow.js"></script>
   
   <!-- Progressive Flow Multi-Chain Extension -->
