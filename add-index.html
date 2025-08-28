@@ -268,34 +268,31 @@
                 </div>
               </div>
 
-              <!-- Configurações de Deploy -->
+              <!-- Informações da Rede Conectada -->
               <div class="card bg-dark border-primary shadow mb-4">
                 <div class="card-header bg-primary text-white">
                   <h5 class="mb-0">
-                    <i class="bi bi-gear me-2"></i>Configurações de Deploy
+                    <i class="bi bi-globe me-2"></i>Rede de Deploy
                   </h5>
                 </div>
                 <div class="card-body">
-                  <div class="mb-4">
-                    <label for="deploy-network" class="form-label text-white fw-bold">
-                      <i class="bi bi-globe me-2"></i>Selecionar Rede Blockchain
-                    </label>
-                    <select id="deploy-network" class="form-select bg-dark text-white border-secondary" required>
-                      <option value="">Carregando redes...</option>
-                    </select>
-                    <div class="form-text text-muted mt-2">
-                      <i class="bi bi-info-circle me-1"></i>
-                      Escolha a rede onde seu token será criado. Diferentes redes têm custos e características distintas.
+                  <div id="connected-network-info" class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="bi bi-check-circle text-success me-2"></i>
+                      <span class="text-white">Usando a rede da carteira conectada</span>
+                    </div>
+                    <div id="network-details" class="text-muted small">
+                      <!-- Será preenchido com detalhes da rede -->
                     </div>
                   </div>
                   
-                  <div class="alert alert-info">
+                  <div class="alert alert-info mb-0">
                     <div class="d-flex align-items-start">
                       <i class="bi bi-calculator me-3 mt-1"></i>
                       <div>
                         <h6 class="mb-1">Estimativa de Custo</h6>
                         <div id="deploy-cost-estimate" class="text-muted small">
-                          Selecione uma rede para ver a estimativa
+                          Detectando rede para calcular custos...
                         </div>
                       </div>
                     </div>
@@ -317,7 +314,7 @@
                   <div class="mt-3">
                     <small class="text-muted">
                       <i class="bi bi-info-circle me-1"></i>
-                      Selecione uma rede para ver os custos de deploy
+                      O deploy será feito na rede da carteira conectada
                     </small>
                   </div>
                 </div>

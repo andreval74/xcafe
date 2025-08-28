@@ -7,6 +7,7 @@ class ProgressiveFlow {
         this.checkingConnection = false; // Flag para evitar verificações múltiplas
         this.supportedNetworks = []; // Cache das redes suportadas
         this.api = null; // Instância da API
+        this.currentNetwork = null; // Rede atual da carteira
         
         this.initializeFlow();
     }
@@ -50,7 +51,9 @@ class ProgressiveFlow {
                 console.log('Carregando redes suportadas da API...');
                 const networks = await this.api.getSupportedNetworksForUI();
                 this.supportedNetworks = networks;
-                this.populateNetworkSelector();
+                
+                // Não popular seletor - usar rede da carteira
+                console.log(`✅ ${this.supportedNetworks.length} redes carregadas no cache`);
             } else {
                 // Fallback para redes fixas
                 console.log('Usando redes fixas (fallback)');
@@ -60,7 +63,6 @@ class ProgressiveFlow {
                     { name: 'Ethereum', chainId: 1, symbol: 'ETH', displayName: 'Ethereum (ETH)' },
                     { name: 'Polygon', chainId: 137, symbol: 'MATIC', displayName: 'Polygon (MATIC)' }
                 ];
-                this.populateNetworkSelector();
             }
         } catch (error) {
             console.error('Erro ao carregar redes:', error);
@@ -69,62 +71,115 @@ class ProgressiveFlow {
                 { name: 'BSC Mainnet', chainId: 56, symbol: 'BNB', displayName: 'BSC Mainnet (BNB)' },
                 { name: 'BSC Testnet', chainId: 97, symbol: 'tBNB', displayName: 'BSC Testnet (tBNB)' }
             ];
-            this.populateNetworkSelector();
         }
     }
     
-    populateNetworkSelector() {
-        const networkSelect = document.getElementById('deploy-network');
-        if (!networkSelect) return;
-        
-        // Limpar opções existentes
-        networkSelect.innerHTML = '<option value="">Selecione a rede...</option>';
-        
-        // Adicionar redes suportadas
-        this.supportedNetworks.forEach(network => {
-            const option = document.createElement('option');
-            option.value = network.chainId;
-            option.textContent = network.displayName;
-            option.dataset.symbol = network.symbol;
-            networkSelect.appendChild(option);
-        });
-        
-        // Listener para atualizar estimativa de custo
-        networkSelect.addEventListener('change', () => {
-            this.updateDeployCostEstimate();
-            
-            // Habilitar/desabilitar botão de deploy
-            const deployBtn = document.getElementById('deploy-token-btn');
-            if (deployBtn) {
-                if (networkSelect.value) {
-                    deployBtn.disabled = false;
-                    const selectedNetwork = this.supportedNetworks.find(n => n.chainId == networkSelect.value);
-                    if (selectedNetwork) {
-                        deployBtn.innerHTML = `<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN EM ${selectedNetwork.name.toUpperCase()}`;
-                    }
-                } else {
-                    deployBtn.disabled = true;
-                    deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
-                }
+    
+    async detectWalletNetwork() {
+        try {
+            if (typeof window.ethereum === 'undefined') {
+                throw new Error('MetaMask não detectado');
             }
-        });
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const network = await provider.getNetwork();
+            
+            console.log('Rede detectada da carteira:', network);
+            
+            // Encontrar informações da rede
+            const networkInfo = this.supportedNetworks.find(n => n.chainId === network.chainId);
+            
+            if (networkInfo) {
+                console.log('✅ Rede suportada:', networkInfo);
+                this.currentNetwork = {
+                    chainId: network.chainId,
+                    name: networkInfo.name,
+                    symbol: networkInfo.symbol,
+                    supported: true
+                };
+            } else {
+                console.warn('⚠️ Rede não suportada pelo sistema');
+                this.currentNetwork = {
+                    chainId: network.chainId,
+                    name: network.name || `Rede ${network.chainId}`,
+                    symbol: 'ETH',
+                    supported: false
+                };
+            }
+            
+            this.updateNetworkDisplay();
+            await this.updateDeployCostEstimate();
+            this.updateDeployButton();
+            
+            return this.currentNetwork;
+            
+        } catch (error) {
+            console.error('Erro ao detectar rede:', error);
+            
+            // Fallback
+            this.currentNetwork = {
+                chainId: 97, // BSC Testnet
+                name: 'BSC Testnet',
+                symbol: 'tBNB',
+                supported: true
+            };
+            
+            this.updateNetworkDisplay();
+            return this.currentNetwork;
+        }
+    }
+    
+    updateNetworkDisplay() {
+        const networkDetails = document.getElementById('network-details');
+        if (!networkDetails || !this.currentNetwork) return;
         
-        console.log(`✅ ${this.supportedNetworks.length} redes carregadas no seletor`);
+        const statusIcon = this.currentNetwork.supported 
+            ? '<i class="bi bi-check-circle text-success me-1"></i>' 
+            : '<i class="bi bi-exclamation-triangle text-warning me-1"></i>';
+            
+        const supportText = this.currentNetwork.supported 
+            ? 'Suportada para deploy' 
+            : 'Rede não suportada - será usado deploy direto';
+            
+        networkDetails.innerHTML = `
+            <div class="d-flex align-items-center mb-1">
+                ${statusIcon}
+                <strong>${this.currentNetwork.name} (${this.currentNetwork.symbol})</strong>
+            </div>
+            <div class="text-muted small">
+                Chain ID: ${this.currentNetwork.chainId} • ${supportText}
+            </div>
+        `;
+    }
+    
+    updateDeployButton() {
+        const deployBtn = document.getElementById('deploy-token-btn');
+        if (!deployBtn || !this.currentNetwork) return;
+        
+        const isWalletConnected = this.sectionData.wallet && this.walletConnected;
+        const hasBasicInfo = this.sectionData.basicinfo;
+        
+        if (isWalletConnected && hasBasicInfo) {
+            deployBtn.disabled = false;
+            deployBtn.innerHTML = `<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN NA ${this.currentNetwork.name.toUpperCase()}`;
+        } else {
+            deployBtn.disabled = true;
+            deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
+        }
     }
     
     async updateDeployCostEstimate() {
-        const networkSelect = document.getElementById('deploy-network');
         const costElement = document.getElementById('deploy-cost-estimate');
         
-        if (!networkSelect || !networkSelect.value) {
-            if (costElement) costElement.textContent = 'Selecione uma rede para ver a estimativa';
+        if (!this.currentNetwork) {
+            if (costElement) costElement.textContent = 'Detectando rede da carteira...';
             return;
         }
         
-        const chainId = parseInt(networkSelect.value);
+        const chainId = this.currentNetwork.chainId;
         
         try {
-            if (this.api) {
+            if (this.api && this.currentNetwork.supported) {
                 const estimate = await this.api.estimateDeployCost(chainId);
                 if (costElement) {
                     costElement.innerHTML = `
@@ -139,12 +194,14 @@ class ProgressiveFlow {
                     56: '~0.003 BNB ($1-2)',
                     97: '~0.003 tBNB (Testnet)',
                     137: '~0.01 MATIC ($0.01)',
-                    43114: '~0.01 AVAX ($0.30)'
+                    43114: '~0.01 AVAX ($0.30)',
+                    250: '~0.1 FTM ($0.10)'
                 };
                 
                 const estimate = estimates[chainId] || '~0.01 ETH';
                 if (costElement) {
-                    costElement.innerHTML = `<strong>Custo estimado:</strong> ${estimate}`;
+                    const method = this.currentNetwork.supported ? 'via API' : 'deploy direto';
+                    costElement.innerHTML = `<strong>Custo estimado:</strong> ${estimate}<br><small>Método: ${method}</small>`;
                 }
             }
         } catch (error) {
@@ -362,6 +419,9 @@ class ProgressiveFlow {
             };
         }
         
+        // Detectar rede da carteira para deploy
+        this.detectWalletNetwork();
+        
         // Marcar seção wallet como completa
         this.markSectionComplete('wallet', walletData);
         
@@ -575,6 +635,11 @@ class ProgressiveFlow {
         
         const { network, address } = this.sectionData.wallet;
         const { name, symbol, decimals, totalSupply, owner, image } = this.sectionData.basicinfo;
+        
+        // Detectar rede da carteira se não foi detectado ainda
+        if (!this.currentNetwork) {
+            this.detectWalletNetwork();
+        }
         
         tokenSummary.innerHTML = `
             <div class="col-md-6">
@@ -1035,17 +1100,11 @@ class ProgressiveFlow {
 
     resetDeployButton() {
         const deployBtn = document.getElementById('deploy-token-btn');
-        const networkSelect = document.getElementById('deploy-network');
         
         if (deployBtn) {
-            if (networkSelect && networkSelect.value) {
+            if (this.currentNetwork && this.walletConnected && this.sectionData.basicinfo) {
                 deployBtn.disabled = false;
-                const selectedNetwork = this.supportedNetworks.find(n => n.chainId == networkSelect.value);
-                if (selectedNetwork) {
-                    deployBtn.innerHTML = `<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN EM ${selectedNetwork.name.toUpperCase()}`;
-                } else {
-                    deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
-                }
+                deployBtn.innerHTML = `<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN NA ${this.currentNetwork.name.toUpperCase()}`;
             } else {
                 deployBtn.disabled = true;
                 deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
