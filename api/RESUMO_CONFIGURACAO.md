@@ -89,7 +89,7 @@ this.apiBaseUrl = 'https://SEU-SERVICE.onrender.com';
 
 ## 🆘 **ERRO COMUM**
 
-**Erro: "Cannot find module 'solc'"**
+### Erro: "Cannot find module 'solc'"
 
 ```powershell
 cd api
@@ -101,4 +101,4 @@ git push
 
 ---
 
-**✅ Seguindo esses passos, a API funcionará 100%**
+## ✅ Seguindo esses passos, a API funcionará 100%

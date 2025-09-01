@@ -3,6 +3,7 @@
 ## 🔄 Mudanças Implementadas
 
 ### ✅ Interface Simplificada
+
 - **Removido:** Seletor manual de rede blockchain
 - **Adicionado:** Detecção automática da rede da carteira conectada
 - **Interface:** Exibe informações da rede detectada automaticamente
@@ -10,6 +11,7 @@
 ### 🧠 Lógica Atualizada
 
 #### **1. Detecção Automática de Rede**
+
 ```javascript
 // Detecta rede quando carteira conecta
 async detectWalletNetwork() {
@@ -29,11 +31,13 @@ async detectWalletNetwork() {
 ```
 
 #### **2. Deploy Inteligente**
+
 - **Rede Suportada:** Usa API multi-chain
 - **Rede Não Suportada:** Fallback para deploy direto via MetaMask
 - **Erro na API:** Fallback automático para deploy direto
 
 #### **3. Interface Responsiva**
+
 - **Botão:** Mostra nome da rede atual
 - **Status:** Indica se rede é suportada
 - **Custos:** Estimativas baseadas na rede conectada
@@ -41,12 +45,14 @@ async detectWalletNetwork() {
 ### 🎯 Experiência do Usuário
 
 #### **Antes:**
+
 1. Conectar carteira
 2. **Selecionar rede manualmente** ❌
 3. Preencher dados do token
 4. Fazer deploy
 
 #### **Depois:**
+
 1. Conectar carteira ✅
 2. **Rede detectada automaticamente** ✅
 3. Preencher dados do token ✅
@@ -55,11 +61,13 @@ async detectWalletNetwork() {
 ### 📱 Interface Atualizada
 
 #### **HTML Changes:**
+
 - Removido `<select id="deploy-network">`
 - Adicionado `<div id="network-details">` para mostrar rede atual
 - Botão atualizado dinamicamente com nome da rede
 
 #### **CSS/Visual:**
+
 - Card "Rede de Deploy" em vez de "Configurações de Deploy"
 - Ícones de status (✅ suportada, ⚠️ não suportada)
 - Informações de Chain ID e método de deploy
@@ -107,8 +115,9 @@ async detectWalletNetwork() {
 ### 🎯 Resultado Final
 
 **Experiência mais fluida e intuitiva:**
+
 - ✅ Menos cliques
-- ✅ Menos confusão 
+- ✅ Menos confusão
 - ✅ Sempre funciona
 - ✅ Rede sempre correta
 - ✅ Fallback garantido

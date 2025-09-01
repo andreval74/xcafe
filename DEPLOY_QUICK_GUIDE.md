@@ -17,11 +17,13 @@ Abra PowerShell no diretório xcafe e execute:
 ### Escolha sua versão:
 
 **API BÁSICA (recomendado para começar)**
+
 - Deploy apenas tokens pré-compilados
 - Menor custo (Free tier do Render)
 - Setup mais rápido
 
 **API ESTENDIDA (funcionalidades completas)**  
+
 - Compilação Solidity + deploy
 - Requer Render Starter ($7/mês)
 - Setup mais complexo
@@ -41,7 +43,7 @@ Copy-Item server-extended.js server.js
 2. **Conecte seu repositório GitHub**
 
 3. **Configure assim:**
-   ```
+   ```powershell
    Name: xcafe-token-api
    Environment: Node  
    Root Directory: api/
@@ -52,7 +54,8 @@ Copy-Item server-extended.js server.js
 4. **Adicione Environment Variables:**
 
    **OBRIGATÓRIAS:**
-   ```
+
+   ```environment
    PORT = 10000
    NODE_ENV = production
    BSC_RPC = https://bsc-dataseed1.binance.org
@@ -61,13 +64,15 @@ Copy-Item server-extended.js server.js
    ```
 
    **OPCIONAIS (para melhor funcionamento):**
-   ```
+
+   ```environment
    ETHEREUM_RPC = https://eth-mainnet.alchemyapi.io/v2/[sua_chave]
    POLYGON_RPC = https://polygon-mainnet.infura.io/v3/[sua_chave]
    ```
 
    **PARA API ESTENDIDA (adicional):**
-   ```
+
+   ```environment
    SOLC_VERSION = 0.8.19
    OPTIMIZATION_ENABLED = true
    OPTIMIZATION_RUNS = 200
@@ -144,12 +149,14 @@ const API_BASE_URL = 'https://sua-nova-api.onrender.com';
 - Verificar se package.json está correto
 - Limpar cache: deletar node_modules
 
-**API 500?** 
+**API 500?**
+
 - Conferir environment variables
 - Testar RPC URLs
 - Verificar private key
 
 **Sem fundos?**
+
 - Adicionar BNB na testnet: BSC Faucet
 - Verificar saldo da wallet
 

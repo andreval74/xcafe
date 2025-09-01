@@ -3,6 +3,7 @@
 ## 🐛 **Problemas Identificados e Corrigidos:**
 
 ### **1. Chain ID Undefined**
+
 **Problema:** `currentNetwork.chainId` estava undefined
 **Solução:** Conversão correta de hex para decimal no `detectWalletNetwork()`
 
@@ -16,6 +17,7 @@ if (typeof chainId === 'string' && chainId.startsWith('0x')) {
 ```
 
 ### **2. Decimal Value NaN**
+
 **Problema:** `parseEther()` recebia valores NaN
 **Solução:** Validação e fallbacks no `estimateDeployCost()`
 
@@ -28,6 +30,7 @@ if (!chainId || chainId === 'undefined') {
 ```
 
 ### **3. Rede BSC Testnet Não Reconhecida**
+
 **Problema:** `bnbt` não estava mapeado no cache de redes
 **Solução:** Mapeamento manual de redes conhecidas
 
@@ -41,10 +44,12 @@ const knownNetworks = {
 ```
 
 ### **4. Token Deploy API Corrompida**
+
 **Problema:** Estrutura de classes bagunçada com código duplicado
 **Solução:** Reescrita completa da `token-deploy-api.js`
 
 ### **5. Deploy Manager Complexo**
+
 **Problema:** Lógica muito complexa causando erros
 **Solução:** Simplificação da `TokenDeployManager`
 
@@ -60,6 +65,7 @@ async deployToken(tokenData) {
 ## ✅ **Estado Atual:**
 
 ### **Fluxo de Deploy Corrigido:**
+
 1. **Conecta carteira** → Detecta rede automaticamente ✅
 2. **Identifica suporte** → API ou deploy direto ✅  
 3. **Tenta API** → Se rede suportada ✅
@@ -67,6 +73,7 @@ async deployToken(tokenData) {
 5. **Deploy confirmado** → Resultado exibido ✅
 
 ### **Redes Suportadas:**
+
 - ✅ **BSC Testnet (97)** - Reconhecida corretamente
 - ✅ **BSC Mainnet (56)** - Via API ou direto
 - ✅ **Ethereum (1)** - Deploy direto
@@ -74,6 +81,7 @@ async deployToken(tokenData) {
 - ✅ **Outras redes** - Deploy direto como fallback
 
 ### **Validações Implementadas:**
+
 - ✅ Chain ID sempre numérico
 - ✅ Dados de deploy sempre válidos  
 - ✅ Fallbacks para estimativas de custo
@@ -87,7 +95,7 @@ async deployToken(tokenData) {
    - `handleDeploy()` - Lógica simplificada com fallback
    - Tratamento robusto de erros
 
-2. **`js/token-deploy-api.js`** 
+2. **`js/token-deploy-api.js`**
    - Reescrita completa
    - Validações de entrada
    - Fallbacks para estimativas
@@ -100,12 +108,14 @@ async deployToken(tokenData) {
 ## 🎯 **Resultado:**
 
 ### **Antes:** ❌
+
 - Erros de Chain ID undefined
 - Decimal NaN crashes  
 - Rede não reconhecida
 - Deploy failing
 
 ### **Depois:** ✅
+
 - ✅ Chain ID sempre correto
 - ✅ Valores numéricos válidos
 - ✅ Todas as redes suportadas  

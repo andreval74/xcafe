@@ -45,7 +45,7 @@ node check-config.js
 - **Connect GitHub** → Selecionar repositório
 - **Configurações:**
 
-```
+```render
   Name: xcafe-token-api
   Environment: Node
   Region: Oregon (US West)
