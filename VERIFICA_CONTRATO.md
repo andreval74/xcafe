@@ -3,6 +3,7 @@
 ## ⚡ CORREÇÃO APLICADA
 
 ### 🎯 **PROBLEMA RESOLVIDO:**
+
 - **Bytecode diferente**: Versão do compilador corrigida de 0.8.26 → 0.8.30
 - **API atualizada**: Agora gera contratos compatíveis com verificação
 - **Deploy corrigido**: Salva código real da API para verificação
@@ -12,12 +13,31 @@
 ## 🛠️ **CONFIGURAÇÕES CORRETAS PARA VERIFICAÇÃO**
 
 ### **BSCScan/EtherScan:**
+
+Compiler Version: v0.8.30+commit.8a97fa7a
+Optimization: ✅ Enabled (200 runs)
+
+1. Preencher dados do token
+2. Fazer deploy via "Criar Token"  
+3. ✅ Código da API é salvo automaticamente
+4. Clicar "Verificar na Blockchain"
+5. Copiar código exibido (real da API)
+6. Colar no BSCScan/EtherScan
+7. Usar configurações: 0.8.30 + Optimization Enabled (200 runs)
+• Compiler Type: Solidity (Single file)
+• Compiler Version: v0.8.30+commit.8a97fa7a  
+• Open Source License Type: MIT License
+
+
+Compiler Version: v0.8.30+commit.8a97fa7a
+Optimization: ✅ Enabled (200 runs)
 ```
 Compiler Version: v0.8.30+commit.8a97fa7a
 Optimization: ✅ Enabled (200 runs)
 ```
 
 ### **Código Fonte:**
+
 - ✅ **Usar sempre o código da API** (salvo automaticamente)
 - ❌ **Não usar template local** (pode diferir da API)
 
@@ -26,13 +46,15 @@ Optimization: ✅ Enabled (200 runs)
 ## 🚀 **PASSOS PARA VERIFICAR**
 
 ### 1. **Deploy do Token**
+
 ```
 1. Preencher dados do token
 2. Fazer deploy via "Criar Token"  
 3. ✅ Código da API é salvo automaticamente
 ```
 
-### 2. **Verificação no Explorer** 
+### 2. **Verificação no Explorer**
+
 ```
 1. Clicar "Verificar na Blockchain"
 2. Copiar código exibido (real da API)
@@ -41,6 +63,7 @@ Optimization: ✅ Enabled (200 runs)
 ```
 
 ### 3. **Configurações Precisas**
+
 ```
 • Compiler Type: Solidity (Single file)
 • Compiler Version: v0.8.30+commit.8a97fa7a  
@@ -53,6 +76,7 @@ Optimization: ✅ Enabled (200 runs)
 ## ✅ **VERIFICAÇÃO AUTOMÁTICA**
 
 O sistema agora:
+
 - 📋 Salva código real da API durante deploy
 - 🔧 Mostra configurações corretas na modal
 - 📄 Permite copiar código exato para verificação
@@ -63,6 +87,7 @@ O sistema agora:
 ## 🎯 **RESULTADO ESPERADO**
 
 Com as correções aplicadas:
+
 - ✅ **Bytecode match**: Código compilado corresponde ao deployado
 - ✅ **Verificação passa**: Explorer aceita o código fonte
 - ✅ **Contrato verificado**: Fica com ✅ no BSCScan
