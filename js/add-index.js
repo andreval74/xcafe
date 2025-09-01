@@ -318,29 +318,24 @@ async function loadSolidityTemplate() {
         console.warn('⚠️ Erro ao carregar template base.sol, usando template interno:', error);
         // Template de fallback básico caso não consiga carregar o base.sol
         return `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.30;
 
 /*
 Gerado por:
 Smart Contract Cafe - Fallback Template
 https://smartcontract.cafe
+
+INFORMAÇÕES DE VERIFICAÇÃO:
+- Compiler Version: v0.8.30+commit.8a97fa7a
+- Optimization: Enabled (200 runs)
+- License: MIT
 */
 
-// CONFIGURAÇÕES DO TOKEN
-string constant TOKEN_NAME = "{{TOKEN_NAME}}";
-string constant TOKEN_SYMBOL = "{{TOKEN_SYMBOL}}";
-uint8 constant TOKEN_DECIMALS = {{DECIMALS}};
-uint256 constant TOKEN_SUPPLY = {{TOKEN_SUPPLY}};
-address constant TOKEN_OWNER = {{OWNER_ADDRESS}};
-string constant TOKEN_LOGO_URI = "{{TOKEN_LOGO_URI}}";
-address constant BTCBR_ORIGINAL = {{TOKEN_ORIGINAL}};
-
-// Contrato ERC-20 básico
 contract {{TOKEN_SYMBOL}} {
-    string public name = TOKEN_NAME;
-    string public symbol = TOKEN_SYMBOL;
-    uint8 public decimals = TOKEN_DECIMALS;
-    uint256 public totalSupply = TOKEN_SUPPLY * (10 ** uint256(decimals));
+    string public name = "{{TOKEN_NAME}}";
+    string public symbol = "{{TOKEN_SYMBOL}}";
+    uint8 public decimals = {{DECIMALS}};
+    uint256 public totalSupply = {{TOKEN_SUPPLY}} * (10 ** uint256(decimals));
     
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -349,8 +344,8 @@ contract {{TOKEN_SYMBOL}} {
     event Approval(address indexed owner, address indexed spender, uint256 value);
     
     constructor() {
-        _balances[TOKEN_OWNER] = totalSupply;
-        emit Transfer(address(0x0), TOKEN_OWNER, totalSupply);
+        _balances[{{OWNER_ADDRESS}}] = totalSupply;
+        emit Transfer(address(0), {{OWNER_ADDRESS}}, totalSupply);
     }
     
     function balanceOf(address account) public view returns (uint256) {
@@ -362,6 +357,28 @@ contract {{TOKEN_SYMBOL}} {
         _balances[msg.sender] -= amount;
         _balances[recipient] += amount;
         emit Transfer(msg.sender, recipient, amount);
+        return true;
+    }
+    
+    function approve(address spender, uint256 amount) public returns (bool) {
+        _allowances[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
+    }
+    
+    function allowance(address owner, address spender) public view returns (uint256) {
+        return _allowances[owner][spender];
+    }
+    
+    function transferFrom(address from, address to, uint256 amount) public returns (bool) {
+        require(_balances[from] >= amount, "Insufficient balance");
+        require(_allowances[from][msg.sender] >= amount, "Allowance exceeded");
+        
+        _balances[from] -= amount;
+        _balances[to] += amount;
+        _allowances[from][msg.sender] -= amount;
+        
+        emit Transfer(from, to, amount);
         return true;
     }
 }
@@ -417,8 +434,44 @@ async function downloadSolidityFile() {
     try {
         console.log('📥 Gerando arquivo Solidity...');
         
-        const contractCode = await generateSolidityContract(tokenData);
-        const fileName = `${tokenData.symbol}.sol`;
+        let contractCode = '';
+        let fileName = `${tokenData.symbol}.sol`;
+        
+        // 1. Priorizar código real da API (se já fez deploy)
+        if (AppState.deployResult && AppState.deployResult.sourceCode) {
+            contractCode = AppState.deployResult.sourceCode;
+            console.log('📄 Usando código fonte real da API deployada');
+        } else {
+            // 2. Gerar usando template atualizado
+            contractCode = await generateSolidityContract(tokenData);
+            console.log('📄 Usando template local atualizado');
+        }
+        
+        // Adicionar header com informações de verificação
+        const verificationHeader = `/*
+=============================================================================
+INFORMAÇÕES PARA VERIFICAÇÃO NO BLOCKCHAIN EXPLORER
+=============================================================================
+
+Para verificar este contrato no BSCScan ou EtherScan, use:
+
+• Compiler Type: Solidity (Single file)
+• Compiler Version: v0.8.30+commit.8a97fa7a
+• Open Source License Type: MIT License
+• Optimization: Yes (200 runs)
+• EVM Version: default
+
+=============================================================================
+Gerado por: xcafe Token Creator
+Website: https://xcafe.com
+Data: ${new Date().toLocaleDateString('pt-BR')}
+=============================================================================
+*/
+
+`;
+
+        // Adicionar header ao código
+        contractCode = verificationHeader + contractCode;
         
         // Criar blob e download
         const blob = new Blob([contractCode], { type: 'text/plain;charset=utf-8' });
@@ -2321,7 +2374,7 @@ contract ${tokenData.symbol || 'Token'} {
 }
 
 /**
- * Abre a URL de verificação do contrato
+ * Abre modal com informações completas de verificação
  */
 function openContractVerification() {
     if (!AppState.deployResult?.contractAddress) {
@@ -2330,28 +2383,198 @@ function openContractVerification() {
     }
     
     const chainId = AppState.wallet.network?.chainId || 97;
-    let verificationUrl;
+    const contractAddress = AppState.deployResult.contractAddress;
+    
+    // URLs dos explorers
+    let explorerName, verificationUrl, contractUrl;
     
     switch (chainId) {
         case 1:
-            verificationUrl = `https://etherscan.io/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            explorerName = 'EtherScan';
+            verificationUrl = `https://etherscan.io/verifyContract?a=${contractAddress}`;
+            contractUrl = `https://etherscan.io/address/${contractAddress}`;
             break;
         case 56:
-            verificationUrl = `https://bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            explorerName = 'BSCScan';
+            verificationUrl = `https://bscscan.com/verifyContract?a=${contractAddress}`;
+            contractUrl = `https://bscscan.com/address/${contractAddress}`;
             break;
         case 97:
-            verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            explorerName = 'BSCScan Testnet';
+            verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${contractAddress}`;
+            contractUrl = `https://testnet.bscscan.com/address/${contractAddress}`;
             break;
         case 137:
-            verificationUrl = `https://polygonscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            explorerName = 'PolygonScan';
+            verificationUrl = `https://polygonscan.com/verifyContract?a=${contractAddress}`;
+            contractUrl = `https://polygonscan.com/address/${contractAddress}`;
             break;
         default:
-            verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            explorerName = 'BSCScan Testnet';
+            verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${contractAddress}`;
+            contractUrl = `https://testnet.bscscan.com/address/${contractAddress}`;
     }
     
-    window.open(verificationUrl, '_blank');
-    showToast('Página de verificação aberta!', 'info');
+    // Obter código fonte (prioritar API)
+    let sourceCode = '';
+    if (AppState.deployResult.sourceCode) {
+        sourceCode = AppState.deployResult.sourceCode;
+    } else {
+        sourceCode = '// Código fonte não disponível. Baixe usando o botão "Baixar Código Solidity".';
+    }
+    
+    // Criar modal de verificação
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'verification-info-modal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-primary bg-primary bg-opacity-20">
+                    <h5 class="modal-title">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Verificação do Contrato
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <!-- Caixa Azul Principal -->
+                    <div class="card bg-primary bg-opacity-10 border-primary mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-gear-fill me-2"></i>Configurações de Verificação - ${explorerName}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <strong class="text-primary d-block">Compiler Type:</strong>
+                                    <code class="text-info bg-dark px-2 py-1 rounded">Solidity (Single file)</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong class="text-primary d-block">Compiler Version:</strong>
+                                    <code class="text-info bg-dark px-2 py-1 rounded">v0.8.30+commit.8a97fa7a</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong class="text-primary d-block">Open Source License:</strong>
+                                    <code class="text-info bg-dark px-2 py-1 rounded">MIT License</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong class="text-primary d-block">Optimization:</strong>
+                                    <span class="badge bg-success me-1">✅ Enabled</span>
+                                    <code class="text-info">200 runs</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong class="text-primary d-block">EVM Version:</strong>
+                                    <code class="text-info bg-dark px-2 py-1 rounded">default</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong class="text-primary d-block">Constructor Arguments:</strong>
+                                    <code class="text-info bg-dark px-2 py-1 rounded">None</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Instruções Passo a Passo -->
+                    <div class="card bg-success bg-opacity-10 border-success mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-list-ol me-2"></i>Passos para Verificação
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ol class="text-white mb-0">
+                                <li class="mb-2">Clique no botão "Abrir ${explorerName}" abaixo</li>
+                                <li class="mb-2">Na página do contrato, vá na aba <strong>"Contract"</strong></li>
+                                <li class="mb-2">Clique em <strong>"Verify and Publish"</strong></li>
+                                <li class="mb-2">Configure exatamente como mostrado na caixa azul acima</li>
+                                <li class="mb-2">Cole o código fonte (use o botão "Copiar Código" abaixo)</li>
+                                <li class="mb-0">Clique em <strong>"Verify and Publish"</strong></li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <!-- Código Fonte -->
+                    <div class="card bg-warning bg-opacity-10 border-warning mb-4">
+                        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="bi bi-code-slash me-2"></i>Código Fonte para Verificação
+                            </h6>
+                            <button class="btn btn-outline-light btn-sm" onclick="copyVerificationCode()" title="Copiar código">
+                                <i class="bi bi-clipboard me-1"></i>Copiar Código
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <pre id="verification-source-code" class="bg-dark text-light p-3 rounded" style="max-height: 300px; overflow-y: auto; font-size: 12px; font-family: 'Courier New', monospace;">${sourceCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer border-secondary">
+                    <div class="d-flex gap-2 flex-wrap w-100">
+                        <button type="button" class="btn btn-success flex-fill" onclick="window.open('${verificationUrl}', '_blank')">
+                            <i class="bi bi-shield-check me-1"></i>Abrir ${explorerName}
+                        </button>
+                        <button type="button" class="btn btn-info flex-fill" onclick="window.open('${contractUrl}', '_blank')">
+                            <i class="bi bi-eye me-1"></i>Ver Contrato
+                        </button>
+                        <button type="button" class="btn btn-primary flex-fill" onclick="downloadVerificationFile()">
+                            <i class="bi bi-download me-1"></i>Download .sol
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Adicionar ao DOM e mostrar
+    document.body.appendChild(modal);
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+    
+    // Remover do DOM quando fechar
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+    
+    console.log('📋 Modal de verificação aberta com configurações corretas');
 }
+
+/**
+ * Copia código fonte para verificação
+ */
+function copyVerificationCode() {
+    const codeElement = document.getElementById('verification-source-code');
+    if (!codeElement) return;
+    
+    const code = codeElement.textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        showToast('Código copiado para a área de transferência!', 'success');
+    }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        showToast('Erro ao copiar código', 'error');
+    });
+}
+
+/**
+ * Download do arquivo para verificação
+ */
+function downloadVerificationFile() {
+    if (!AppState.deployResult?.deployData) {
+        showToast('Dados não disponíveis', 'warning');
+        return;
+    }
+    
+    // Usar função já existente
+    downloadSolidityFile();
+}
+
+// Tornar funções globais para os botões do modal
+window.copyVerificationCode = copyVerificationCode;
+window.downloadVerificationFile = downloadVerificationFile;
 
 /**
  * Deploy na mainnet usando os mesmos dados
