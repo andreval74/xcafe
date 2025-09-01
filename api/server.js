@@ -27,9 +27,20 @@ function toChecksumAddress(address) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy - necessário para Render.com e outros proxies
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+// Logging middleware (opcional para debug)
+if (process.env.NODE_ENV !== 'production' || process.env.DEBUG === 'true') {
+    app.use((req, res, next) => {
+        console.log(`🌐 ${req.method} ${req.path} - IP: ${req.ip}`);
+        next();
+    });
+}
 
 // Rate limiting
 const apiLimiter = rateLimit({
@@ -38,6 +49,14 @@ const apiLimiter = rateLimit({
     message: { 
         success: false, 
         error: "Rate limit exceeded. Tente novamente em 1 minuto." 
+    },
+    // Configuração para proxies (Render.com, Vercel, etc.)
+    trustProxy: true,
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    // Usar IP real do cliente através do proxy
+    keyGenerator: (req) => {
+        return req.ip || req.connection.remoteAddress || 'unknown';
     }
 });
 

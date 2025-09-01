@@ -94,6 +94,8 @@ Start Command: npm start
 ```text
 PORT=10000
 NODE_ENV=production
+TRUST_PROXY=true
+DEBUG=false
 SOLC_VERSION=0.8.26
 OPTIMIZATION_ENABLED=true
 OPTIMIZATION_RUNS=200

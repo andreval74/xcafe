@@ -23,6 +23,12 @@ Valor: production
 Chave: PORT  
 Valor: 10000
 
+Chave: DEBUG
+Valor: false
+
+Chave: TRUST_PROXY
+Valor: true
+
 Chave: SOLC_VERSION
 Valor: 0.8.26
 

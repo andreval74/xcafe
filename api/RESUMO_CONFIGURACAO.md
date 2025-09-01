@@ -46,6 +46,8 @@ BSC_TESTNET_RPC=https://data-seed-prebsc-1-s1.binance.org:8545/
 | **Start Command** | `npm start` |
 | **NODE_ENV** | `production` |
 | **PORT** | `10000` |
+| **TRUST_PROXY** | `true` |
+| **DEBUG** | `false` |
 | **SOLC_VERSION** | `0.8.26` |
 | **OPTIMIZATION_RUNS** | `200` |
 | **BSC_TESTNET_RPC** | `https://data-seed-prebsc-1-s1.binance.org:8545/` |
