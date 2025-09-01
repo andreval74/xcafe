@@ -4,7 +4,7 @@ API híbrida para compilação de contratos Solidity. O usuário paga o deploy v
 
 ## 📁 Estrutura
 
-```
+```text
 api/
 ├── server.js                    # Servidor principal
 ├── package.json                 # Dependências Node.js
@@ -19,17 +19,20 @@ api/
 ## ⚡ Início Rápido
 
 1. **Configurar ambiente:**
+
    ```bash
    cp .env.template .env
    npm install
    ```
 
 2. **Verificar configuração:**
+
    ```bash
    node check-config.js
    ```
 
 3. **Testar localmente:**
+
    ```bash
    npm start
    # Acessar: http://localhost:3000/health
@@ -38,6 +41,7 @@ api/
 ## 🌐 Deploy no Render.com
 
 Veja os arquivos de configuração:
+
 - **Detalhado:** `CONFIGURACAO_COMPLETA.md`
 - **Passo-a-passo:** `PASSO_A_PASSO.md`
 - **Rápido:** `RESUMO_CONFIGURACAO.md`
