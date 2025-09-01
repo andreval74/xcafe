@@ -1612,9 +1612,15 @@ async function performRealDeploy() {
             deployData: tokenData,
             gasUsed: result.gasUsed || 'N/A',
             blockNumber: result.blockNumber || 'N/A',
-            sourceCode: result.token?.sourceCode || null,
-            compilation: result.token?.compilation || null
+            sourceCode: result.sourceCode || result.token?.sourceCode || null, // Código da API
+            compilation: result.compilation || result.token?.compilation || null
         };
+        
+        // IMPORTANTE: Salvar código real da API para verificação
+        if (result.sourceCode) {
+            deploymentState.contractCode = result.sourceCode;
+            console.log('📄 Código fonte da API capturado para verificação');
+        }
         
         console.log('✅ Deploy concluído:', AppState.deployResult);
         
@@ -2566,6 +2572,9 @@ window.shareToken = shareToken;
 window.previewContractBeforeDeploy = previewContractBeforeDeploy;
 window.viewDeployedContract = viewDeployedContract;
 window.verifyDeployedContract = verifyDeployedContract;
+window.compareContracts = compareContracts;
+window.copyApiCode = copyApiCode;
+window.copyTemplateCode = copyTemplateCode;
 
 /**
  * Carrega e processa o template do contrato simple.sol
@@ -2686,21 +2695,25 @@ function viewDeployedContract() {
         return;
     }
     
-    // Usar código do deploy ou gerar a partir dos dados
+    // Priorizar código fonte da API (que é o real)
     let contractCode = '';
+    let title = 'Contrato Deployado';
     
     if (AppState.deployResult.sourceCode) {
-        // Se temos o código fonte do resultado do deploy
+        // Código da API (o que foi realmente deployado)
         contractCode = AppState.deployResult.sourceCode;
+        title = 'Contrato Deployado (Código Real da API)';
+        console.log('📄 Usando código fonte da API (real)');
     } else if (deploymentState.contractCode) {
-        // Se temos o código que foi preparado para deploy
+        // Código que tentamos deploy personalizado
         contractCode = deploymentState.contractCode;
+        title = 'Contrato Deployado (Template Local)';
+        console.log('📄 Usando código do template local');
     } else {
-        // Gerar código a partir dos dados do deploy como fallback
+        // Recriar código do template como último recurso
         try {
             const deployData = AppState.deployResult.deployData;
             if (deployData) {
-                // Recriar código do template
                 loadContractTemplate().then(template => {
                     const regeneratedCode = processContractTemplate(template, {
                         name: deployData.name,
@@ -2711,7 +2724,7 @@ function viewDeployedContract() {
                         logoUri: deployData.logoUri || '',
                         originalContract: '0x0000000000000000000000000000000000000000'
                     });
-                    showContractModal(regeneratedCode, 'Contrato Deployado (Recriado)');
+                    showContractModal(regeneratedCode, 'Contrato Reconstruído (Template Local)');
                 });
                 return;
             }
@@ -2723,7 +2736,7 @@ function viewDeployedContract() {
         return;
     }
     
-    showContractModal(contractCode, 'Contrato Deployado');
+    showContractModal(contractCode, title);
 }
 
 /**
@@ -2752,8 +2765,11 @@ function showContractModal(contractCode, title) {
                         </div>
                         <pre id="contract-code-display" class="border p-3" style="max-height: 500px; overflow-y: auto; font-size: 12px; background-color: #f8f9fa; color: #212529; font-family: 'Courier New', monospace;"></pre>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-warning" onclick="compareContracts()">
+                            <i class="fas fa-code-branch"></i> Comparar API vs Template
+                        </button>
                         <button type="button" class="btn btn-info" onclick="verifyDeployedContract()">
                             <i class="fas fa-shield-alt"></i> Verificar na Blockchain
                         </button>
@@ -3093,7 +3109,122 @@ async function attemptAutoVerification() {
     }
 }
 
-console.log('✅ xcafe Token Creator - Tela Única carregado');
+/**
+ * Compara código da API vs Template local
+ */
+async function compareContracts() {
+    if (!AppState.deployResult || !AppState.deployResult.success) {
+        alert('Faça um deploy primeiro para comparar os contratos.');
+        return;
+    }
+    
+    try {
+        const deployData = AppState.deployResult.deployData;
+        
+        // Código da API (o que foi deployado)
+        const apiCode = AppState.deployResult.sourceCode || 'Código da API não disponível';
+        
+        // Código do nosso template
+        const template = await loadContractTemplate();
+        const templateCode = processContractTemplate(template, {
+            name: deployData.name,
+            symbol: deployData.symbol,
+            decimals: deployData.decimals || '18',
+            totalSupply: deployData.totalSupply,
+            ownerAddress: deployData.owner,
+        });
+        
+        // Mostrar modal de comparação
+        showComparisonModal(apiCode, templateCode);
+        
+    } catch (error) {
+        console.error('Erro ao comparar contratos:', error);
+        alert('Erro ao comparar contratos: ' + error.message);
+    }
+}
+
+/**
+ * Modal de comparação de contratos
+ */
+function showComparisonModal(apiCode, templateCode) {
+    let modal = document.getElementById('comparison-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'comparison-modal';
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title">
+                            <i class="fas fa-code-branch text-warning me-2"></i>Comparação: API vs Template
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <strong>⚠️ IMPORTANTE:</strong> Para verificação na blockchain, use sempre o <strong>Código da API</strong> (esquerda),
+                            pois é este código que foi realmente deployado.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-success">📡 Código da API (REAL - Use para verificação)</h6>
+                                <div class="mb-2">
+                                    <button class="btn btn-success btn-sm w-100" onclick="copyApiCode()">
+                                        <i class="fas fa-copy"></i> Copiar Código da API
+                                    </button>
+                                </div>
+                                <pre id="api-code-display" class="border border-success p-2 text-dark" style="height: 400px; overflow-y: auto; font-size: 10px; background-color: #f8f9fa; font-family: 'Courier New', monospace;"></pre>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-info">📄 Template Local (Referência)</h6>
+                                <div class="mb-2">
+                                    <button class="btn btn-info btn-sm w-100" onclick="copyTemplateCode()">
+                                        <i class="fas fa-copy"></i> Copiar Template
+                                    </button>
+                                </div>
+                                <pre id="template-code-display" class="border border-info p-2 text-dark" style="height: 400px; overflow-y: auto; font-size: 10px; background-color: #f8f9fa; font-family: 'Courier New', monospace;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    // Atualizar conteúdo
+    document.getElementById('api-code-display').textContent = apiCode;
+    document.getElementById('template-code-display').textContent = templateCode;
+    
+    // Armazenar para funções de cópia
+    window.comparisonData = { apiCode, templateCode };
+    
+    // Mostrar modal
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+/**
+ * Funções auxiliares para comparação
+ */
+function copyApiCode() {
+    if (window.comparisonData) {
+        navigator.clipboard.writeText(window.comparisonData.apiCode);
+        alert('Código da API copiado! Use este para verificação na blockchain.');
+    }
+}
+
+function copyTemplateCode() {
+    if (window.comparisonData) {
+        navigator.clipboard.writeText(window.comparisonData.templateCode);
+        alert('Template local copiado!');
+    }
+}
 
 
 
