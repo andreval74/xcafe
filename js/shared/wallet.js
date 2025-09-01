@@ -85,10 +85,13 @@ class Wallet {
                 }
             });
             
-            // Mudança de rede
-            window.ethereum.on('chainChanged', (chainId) => {
-                console.log('🌐 Rede alterada, atualizando...');
-                this.detectNetwork();
+            // Mudança de rede - forçar atualização completa
+            window.ethereum.on('chainChanged', async (chainId) => {
+                console.log('🌐 Rede alterada, forçando atualização completa...');
+                // Pequeno delay para garantir que a mudança foi processada
+                setTimeout(async () => {
+                    await this.forceNetworkUpdate();
+                }, 500);
             });
         }
     }
@@ -280,30 +283,19 @@ class Wallet {
      */
     static async detectNetwork() {
         try {
+            if (!this.isMetaMaskAvailable()) {
+                console.log('⚠️ MetaMask não disponível para detectar rede');
+                return;
+            }
+            
             const chainId = await window.ethereum.request({
                 method: 'eth_chainId'
             });
             
             networkData = this.getNetworkInfo(chainId);
             
-            // Atualiza UI da rede
-            const currentNetworkSpan = document.getElementById('current-network');
-            const chainIdSpan = document.getElementById('chain-id-value');
-            const networkDisplayInput = document.getElementById('network-display');
-            
-            if (currentNetworkSpan) {
-                currentNetworkSpan.textContent = networkData.name;
-            }
-            
-            if (chainIdSpan) {
-                chainIdSpan.textContent = networkData.chainId;
-            }
-            
-            // Atualizar campo de rede de deploy
-            if (networkDisplayInput) {
-                networkDisplayInput.value = `${networkData.name} (Chain ID: ${networkData.chainId})`;
-                console.log('🌐 Campo de rede de deploy atualizado:', networkData.name);
-            }
+            // Forçar atualização da UI da rede
+            this.updateNetworkUI();
             
             console.log(`🌐 Rede detectada: ${networkData.name} (ID: ${networkData.chainId})`);
             
@@ -316,6 +308,49 @@ class Wallet {
             
         } catch (error) {
             console.error('❌ Erro ao detectar rede:', error);
+        }
+    }
+    
+    /**
+     * Atualiza especificamente a UI da rede
+     */
+    static updateNetworkUI() {
+        try {
+            // Atualiza elementos da rede
+            const currentNetworkSpan = document.getElementById('current-network');
+            const chainIdSpan = document.getElementById('chain-id-value');
+            const networkDisplayInput = document.getElementById('network-display');
+            
+            if (currentNetworkSpan) {
+                currentNetworkSpan.textContent = networkData.name;
+                console.log('✅ Elemento current-network atualizado:', networkData.name);
+            }
+            
+            if (chainIdSpan) {
+                chainIdSpan.textContent = networkData.chainId;
+                console.log('✅ Elemento chain-id-value atualizado:', networkData.chainId);
+            }
+            
+            // Atualizar campo de rede de deploy com dados completos
+            if (networkDisplayInput) {
+                const networkText = `${networkData.name} (Chain ID: ${networkData.chainId})`;
+                networkDisplayInput.value = networkText;
+                console.log('🌐 Campo de rede de deploy atualizado:', networkText);
+            } else {
+                console.log('⚠️ Campo network-display não encontrado');
+            }
+            
+            // Forçar visibilidade da seção de rede se estiver conectado
+            if (walletConnected) {
+                const networkSection = document.getElementById('network-info-section');
+                if (networkSection) {
+                    networkSection.style.display = 'block';
+                    console.log('✅ Seção de rede forçada a ser visível');
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Erro ao atualizar UI da rede:', error);
         }
     }
     
@@ -373,6 +408,11 @@ class Wallet {
                 console.log('✅ Seção de rede mostrada');
             } else {
                 console.log('⚠️ Seção network-info-section não encontrada');
+            }
+            
+            // Forçar atualização da UI da rede
+            if (networkData.name) {
+                this.updateNetworkUI();
             }
             
             // Auto-preencher endereço do proprietário se existir
@@ -639,6 +679,37 @@ class Wallet {
             this.setupEventListeners();
         }, 100);
     }
+    
+    /**
+     * Força atualização completa da rede e UI
+     */
+    static async forceNetworkUpdate() {
+        console.log('🔄 Forçando atualização completa da rede...');
+        
+        try {
+            // Re-detectar rede
+            await this.detectNetwork();
+            
+            // Atualizar UI completa
+            this.updateWalletUI();
+            
+            // Verificar se elementos foram atualizados
+            setTimeout(() => {
+                const networkDisplayInput = document.getElementById('network-display');
+                const currentNetworkSpan = document.getElementById('current-network');
+                const chainIdSpan = document.getElementById('chain-id-value');
+                
+                console.log('🔍 Verificação pós-atualização:');
+                console.log('- network-display:', networkDisplayInput?.value || 'Não encontrado');
+                console.log('- current-network:', currentNetworkSpan?.textContent || 'Não encontrado');
+                console.log('- chain-id-value:', chainIdSpan?.textContent || 'Não encontrado');
+                console.log('- networkData:', networkData);
+            }, 100);
+            
+        } catch (error) {
+            console.error('❌ Erro ao forçar atualização da rede:', error);
+        }
+    }
 }
 
 // ==================== INICIALIZAÇÃO AUTOMÁTICA ====================
@@ -670,7 +741,8 @@ window.WalletManager = {
     connect: () => Wallet.connect(),
     disconnect: () => Wallet.disconnect(),
     getStatus: () => Wallet.getStatus(),
-    updateWalletUI: () => Wallet.updateWalletUI()
+    updateWalletUI: () => Wallet.updateWalletUI(),
+    forceNetworkUpdate: () => Wallet.forceNetworkUpdate()
 };
 
 // Funções globais para compatibilidade

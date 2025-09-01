@@ -826,6 +826,11 @@ async function connectWallet() {
             console.log('✅ Wallet conectada:', AppState.wallet.address);
             console.log('🌐 Rede detectada:', AppState.wallet.network?.name);
             
+            // Forçar atualização da rede após conectar
+            setTimeout(() => {
+                Wallet.forceNetworkUpdate();
+            }, 1000);
+            
             // Atualizar progresso visual
             updateVisualProgress();
         }
