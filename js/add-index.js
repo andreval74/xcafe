@@ -1621,10 +1621,15 @@ async function performRealDeploy() {
             compilation: result.compilation || result.token?.compilation || null
         };
         
-        // IMPORTANTE: Salvar código real da API para verificação
+        // CRÍTICO: Garantir que o código real da API seja salvo para verificação
         if (result.sourceCode) {
             deploymentState.contractCode = result.sourceCode;
-            console.log('📄 Código fonte da API capturado para verificação');
+            console.log('� Código fonte da API salvo para verificação:', result.sourceCode.substring(0, 100) + '...');
+        } else if (result.token?.sourceCode) {
+            deploymentState.contractCode = result.token.sourceCode;
+            console.log('🔐 Código fonte da API (token) salvo para verificação');
+        } else {
+            console.warn('⚠️ ATENÇÃO: Código fonte da API não encontrado! Verificação pode falhar.');
         }
         
         console.log('✅ Deploy concluído:', AppState.deployResult);
@@ -2163,7 +2168,7 @@ function openVerificationUrl() {
 }
 
 // Adicionar token ao MetaMask
-async function addTokenToMetaMask() {
+async function addTokenToMetaMask(event = null) {
     if (!AppState.deployResult?.contractAddress) {
         alert('Endereço do contrato não disponível');
         return;
@@ -2183,16 +2188,22 @@ async function addTokenToMetaMask() {
             },
         });
         
-        // Feedback visual
-        const btn = event.target.closest('button');
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="bi bi-check"></i>';
-        setTimeout(() => {
-            btn.innerHTML = originalHtml;
-        }, 2000);
+        // Feedback visual se houver evento
+        if (event?.target) {
+            const btn = event.target.closest('button');
+            if (btn) {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Adicionado!';
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                }, 2000);
+            }
+        }
+        
+        console.log('✅ Token adicionado ao MetaMask com sucesso');
         
     } catch (error) {
-        console.error('Erro ao adicionar token ao MetaMask:', error);
+        console.error('❌ Erro ao adicionar token ao MetaMask:', error);
         alert('Erro ao adicionar token ao MetaMask');
     }
 }
@@ -2875,22 +2886,36 @@ async function verifyDeployedContract() {
         const deployData = AppState.deployResult.deployData;
         const chainId = AppState.wallet.network?.chainId || 97;
         
-        // Gerar código esperado
-        const template = await loadContractTemplate();
-        const expectedCode = processContractTemplate(template, {
-            name: deployData.name,
-            symbol: deployData.symbol,
-            decimals: deployData.decimals || '18',
-            totalSupply: deployData.totalSupply,
-            ownerAddress: deployData.owner,
-            logoUri: deployData.logoUri || '',
-            originalContract: '0x0000000000000000000000000000000000000000'
-        });
+        // IMPORTANTE: Priorizar código real da API
+        let verificationCode = '';
+        
+        if (AppState.deployResult.sourceCode) {
+            // Usar código que foi realmente deployado pela API
+            verificationCode = AppState.deployResult.sourceCode;
+            console.log('🔐 Usando código real da API para verificação');
+        } else if (deploymentState.contractCode) {
+            // Usar código salvo no estado
+            verificationCode = deploymentState.contractCode;
+            console.log('🔐 Usando código do estado para verificação');
+        } else {
+            // Recriar código do template como último recurso
+            console.warn('⚠️ Código da API não encontrado, recriando do template');
+            const template = await loadContractTemplate();
+            verificationCode = processContractTemplate(template, {
+                name: deployData.name,
+                symbol: deployData.symbol,
+                decimals: deployData.decimals || '18',
+                totalSupply: deployData.totalSupply,
+                ownerAddress: deployData.owner,
+                logoUri: deployData.logoUri || '',
+                originalContract: '0x0000000000000000000000000000000000000000'
+            });
+        }
         
         const explorerUrl = getExplorerContractUrl(contractAddress, chainId);
         
         // Criar interface de verificação
-        showVerificationModal(contractAddress, expectedCode, explorerUrl, chainId);
+        showVerificationModal(contractAddress, verificationCode, explorerUrl, chainId);
         
     } catch (error) {
         console.error('Erro na verificação:', error);

@@ -291,15 +291,21 @@ class XcafeHybridAPI {
             // 3. Deploy via MetaMask
             const deployment = await this.deployContract(generation.compilation);
 
+            // 4. Retornar dados completos incluindo código fonte
             return {
                 success: true,
                 token: generation.token,
+                sourceCode: generation.sourceCode, // IMPORTANTE: código real da API
+                compilation: generation.compilation, // dados de compilação
                 contract: {
                     address: deployment.contractAddress,
                     transactionHash: deployment.transactionHash,
                     network: deployment.network,
                     explorer: deployment.explorer
                 },
+                contractAddress: deployment.contractAddress,
+                transactionHash: deployment.transactionHash,
+                gasUsed: deployment.gasUsed,
                 message: `Token ${tokenData.name} criado com sucesso!`
             };
 
