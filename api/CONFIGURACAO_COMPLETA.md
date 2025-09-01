@@ -8,7 +8,7 @@
 
 Crie o arquivo `.env` na pasta `api/` com o conteúdo exato:
 
-```bash
+```env
 # ===== CONFIGURAÇÕES BÁSICAS =====
 NODE_ENV=production
 PORT=3000
@@ -76,7 +76,8 @@ Verifique se o `package.json` tem todas as dependências:
 ## 🌐 **3. CONFIGURAÇÃO DO RENDER.COM**
 
 ### **3.1 Criação do Service**
-```
+
+```text
 Name: xcafe-token-api-hybrid
 Environment: Node
 Region: Oregon (US West) 
@@ -89,7 +90,8 @@ Start Command: npm start
 ### **3.2 Environment Variables (COPIAR EXATO)**
 
 **BÁSICAS (Obrigatórias):**
-```
+
+```text
 PORT=10000
 NODE_ENV=production
 SOLC_VERSION=0.8.26
@@ -101,7 +103,8 @@ LOG_LEVEL=info
 ```
 
 **BLOCKCHAIN RPCs (URLs Públicas):**
-```
+
+```text
 BSC_MAINNET_RPC=https://bsc-dataseed1.binance.org/
 BSC_TESTNET_RPC=https://data-seed-prebsc-1-s1.binance.org:8545/
 ETHEREUM_RPC=https://eth.llamarpc.com
@@ -109,7 +112,8 @@ POLYGON_RPC=https://polygon.llamarpc.com
 ```
 
 **APENAS SE USAR DEPLOY AUTOMÁTICO:**
-```
+
+```text
 DEPLOYER_PRIVATE_KEY=[SUA_PRIVATE_KEY_SEM_0x]
 JWT_SECRET=[STRING_ALEATORIA_32_CHARS_MINIMO]
 ```

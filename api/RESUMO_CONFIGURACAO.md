@@ -3,7 +3,8 @@
 ## 🎯 **3 ARQUIVOS ESSENCIAIS**
 
 ### 1. `.env` (criar na pasta api/)
-```
+
+```env
 NODE_ENV=production
 PORT=3000
 SOLC_VERSION=0.8.26
@@ -16,6 +17,7 @@ BSC_TESTNET_RPC=https://data-seed-prebsc-1-s1.binance.org:8545/
 ```
 
 ### 2. `package.json` (verificar dependências)
+
 ```json
 {
   "dependencies": {
@@ -70,6 +72,7 @@ git push
 ## 🔗 **ATUALIZAR FRONTEND**
 
 Arquivo: `js/xcafe-hybrid-api.js`
+
 ```javascript
 // Linha ~5 - SUBSTITUIR pela URL do Render
 this.apiBaseUrl = 'https://SEU-SERVICE.onrender.com';
@@ -84,7 +87,8 @@ this.apiBaseUrl = 'https://SEU-SERVICE.onrender.com';
 
 ## 🆘 **ERRO COMUM**
 
-**"Cannot find module 'solc'"**
+**Erro: "Cannot find module 'solc'"**
+
 ```powershell
 cd api
 npm install solc@0.8.26
@@ -94,4 +98,5 @@ git push
 ```
 
 ---
+
 **✅ Seguindo esses passos, a API funcionará 100%**

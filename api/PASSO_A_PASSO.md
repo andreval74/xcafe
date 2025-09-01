@@ -3,7 +3,8 @@
 ## ✅ **PASSO 1: PREPARAR ARQUIVOS LOCAIS**
 
 ### 1.1 Criar arquivo .env
-```bash
+
+```env
 # Copie o arquivo .env.template para .env na pasta api/
 # Ou crie manualmente com o conteúdo:
 
@@ -19,12 +20,14 @@ BSC_TESTNET_RPC=https://data-seed-prebsc-1-s1.binance.org:8545/
 ```
 
 ### 1.2 Instalar dependências
+
 ```powershell
 cd api
 npm install
 ```
 
 ### 1.3 Verificar configuração
+
 ```powershell
 node check-config.js
 ```
