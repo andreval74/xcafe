@@ -2914,12 +2914,62 @@ async function verifyDeployedContract() {
         
         const explorerUrl = getExplorerContractUrl(contractAddress, chainId);
         
-        // Criar interface de verificação
+        // Criar interface de verificação com dados da API
         showVerificationModal(contractAddress, verificationCode, explorerUrl, chainId);
+        
+        // Atualizar configurações de compilação se disponível
+        if (AppState.deployResult.compilation) {
+            updateCompilationSettings(AppState.deployResult.compilation);
+        }
         
     } catch (error) {
         console.error('Erro na verificação:', error);
         alert('Erro ao verificar contrato: ' + error.message);
+    }
+}
+
+/**
+ * Atualiza as configurações de compilação na modal
+ */
+function updateCompilationSettings(compilation) {
+    const settingsDiv = document.getElementById('compilation-settings');
+    if (!settingsDiv || !compilation) return;
+    
+    try {
+        let settingsHtml = '';
+        
+        if (compilation.compiler?.version) {
+            settingsHtml += `• <strong>Compiler Version:</strong> ${compilation.compiler.version}<br>`;
+        } else {
+            settingsHtml += `• <strong>Compiler Version:</strong> v0.8.26+commit.8a97fa7a<br>`;
+        }
+        
+        if (compilation.settings?.optimizer) {
+            const optimizer = compilation.settings.optimizer;
+            const enabled = optimizer.enabled ? '✅ Enabled' : '❌ Disabled';
+            const runs = optimizer.runs || 200;
+            settingsHtml += `• <strong>Optimization:</strong> <span class="text-${optimizer.enabled ? 'success' : 'danger'}">${enabled}</span>`;
+            if (optimizer.enabled) {
+                settingsHtml += ` com <strong>${runs} runs</strong>`;
+            }
+            settingsHtml += '<br>';
+        } else {
+            settingsHtml += `• <strong>Optimization:</strong> <span class="text-success">✅ Enabled</span> com <strong>200 runs</strong><br>`;
+        }
+        
+        if (compilation.settings?.evmVersion) {
+            settingsHtml += `• <strong>EVM Version:</strong> ${compilation.settings.evmVersion}<br>`;
+        } else {
+            settingsHtml += `• <strong>EVM Version:</strong> default<br>`;
+        }
+        
+        settingsHtml += `• <strong>License Type:</strong> MIT License`;
+        
+        settingsDiv.innerHTML = settingsHtml;
+        console.log('⚙️ Configurações de compilação atualizadas na modal');
+        
+    } catch (error) {
+        console.error('❌ Erro ao atualizar configurações de compilação:', error);
     }
 }
 
@@ -2985,21 +3035,39 @@ function showVerificationModal(contractAddress, sourceCode, explorerUrl, chainId
                             <div class="tab-pane active" id="manual-tab">
                                 <div class="card bg-dark border-secondary">
                                     <div class="card-body">
-                                        <h6 class="text-warning">📋 Passos para Verificação Manual:</h6>
+                                        <h6 class="text-warning">📋 Instruções Detalhadas para BSCScan:</h6>
+                                        <div class="alert alert-info mb-3">
+                                            <strong>⚙️ Configurações de Compilação da API:</strong><br>
+                                            <div id="compilation-settings">
+                                                • <strong>Compiler Version:</strong> v0.8.26+commit.8a97fa7a<br>
+                                                • <strong>Optimization:</strong> <span class="text-success">✅ Enabled</span> com <strong>200 runs</strong><br>
+                                                • <strong>EVM Version:</strong> default<br>
+                                                • <strong>License Type:</strong> MIT License
+                                            </div>
+                                        </div>
                                         <ol class="text-light">
-                                            <li>Acesse o <strong>Explorer</strong> do contrato (link acima)</li>
+                                            <li>Acesse o <strong>BSCScan Testnet</strong> do contrato (link acima)</li>
                                             <li>Vá na aba <strong>"Contract"</strong></li>
                                             <li>Clique em <strong>"Verify and Publish"</strong></li>
-                                            <li>Selecione:
-                                                <ul>
-                                                    <li><strong>Compiler:</strong> v0.8.26</li>
-                                                    <li><strong>License:</strong> MIT</li>
-                                                    <li><strong>Optimization:</strong> Enabled (200 runs)</li>
-                                                </ul>
-                                            </li>
-                                            <li>Cole o código fonte copiado</li>
+                                            <li><strong>Compiler Type:</strong> Solidity (Single file)</li>
+                                            <li><strong>Compiler Version:</strong> v0.8.26+commit.8a97fa7a</li>
+                                            <li><strong>Open Source License Type:</strong> MIT License (MIT)</li>
+                                            <li><strong>Optimization:</strong> ✅ Yes, com <strong>200</strong> runs</li>
+                                            <li>Cole o <strong>código completo da API</strong> (botão "Copiar Código" acima)</li>
+                                            <li>Deixe os <strong>Constructor Arguments</strong> vazios (se não solicitado)</li>
                                             <li>Clique em <strong>"Verify and Publish"</strong></li>
                                         </ol>
+                                        
+                                        <div class="mt-3 p-3 bg-danger bg-opacity-10 border border-danger rounded">
+                                            <h6 class="text-danger">🚨 Se Still Failing:</h6>
+                                            <p class="mb-1">O bytecode pode estar diferente por:</p>
+                                            <ul class="mb-2">
+                                                <li>Versão exata do compilador (use v0.8.26+commit.8a97fa7a)</li>
+                                                <li>Configuração de optimization (deve ser 200 runs)</li>
+                                                <li>Metadata hash differences</li>
+                                            </ul>
+                                            <p class="mb-0"><strong>Solução:</strong> Use o código fonte exato que está sendo copiado da API!</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -3052,34 +3120,72 @@ function showVerificationModal(contractAddress, sourceCode, explorerUrl, chainId
 }
 
 /**
- * Copia código de verificação
+ * Copia código de verificação (sempre da API)
  */
 function copyVerificationCode() {
-    if (window.verificationData) {
-        navigator.clipboard.writeText(window.verificationData.sourceCode).then(() => {
-            // Feedback visual
-            const btn = document.querySelector('button[onclick="copyVerificationCode()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-            btn.className = 'btn btn-success btn-sm w-100';
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.className = 'btn btn-primary btn-sm w-100';
-            }, 2000);
-        });
+    // Priorizar código real da API
+    let codeToUse = '';
+    
+    if (AppState.deployResult?.sourceCode) {
+        codeToUse = AppState.deployResult.sourceCode;
+        console.log('📋 Copiando código real da API');
+    } else if (deploymentState.contractCode) {
+        codeToUse = deploymentState.contractCode;
+        console.log('📋 Copiando código do estado de deploy');
+    } else if (window.verificationData?.sourceCode) {
+        codeToUse = window.verificationData.sourceCode;
+        console.log('📋 Copiando código da verificação');
+    } else {
+        alert('❌ Código fonte não disponível para cópia');
+        return;
     }
+    
+    navigator.clipboard.writeText(codeToUse).then(() => {
+        // Feedback visual
+        const btn = document.querySelector('button[onclick="copyVerificationCode()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Código da API Copiado!';
+        btn.className = 'btn btn-success btn-sm w-100';
+        
+        console.log('✅ Código copiado para área de transferência:', codeToUse.substring(0, 50) + '...');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-primary btn-sm w-100';
+        }, 2000);
+    }).catch(error => {
+        console.error('❌ Erro ao copiar código:', error);
+        alert('Erro ao copiar código');
+    });
 }
 
 /**
- * Download código de verificação
+ * Download código de verificação (sempre da API)
  */
 function downloadVerificationCode() {
-    if (window.verificationData) {
-        const tokenSymbol = AppState.deployResult?.deployData?.symbol?.replace(/[^a-zA-Z0-9]/g, '') || 'Token';
-        const filename = `${tokenSymbol}_Verification.sol`;
-        
-        const blob = new Blob([window.verificationData.sourceCode], { type: 'text/plain' });
+    // Priorizar código real da API
+    let codeToDownload = '';
+    
+    if (AppState.deployResult?.sourceCode) {
+        codeToDownload = AppState.deployResult.sourceCode;
+        console.log('💾 Baixando código real da API');
+    } else if (deploymentState.contractCode) {
+        codeToDownload = deploymentState.contractCode;
+        console.log('💾 Baixando código do estado de deploy');
+    } else if (window.verificationData?.sourceCode) {
+        codeToDownload = window.verificationData.sourceCode;
+        console.log('💾 Baixando código da verificação');
+    } else {
+        alert('❌ Código fonte não disponível para download');
+        return;
+    }
+    
+    const tokenSymbol = AppState.deployResult?.deployData?.symbol?.replace(/[^a-zA-Z0-9]/g, '') || 'Token';
+    const contractAddress = AppState.deployResult?.contractAddress?.substring(0, 8) || '';
+    const filename = `${tokenSymbol}_${contractAddress}_API_Verification.sol`;
+    
+    try {
+        const blob = new Blob([codeToDownload], { type: 'text/plain' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
@@ -3089,6 +3195,25 @@ function downloadVerificationCode() {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
+        
+        console.log('✅ Download realizado:', filename);
+        
+        // Feedback visual
+        const btn = document.querySelector('button[onclick="downloadVerificationCode()"]');
+        if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Downloaded!';
+            btn.className = 'btn btn-success btn-sm w-100';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.className = 'btn btn-info btn-sm w-100';
+            }, 2000);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro no download:', error);
+        alert('Erro ao fazer download do arquivo');
     }
 }
 
