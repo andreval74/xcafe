@@ -80,7 +80,7 @@ app.get('/health', (req, res) => {
 // Função auxiliar para compilar contratos
 async function compileContract(sourceCode, contractName, optimization = true) {
     try {
-        const solcVersion = process.env.SOLC_VERSION || '0.8.26'; // Versão mais moderna
+        const solcVersion = process.env.SOLC_VERSION || '0.8.30'; // Versão específica para match
         
         // Preparar input para solc
         const input = {

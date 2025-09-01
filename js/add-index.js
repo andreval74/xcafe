@@ -1516,21 +1516,6 @@ async function deployWithCustomContract() {
     try {
         updateDeployStatus('📋 Carregando template do contrato...');
         
-        // Carregar e processar template
-        const template = await loadContractTemplate();
-        const processedContract = processContractTemplate(template, {
-            name: tokenData.name,
-            symbol: tokenData.symbol,
-            decimals: tokenData.decimals,
-            totalSupply: tokenData.totalSupply,
-            ownerAddress: tokenData.owner,
-            logoUri: '',
-            originalContract: '0x0000000000000000000000000000000000000000'
-        });
-        
-        // Salvar código do contrato no estado para visualização posterior
-        deploymentState.contractCode = processedContract;
-        
         updateDeployStatus('🔗 Compilando contrato...');
         
         // Verificar se XcafeHybridAPI está disponível
@@ -1540,8 +1525,8 @@ async function deployWithCustomContract() {
         
         const api = new XcafeHybridAPI();
         
-        // Deploy usando nosso contrato personalizado
-        const result = await api.deployCustomContract(processedContract, {
+        // Deploy usando API padrão - ela gerencia template e compilação
+        const result = await api.createToken({
             name: tokenData.name,
             symbol: tokenData.symbol,
             totalSupply: tokenData.totalSupply,
@@ -1549,9 +1534,21 @@ async function deployWithCustomContract() {
             owner: tokenData.owner
         });
         
-        console.log('✅ Token criado com contrato personalizado:', result);
+        console.log('✅ Token criado com API padrão:', result);
         
         updateDeployStatus('✅ Deploy concluído!');
+        
+        // CRÍTICO: Salvar código fonte da API para verificação
+        let apiSourceCode = null;
+        if (result.sourceCode) {
+            apiSourceCode = result.sourceCode;
+        } else if (result.token?.sourceCode) {
+            apiSourceCode = result.token.sourceCode;
+        }
+        
+        if (apiSourceCode) {
+            console.log('🔐 Código fonte da API salvo para verificação:', apiSourceCode.substring(0, 100) + '...');
+        }
         
         // Salvar resultado no estado com dados completos
         AppState.deployResult = {
@@ -1561,7 +1558,7 @@ async function deployWithCustomContract() {
             deployData: tokenData,
             gasUsed: result.gasUsed || 'N/A',
             blockNumber: result.blockNumber || 'N/A',
-            sourceCode: processedContract,
+            sourceCode: apiSourceCode, // Código real da API
             compilation: result.token?.compilation || null
         };
         
@@ -2886,41 +2883,40 @@ async function verifyDeployedContract() {
         const deployData = AppState.deployResult.deployData;
         const chainId = AppState.wallet.network?.chainId || 97;
         
-        // IMPORTANTE: Priorizar código real da API
+        // CRÍTICO: Usar sempre o código real da API
         let verificationCode = '';
         
         if (AppState.deployResult.sourceCode) {
-            // Usar código que foi realmente deployado pela API
+            // Código que foi realmente deployado pela API
             verificationCode = AppState.deployResult.sourceCode;
-            console.log('🔐 Usando código real da API para verificação');
-        } else if (deploymentState.contractCode) {
-            // Usar código salvo no estado
-            verificationCode = deploymentState.contractCode;
-            console.log('🔐 Usando código do estado para verificação');
+            console.log('🔐 Usando código real da API para verificação (correto)');
         } else {
-            // Recriar código do template como último recurso
-            console.warn('⚠️ Código da API não encontrado, recriando do template');
-            const template = await loadContractTemplate();
-            verificationCode = processContractTemplate(template, {
-                name: deployData.name,
-                symbol: deployData.symbol,
-                decimals: deployData.decimals || '18',
-                totalSupply: deployData.totalSupply,
-                ownerAddress: deployData.owner,
-                logoUri: deployData.logoUri || '',
-                originalContract: '0x0000000000000000000000000000000000000000'
-            });
+            console.error('❌ ERRO CRÍTICO: Código da API não foi salvo! Verificação irá falhar.');
+            alert('Erro: Código fonte da API não encontrado. A verificação pode falhar.');
+            
+            // Tentar recriar código básico como fallback (pode não funcionar)
+            verificationCode = await generateFallbackContract(deployData);
         }
         
         const explorerUrl = getExplorerContractUrl(contractAddress, chainId);
         
-        // Criar interface de verificação com dados da API
+        // Criar interface de verificação com código real
         showVerificationModal(contractAddress, verificationCode, explorerUrl, chainId);
         
-        // Atualizar configurações de compilação se disponível
-        if (AppState.deployResult.compilation) {
-            updateCompilationSettings(AppState.deployResult.compilation);
-        }
+        // Configurações de compilação para BSC/Ethereum
+        const compilationInfo = {
+            compiler: {
+                version: 'v0.8.30+commit.8a97fa7a' // Versão específica que gera o bytecode correto
+            },
+            settings: {
+                optimizer: {
+                    enabled: true,
+                    runs: 200
+                }
+            }
+        };
+        
+        updateCompilationSettings(compilationInfo);
         
     } catch (error) {
         console.error('Erro na verificação:', error);
@@ -2929,47 +2925,94 @@ async function verifyDeployedContract() {
 }
 
 /**
+ * Gera contrato básico como fallback (pode falhar na verificação)
+ */
+async function generateFallbackContract(deployData) {
+    console.warn('⚠️ Gerando contrato fallback - pode não funcionar na verificação');
+    
+    return `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.30;
+
+contract ${deployData.symbol} {
+    string public name = "${deployData.name}";
+    string public symbol = "${deployData.symbol}";
+    uint8 public decimals = ${deployData.decimals || '18'};
+    uint256 public totalSupply = ${deployData.totalSupply} * (10 ** uint256(decimals));
+    
+    mapping(address => uint256) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowances;
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    
+    constructor() {
+        _balances[${deployData.owner}] = totalSupply;
+        emit Transfer(address(0x0), ${deployData.owner}, totalSupply);
+    }
+    
+    function balanceOf(address account) public view returns (uint256) {
+        return _balances[account];
+    }
+    
+    function transfer(address recipient, uint256 amount) public returns (bool) {
+        require(_balances[msg.sender] >= amount, "Insufficient balance");
+        _balances[msg.sender] -= amount;
+        _balances[recipient] += amount;
+        emit Transfer(msg.sender, recipient, amount);
+        return true;
+    }
+    
+    function transferFrom(address from, address to, uint256 value) public returns (bool) {
+        require(_balances[from] >= value, "Insufficient balance");
+        require(_allowances[from][msg.sender] >= value, "Allowance exceeded");
+        _balances[from] -= value;
+        _balances[to] += value;
+        _allowances[from][msg.sender] -= value;
+        emit Transfer(from, to, value);
+        return true;
+    }
+    
+    function approve(address spender, uint256 amount) public returns (bool) {
+        _allowances[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
+    }
+    
+    function allowance(address owner, address spender) public view returns (uint256) {
+        return _allowances[owner][spender];
+    }
+}`;
+}
+
+/**
  * Atualiza as configurações de compilação na modal
  */
 function updateCompilationSettings(compilation) {
     const settingsDiv = document.getElementById('compilation-settings');
-    if (!settingsDiv || !compilation) return;
+    if (!settingsDiv) return;
     
     try {
         let settingsHtml = '';
         
-        if (compilation.compiler?.version) {
-            settingsHtml += `• <strong>Compiler Version:</strong> ${compilation.compiler.version}<br>`;
-        } else {
-            settingsHtml += `• <strong>Compiler Version:</strong> v0.8.26+commit.8a97fa7a<br>`;
-        }
+        // CRÍTICO: Sempre usar versão 0.8.30 que gera bytecode correto
+        settingsHtml += `• <strong>Compiler Version:</strong> v0.8.30+commit.8a97fa7a<br>`;
         
-        if (compilation.settings?.optimizer) {
-            const optimizer = compilation.settings.optimizer;
-            const enabled = optimizer.enabled ? '✅ Enabled' : '❌ Disabled';
-            const runs = optimizer.runs || 200;
-            settingsHtml += `• <strong>Optimization:</strong> <span class="text-${optimizer.enabled ? 'success' : 'danger'}">${enabled}</span>`;
-            if (optimizer.enabled) {
-                settingsHtml += ` com <strong>${runs} runs</strong>`;
-            }
-            settingsHtml += '<br>';
-        } else {
-            settingsHtml += `• <strong>Optimization:</strong> <span class="text-success">✅ Enabled</span> com <strong>200 runs</strong><br>`;
-        }
-        
-        if (compilation.settings?.evmVersion) {
-            settingsHtml += `• <strong>EVM Version:</strong> ${compilation.settings.evmVersion}<br>`;
-        } else {
-            settingsHtml += `• <strong>EVM Version:</strong> default<br>`;
-        }
-        
-        settingsHtml += `• <strong>License Type:</strong> MIT License`;
+        // Otimização sempre habilitada com 200 runs
+        settingsHtml += `• <strong>Optimization:</strong> <span class="text-success">✅ Enabled</span> com <strong>200 runs</strong><br>`;
         
         settingsDiv.innerHTML = settingsHtml;
-        console.log('⚙️ Configurações de compilação atualizadas na modal');
+        
+        console.log('✅ Configurações de compilação atualizadas para versão 0.8.30');
         
     } catch (error) {
-        console.error('❌ Erro ao atualizar configurações de compilação:', error);
+        console.error('Erro ao atualizar configurações:', error);
+        // Fallback com configurações padrão
+        if (settingsDiv) {
+            settingsDiv.innerHTML = `
+                • <strong>Compiler Version:</strong> v0.8.30+commit.8a97fa7a<br>
+                • <strong>Optimization:</strong> <span class="text-success">✅ Enabled</span> com <strong>200 runs</strong>
+            `;
+        }
     }
 }
 

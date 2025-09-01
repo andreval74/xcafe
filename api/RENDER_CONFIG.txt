@@ -30,7 +30,7 @@ Chave: TRUST_PROXY
 Valor: true
 
 Chave: SOLC_VERSION
-Valor: 0.8.26
+Valor: 0.8.30
 
 Chave: OPTIMIZATION_ENABLED
 Valor: true
