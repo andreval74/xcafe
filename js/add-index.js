@@ -605,10 +605,11 @@ function initializeApp() {
  * Configura listeners de eventos
  */
 function setupEventListeners() {
-    // Conectar MetaMask
+    // Conectar MetaMask - evitar event listeners duplicados
     const connectBtn = document.getElementById('connect-metamask-btn');
-    if (connectBtn) {
+    if (connectBtn && !connectBtn.hasConnectListener) {
         connectBtn.addEventListener('click', connectWallet);
+        connectBtn.hasConnectListener = true;
     }
     
     // Botões de limpeza/reinício
@@ -806,6 +807,13 @@ function formatSupplyInput(event) {
  */
 async function connectWallet() {
     try {
+        // Evitar múltiplas chamadas
+        const connectBtn = document.getElementById('connect-metamask-btn');
+        if (connectBtn && connectBtn.disabled) {
+            console.log('⏳ Conexão já em andamento...');
+            return;
+        }
+        
         const result = await Wallet.connect();
         
         if (result) {

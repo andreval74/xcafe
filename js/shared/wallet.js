@@ -23,6 +23,7 @@ let walletConnected = false;
 let walletAddress = '';
 let networkData = {};
 let balanceUpdateInProgress = false;
+let isConnecting = false; // Flag para evitar múltiplas conexões simultâneas
 
 // ==================== CONFIGURAÇÕES ====================
 const WALLET_CONFIG = {
@@ -97,20 +98,40 @@ class Wallet {
      */
     static async connect() {
         try {
+            // Verificar se já está conectando
+            if (isConnecting) {
+                console.log('⏳ Conexão já em andamento, aguarde...');
+                return false;
+            }
+            
+            // Verificar se já está conectado
+            if (walletConnected && walletAddress) {
+                console.log('✅ Wallet já conectada:', walletAddress);
+                return true;
+            }
+            
             if (!this.isMetaMaskAvailable()) {
                 alert('MetaMask não detectado! Por favor, instale a MetaMask.');
                 return false;
             }
             
+            // Definir flag de conexão em andamento
+            isConnecting = true;
             console.log('🔗 Conectando com MetaMask...');
             
             // Mostra loading
             this.showButtonLoading('connect-metamask-btn', 'Conectando...');
             
-            // Solicita conexão
-            const accounts = await window.ethereum.request({
+            // Solicita conexão com timeout
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout na conexão')), 15000);
+            });
+            
+            const connectPromise = window.ethereum.request({
                 method: 'eth_requestAccounts'
             });
+            
+            const accounts = await Promise.race([connectPromise, timeoutPromise]);
             
             if (accounts.length > 0) {
                 walletAddress = accounts[0];
@@ -141,11 +162,23 @@ class Wallet {
             
         } catch (error) {
             console.error('❌ Erro ao conectar wallet:', error);
-            alert('Erro ao conectar com a MetaMask: ' + error.message);
+            
+            // Verificar se é erro de processo duplicado
+            if (error.message.includes('Already processing eth_requestAccounts')) {
+                alert('Conexão já em andamento. Aguarde alguns segundos e tente novamente.');
+            } else if (error.message.includes('User rejected the request')) {
+                console.log('👤 Usuário rejeitou a conexão');
+            } else {
+                alert('Erro ao conectar com a MetaMask: ' + error.message);
+            }
             
             // Restaura botão em caso de erro
             this.hideButtonLoading('connect-metamask-btn', '<i class="bi bi-wallet2 me-2"></i>CONECTAR');
             return false;
+            
+        } finally {
+            // Sempre limpar flag de conexão
+            isConnecting = false;
         }
     }
     
