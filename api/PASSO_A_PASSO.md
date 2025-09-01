@@ -35,14 +35,17 @@ node check-config.js
 ## ✅ **PASSO 2: CONFIGURAR RENDER.COM**
 
 ### 2.1 Criar conta no Render
-- Acesse: https://render.com
+
+- Acesse: <https://render.com>
 - Faça login com GitHub
 
 ### 2.2 Criar Web Service
+
 - **New** → **Web Service**
 - **Connect GitHub** → Selecionar repositório
 - **Configurações:**
-  ```
+
+```
   Name: xcafe-token-api
   Environment: Node
   Region: Oregon (US West)
@@ -50,9 +53,10 @@ node check-config.js
   Root Directory: api
   Build Command: npm install
   Start Command: npm start
-  ```
+```
 
 ### 2.3 Environment Variables (EXATO)
+
 **Clique em "Environment" e adicione:**
 
 | Key | Value |
@@ -68,15 +72,18 @@ node check-config.js
 | `BSC_TESTNET_RPC` | `https://data-seed-prebsc-1-s1.binance.org:8545/` |
 
 ### 2.4 Deploy
+
 - Clique **"Create Web Service"**
 - Aguarde build e deploy (2-5 minutos)
 
 ## ✅ **PASSO 3: TESTAR API**
 
 ### 3.1 Health Check
+
 Acesse: `https://seu-service-name.onrender.com/health`
 
 **Deve retornar:**
+
 ```json
 {
   "success": true,
@@ -86,6 +93,7 @@ Acesse: `https://seu-service-name.onrender.com/health`
 ```
 
 ### 3.2 Teste de compilação
+
 ```bash
 curl -X POST https://seu-service.onrender.com/api/generate-token \
   -H "Content-Type: application/json" \
@@ -95,12 +103,15 @@ curl -X POST https://seu-service.onrender.com/api/generate-token \
 ## ✅ **PASSO 4: ATUALIZAR FRONTEND**
 
 ### 4.1 Editar xcafe-hybrid-api.js
+
 Linha ~5, alterar:
+
 ```javascript
 this.apiBaseUrl = 'https://SEU-SERVICE-NAME.onrender.com';
 ```
 
 ### 4.2 Testar integração
+
 - Abra `add-index.html`
 - Preencha formulário
 - Clique "Criar Token"
@@ -109,10 +120,13 @@ this.apiBaseUrl = 'https://SEU-SERVICE-NAME.onrender.com';
 ## 🆘 **RESOLUÇÃO DE PROBLEMAS**
 
 ### ❌ Erro: "Application failed to respond"
+
 **Solução:** Verificar logs no Render dashboard
 
 ### ❌ Erro: "Cannot find module"
-**Solução:** 
+
+**Solução:**
+
 ```powershell
 cd api
 npm install
@@ -122,12 +136,15 @@ git push
 ```
 
 ### ❌ Erro: "Environment variable not found"
+
 **Solução:** Verificar todas as variables no Render
 
 ### ❌ Erro: "Compilation failed"
+
 **Solução:** Verificar se SOLC_VERSION = 0.8.26
 
 ### ❌ Frontend não conecta
+
 **Solução:** Verificar URL da API no código
 
 ## ✅ **CHECKLIST FINAL**
@@ -141,11 +158,13 @@ git push
 ## 📞 **SUPORTE TÉCNICO**
 
 **URLs importantes:**
-- Render Dashboard: https://dashboard.render.com
+
+- Render Dashboard: <https://dashboard.render.com>
 - Logs da API: Dashboard → Services → Logs
-- BSCScan Testnet: https://testnet.bscscan.com
+- BSCScan Testnet: <https://testnet.bscscan.com>
 
 **Comandos úteis:**
+
 ```powershell
 # Verificar configuração local
 cd api && node check-config.js

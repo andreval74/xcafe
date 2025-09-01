@@ -144,9 +144,11 @@ npm run dev
 ## 🔍 **5. TESTES DE VERIFICAÇÃO**
 
 ### **5.1 Health Check**
+
 URL: `https://sua-api.onrender.com/health`
 
 **Resposta esperada:**
+
 ```json
 {
   "success": true,
@@ -162,6 +164,7 @@ URL: `https://sua-api.onrender.com/health`
 ```
 
 ### **5.2 Teste de Compilação**
+
 ```bash
 curl -X POST https://sua-api.onrender.com/api/generate-token \
   -H "Content-Type: application/json" \
@@ -174,6 +177,7 @@ curl -X POST https://sua-api.onrender.com/api/generate-token \
 ```
 
 **Resposta esperada:**
+
 ```json
 {
   "success": true,
@@ -191,27 +195,35 @@ curl -X POST https://sua-api.onrender.com/api/generate-token \
 ## ⚠️ **6. PROBLEMAS COMUNS E SOLUÇÕES**
 
 ### **6.1 Erro: "Cannot find module 'solc'"**
+
 **Solução:** Instalar dependências
+
 ```powershell
 cd api
 npm install
 ```
 
 ### **6.2 Erro: "SOLC_VERSION not defined"**
+
 **Solução:** Verificar arquivo .env ou environment variables
 
 ### **6.3 Erro: "Rate limit exceeded"**
+
 **Solução:** Aguardar 1 minuto ou ajustar RATE_LIMIT_MAX_REQUESTS
 
 ### **6.4 Erro: "Port already in use"**
+
 **Solução:** Mudar PORT no .env ou matar processo:
+
 ```powershell
 netstat -ano | findstr :3000
 taskkill /PID [NUMERO_PID] /F
 ```
 
 ### **6.5 Erro de Compilação Solidity**
+
 **Solução:** Verificar versão do solc
+
 ```bash
 # Na pasta api/
 npm list solc
@@ -240,22 +252,26 @@ class XcafeHybridAPI {
 ## ✅ **8. CHECKLIST FINAL**
 
 ### **Arquivos Criados/Verificados:**
+
 - [ ] `api/.env` (com todas as variáveis)
 - [ ] `api/package.json` (dependências corretas)
 - [ ] `api/server.js` (código principal)
 
 ### **Render.com Configurado:**
+
 - [ ] Service criado
 - [ ] Environment Variables definidas
 - [ ] Deploy realizado com sucesso
 - [ ] Health check funcionando
 
 ### **Frontend Atualizado:**
+
 - [ ] URL da API atualizada
 - [ ] Testes realizados
 - [ ] Deploy funciona end-to-end
 
 ### **Testes Realizados:**
+
 - [ ] Health check: ✅
 - [ ] Compilação: ✅  
 - [ ] Deploy via frontend: ✅
@@ -273,6 +289,7 @@ Se ainda houver erros após seguir TODOS os passos:
 4. **Verificar console:** F12 → Console → Mensagens de erro
 
 **URLs importantes:**
+
 - API Health: `https://sua-api.onrender.com/health`
 - Render Dashboard: `https://dashboard.render.com`
 - BSCScan Testnet: `https://testnet.bscscan.com`
