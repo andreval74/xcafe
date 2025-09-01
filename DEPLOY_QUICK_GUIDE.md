@@ -14,9 +14,9 @@ Abra PowerShell no diretório xcafe e execute:
 
 ## 2. OU FAÇA MANUAL
 
-### Escolha sua versão:
+### Escolha sua versão
 
-**API BÁSICA (recomendado para começar)**
+### API BÁSICA (recomendado para começar)
 
 - Deploy apenas tokens pré-compilados
 - Menor custo (Free tier do Render)
@@ -28,7 +28,7 @@ Abra PowerShell no diretório xcafe e execute:
 - Requer Render Starter ($7/mês)
 - Setup mais complexo
 
-### Para API Estendida, copie os arquivos:
+### Para API Estendida, copie os arquivos
 
 ```powershell
 cd api
@@ -43,7 +43,8 @@ Copy-Item server-extended.js server.js
 2. **Conecte seu repositório GitHub**
 
 3. **Configure assim:**
-   ```powershell
+
+   ```text
    Name: xcafe-token-api
    Environment: Node  
    Root Directory: api/
@@ -81,15 +82,18 @@ Copy-Item server-extended.js server.js
 ## 4. OBTER CHAVES NECESSÁRIAS
 
 ### Private Key (CUIDADO!)
+
 - MetaMask → Account Details → Export Private Key
 - Cole SEM o "0x" no início
 - Certifique-se que tem BNB/ETH para gas
 
 ### APIs Blockchain (gratuitas)
+
 - **Alchemy:** alchemy.com → Create App → Copiar API Key
 - **Infura:** infura.io → Create Project → Copiar Project ID  
 
 ### JWT Secret
+
 - Gere string aleatória: `openssl rand -base64 32`
 - Ou use gerador online
 
@@ -113,6 +117,7 @@ curl -X POST https://sua-api.onrender.com/api/deploy-token \
 ```
 
 Se API estendida:
+
 ```bash
 # Compilar contrato
 curl -X POST https://sua-api.onrender.com/api/compile \
@@ -146,6 +151,7 @@ const API_BASE_URL = 'https://sua-nova-api.onrender.com';
 ## 🆘 PROBLEMAS COMUNS
 
 **Build falhando?**
+
 - Verificar se package.json está correto
 - Limpar cache: deletar node_modules
 
