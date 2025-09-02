@@ -1,21 +1,16 @@
 <!-- Componente de Conexão da Carteira - wallet-connection -->
-<div class="section-header">
-    <h4 class="text-primary mb-3">
-        <i class="bi bi-wallet2 me-2"></i>1. Conexão da Carteira
-    </h4>
-    <p class="text-muted">Conecte sua carteira Web3 para acessar a funcionalidade.</p>
-</div>
-
 <div class="card bg-dark border-warning shadow mb-4">
     <div class="card-header bg-warning text-dark">
         <h5 class="card-title mb-0">
-            <i class="bi bi-shield-check me-2"></i>Conexão Segura MetaMask
+            <i class="bi bi-shield-check me-2"></i>Conectar a Carteira
         </h5>
     </div>
     <div class="card-body">
         <div class="row g-3 align-items-end">
             <div class="col-md-8">
-                <label for="wallet-status" class="form-label text-white">Status da Conexão</label>
+                <label for="network-display" class="form-label text-white">
+                    <i class="bi bi-wallet text-primary me-2"></i>Endereço da Carteira
+                </label>
                 <input type="text" class="form-control bg-dark text-white border-secondary" id="wallet-status"
                     placeholder="Verificando conexão..." style="font-family: monospace;" readonly>
             </div>
@@ -25,6 +20,7 @@
                 </button>
             </div>
         </div>
+
         <div class="row mt-3" id="network-info-section" style="display: none;">
             <div class="col-12">
                 <div class="alert alert-info mb-0">
@@ -37,7 +33,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Status de carregamento inicial -->
         <div id="wallet-loading" class="text-center mt-3" style="display: none;">
             <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>

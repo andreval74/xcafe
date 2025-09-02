@@ -199,9 +199,9 @@ function updateVisualProgress() {
         }
     });
     
-    // Controlar botão "Próxima Seção" - apenas 3 campos obrigatórios
-    const nextSectionBtn = document.getElementById('next-section-btn');
-    if (nextSectionBtn) {
+    // Controlar botão "Criar Token" - apenas 3 campos obrigatórios
+    const createTokenBtn = document.getElementById('create-token-btn');
+    if (createTokenBtn) {
         // Verificar estado da carteira em tempo real
         const walletStatus = Wallet.getStatus();
         const isWalletConnected = walletStatus.connected || wallet.connected;
@@ -213,10 +213,10 @@ function updateVisualProgress() {
                                  tokenData.totalSupply && tokenData.totalSupply.length > 0;
         
         if (hasRequiredFields) {
-            nextSectionBtn.style.display = 'block';
-            console.log('✅ Botão "Próxima Seção" mostrado (3 campos obrigatórios preenchidos)');
-            nextSectionBtn.onclick = () => {
-                console.log('🚀 Botão "Próxima Seção" clicado');
+            createTokenBtn.style.display = 'block';
+            console.log('✅ Botão "Criar Token" mostrado (3 campos obrigatórios preenchidos)');
+            createTokenBtn.onclick = () => {
+                console.log('🚀 Botão "Criar Token" clicado');
                 
                 // Garantir que campos automáticos estão preenchidos
                 const decimalsInput = document.getElementById('decimals');
@@ -234,19 +234,11 @@ function updateVisualProgress() {
                 // Atualizar dados com preenchimento automático
                 onTokenDataChange();
                 
-                // Estimar gas e mostrar seção
-                estimateGasForDeploy().then(gasInfo => {
-                    updateGasDisplay(gasInfo);
-                });
-                
-                // Inicializar seção de deploy
-                initializeDeploySection();
-                
-                enableSection('section-deploy');
-                nextSectionBtn.style.display = 'none';
+                // Fazer deploy direto
+                deployToken();
             };
         } else {
-            nextSectionBtn.style.display = 'none';
+            createTokenBtn.style.display = 'none';
             const missing = [];
             if (!isWalletConnected) missing.push('carteira');
             if (!tokenData.name || tokenData.name.trim().length < 3) missing.push('nome');
@@ -261,7 +253,7 @@ function updateVisualProgress() {
             });
         }
     } else {
-        console.log('⚠️ Botão next-section-btn não encontrado no DOM');
+        console.log('⚠️ Botão create-token-btn não encontrado no DOM');
     }
 }
 
@@ -650,8 +642,60 @@ function initializeApp() {
         checkWalletConnection();
     }, 1000);
     
-    // Mostrar apenas primeira seção inicialmente
-    showOnlyFirstSection();
+    // RESTAURAR: Sistema de validação por seções (mas manter layout atual visível)
+    setupSectionValidation();
+}
+
+/**
+ * Configura sistema de validação das seções (mantém layout visível)
+ */
+function setupSectionValidation() {
+    // Manter todas as seções visíveis para trabalhar no layout
+    const allSections = document.querySelectorAll('.creation-section');
+    allSections.forEach((section) => {
+        section.classList.add('active', 'section-enabled');
+        section.style.display = 'block';
+    });
+    
+    // Garantir que o botão está visível (event listener já configurado em setupEventListeners)
+    const createTokenBtn = document.getElementById('create-token-btn');
+    if (createTokenBtn) {
+        createTokenBtn.style.display = 'block';
+    }
+    
+    console.log('🎨 Layout visível + Validação ativa');
+}
+
+/**
+ * Manipula criação do token com validação
+ */
+async function handleTokenCreation() {
+    console.log('🚀 Iniciando criação do token...');
+    
+    // Verificar se wallet está conectada
+    if (!AppState.wallet.connected) {
+        alert('Por favor, conecte sua carteira primeiro.');
+        return;
+    }
+    
+    // Verificar campos obrigatórios
+    const tokenName = document.getElementById('tokenName').value.trim();
+    const tokenSymbol = document.getElementById('tokenSymbol').value.trim();
+    const totalSupply = document.getElementById('totalSupply').value.trim();
+    const ownerAddress = document.getElementById('ownerAddress').value.trim();
+    
+    if (!tokenName || !tokenSymbol || !totalSupply || !ownerAddress) {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return;
+    }
+    
+    // Prosseguir com criação do token
+    try {
+        await deployToken();
+    } catch (error) {
+        console.error('❌ Erro na criação do token:', error);
+        alert('Erro ao criar token. Verifique o console para detalhes.');
+    }
 }
 
 /**
@@ -675,6 +719,13 @@ function setupEventListeners() {
     const deployBtn = document.getElementById('deploy-token-btn');
     if (deployBtn) {
         deployBtn.addEventListener('click', deployToken);
+    }
+    
+    // Create Token button (novo botão principal)
+    const createTokenBtn = document.getElementById('create-token-btn');
+    if (createTokenBtn && !createTokenBtn.hasCreateListener) {
+        createTokenBtn.addEventListener('click', handleTokenCreation);
+        createTokenBtn.hasCreateListener = true;
     }
     
     // Botão refresh gas estimation
@@ -744,12 +795,6 @@ function setupResultButtons() {
         addToMetamaskBtn.addEventListener('click', addTokenToMetaMask);
     }
     
-    // Visualizar código deployado
-    const viewDeployedContractBtn = document.getElementById('view-deployed-contract-btn');
-    if (viewDeployedContractBtn) {
-        viewDeployedContractBtn.addEventListener('click', viewDeployedContract);
-    }
-    
     // Download do contrato
     const downloadContractBtn = document.getElementById('download-contract-btn');
     if (downloadContractBtn) {
@@ -760,12 +805,6 @@ function setupResultButtons() {
     const openVerificationBtn = document.getElementById('open-verification-btn');
     if (openVerificationBtn) {
         openVerificationBtn.addEventListener('click', openContractVerification);
-    }
-    
-    // Deploy na mainnet
-    const deployMainnetBtn = document.getElementById('deploy-mainnet-btn');
-    if (deployMainnetBtn) {
-        deployMainnetBtn.addEventListener('click', deployToMainnet);
     }
     
     // Limpar tudo
@@ -2013,10 +2052,10 @@ function resetApp() {
         deployBtn.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>CRIAR TOKEN';
     }
     
-    // Esconder botão "Próxima Seção"
-    const nextSectionBtn = document.getElementById('next-section-btn');
-    if (nextSectionBtn) {
-        nextSectionBtn.style.display = 'none';
+    // Esconder botão "Criar Token"
+    const createTokenBtn = document.getElementById('create-token-btn');
+    if (createTokenBtn) {
+        createTokenBtn.style.display = 'none';
     }
     
     // Limpar resultados de deploy
