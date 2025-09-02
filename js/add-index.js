@@ -554,63 +554,25 @@ contract ${tokenData.symbol} {
         }
     }
     
-    // Criar modal Bootstrap
-    const modalId = 'contractModal-' + Date.now();
-    const modalHTML = `
-        <div class="modal fade" id="${modalId}" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content bg-dark text-white border-primary">
-                    <div class="modal-header border-secondary">
-                        <h5 class="modal-title">
-                            <i class="bi bi-file-earmark-code me-2"></i>${modalTitle}
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <small class="text-muted">Código fonte do contrato ERC-20</small>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-success btn-sm" onclick="copyModalCode('${modalId}')">
-                                    <i class="bi bi-clipboard me-1"></i>Copiar
-                                </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="downloadModalCode('${modalId}')">
-                                    <i class="bi bi-download me-1"></i>Baixar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="bg-black rounded p-3" style="max-height: 60vh; overflow-y: auto;">
-                            <pre id="code-${modalId}" class="text-light mb-0" style="font-size: 11px; line-height: 1.4; white-space: pre-wrap;">${contractCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-secondary">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    // Usar modal existente no HTML
+    const modal = document.getElementById('contractModal');
+    const titleEl = document.getElementById('contract-modal-title');
+    const codeEl = document.getElementById('contract-modal-code');
     
-    // Remover modal anterior
-    document.querySelectorAll('[id^="contractModal-"]').forEach(m => m.remove());
-    
-    // Adicionar ao DOM
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    // Atualizar conteúdo do modal
+    if (titleEl) titleEl.textContent = modalTitle;
+    if (codeEl) codeEl.textContent = contractCode;
     
     // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById(modalId));
-    modal.show();
-    
-    // Limpar quando fechar
-    document.getElementById(modalId).addEventListener('hidden.bs.modal', function() {
-        this.remove();
-    });
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
     
     console.log('✅ Modal exibida com sucesso!');
 }
 
 // Funções auxiliares para o modal
-window.copyModalCode = function(modalId) {
-    const codeEl = document.getElementById('code-' + modalId);
+window.copyModalCode = function() {
+    const codeEl = document.getElementById('contract-modal-code');
     if (codeEl) {
         navigator.clipboard.writeText(codeEl.textContent).then(() => {
             alert('Código copiado para a área de transferência!');
@@ -620,8 +582,8 @@ window.copyModalCode = function(modalId) {
     }
 };
 
-window.downloadModalCode = function(modalId) {
-    const codeEl = document.getElementById('code-' + modalId);
+window.downloadModalCode = function() {
+    const codeEl = document.getElementById('contract-modal-code');
     if (codeEl) {
         const code = codeEl.textContent;
         const symbol = AppState.tokenData?.symbol || 'Contract';
@@ -1885,58 +1847,21 @@ async function previewContract() {
     
     try {
         const contractCode = await generateSolidityContract(tokenData);
-    
-    // Criar modal de preview
-    const modal = document.createElement('div');
-    modal.className = 'modal fade';
-    modal.id = 'contractPreviewModal';
-    modal.innerHTML = `
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title">
-                        <i class="bi bi-file-code me-2"></i>
-                        Preview: ${tokenData.symbol}.sol
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-between mb-3">
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Token: ${tokenData.name} (${tokenData.symbol})
-                        </small>
-                        <button class="btn btn-sm btn-outline-info" onclick="copyContractCode()">
-                            <i class="bi bi-clipboard me-1"></i>Copiar Código
-                        </button>
-                    </div>
-                    <pre class="bg-black p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code id="contract-code">${escapeHtml(contractCode)}</code></pre>
-                </div>
-                <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-info" onclick="downloadSolidityFile(); closeModal('contractPreviewModal')">
-                        <i class="bi bi-download me-2"></i>Baixar Arquivo
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Mostrar modal (usando Bootstrap se disponível, senão CSS puro)
-    if (typeof bootstrap !== 'undefined') {
+        
+        // Usar modal existente no HTML
+        const modal = document.getElementById('contractPreviewModal');
+        const titleEl = document.getElementById('preview-modal-title');
+        const infoEl = document.getElementById('preview-token-info');
+        const codeEl = document.getElementById('preview-contract-code');
+        
+        // Atualizar conteúdo do modal
+        if (titleEl) titleEl.textContent = `Preview: ${tokenData.symbol}.sol`;
+        if (infoEl) infoEl.textContent = `Token: ${tokenData.name} (${tokenData.symbol})`;
+        if (codeEl) codeEl.textContent = contractCode;
+        
+        // Mostrar modal
         const bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
-    } else {
-        modal.style.display = 'block';
-        modal.classList.add('show');
-    }
-    
-    // Remover modal quando fechar
-    modal.addEventListener('hidden.bs.modal', () => {
-        document.body.removeChild(modal);
-    });
         
     } catch (error) {
         console.error('❌ Erro ao gerar preview do contrato:', error);
@@ -1958,15 +1883,6 @@ function closeModal(modalId) {
             modal.classList.remove('show');
         }
     }
-}
-
-/**
- * Escapa HTML para exibição segura
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 /**
@@ -3588,41 +3504,6 @@ function showToast(message, type = 'info') {
     });
 }
 
-// Utilitários para URLs de explorers
-function getExplorerTxUrl(txHash, chainId) {
-    if (!txHash) return '#';
-    
-    switch (chainId) {
-        case 1: return `https://etherscan.io/tx/${txHash}`;
-        case 56: return `https://bscscan.com/tx/${txHash}`;
-        case 97: return `https://testnet.bscscan.com/tx/${txHash}`;
-        case 137: return `https://polygonscan.com/tx/${txHash}`;
-        case 8453: return `https://basescan.org/tx/${txHash}`;
-        default: return `https://etherscan.io/tx/${txHash}`;
-    }
-}
-
-function getExplorerContractUrl(contractAddress, chainId) {
-    if (!contractAddress) return '#';
-    
-    // Normalizar chainId para decimal
-    if (typeof chainId === 'string' && chainId.startsWith('0x')) {
-        chainId = parseInt(chainId, 16);
-    } else if (typeof chainId === 'string') {
-        chainId = parseInt(chainId, 10);
-    }
-    
-    switch (chainId) {
-        case 1: return `https://etherscan.io/address/${contractAddress}`;
-        case 56: return `https://bscscan.com/address/${contractAddress}`;
-        case 97: return `https://testnet.bscscan.com/address/${contractAddress}`;
-        case 137: return `https://polygonscan.com/address/${contractAddress}`;
-        case 8453: return `https://basescan.org/address/${contractAddress}`;
-        case 11155111: return `https://sepolia.etherscan.io/address/${contractAddress}`;
-        default: return `https://etherscan.io/address/${contractAddress}`;
-    }
-}
-
 // Exportar funções globais
 window.connectWallet = connectWallet;
 window.resetApp = resetApp;
@@ -3882,19 +3763,25 @@ function viewDeployedContract() {
  * Copia o código do contrato para o clipboard
  */
 function copyContractCode() {
-    const codeDisplay = document.getElementById('contract-code-display');
+    // Tentar primeiro o modal de preview
+    let codeDisplay = document.getElementById('preview-contract-code');
+    if (!codeDisplay) {
+        // Fallback para outros displays de código
+        codeDisplay = document.getElementById('contract-code-display');
+    }
+    
     if (codeDisplay) {
         navigator.clipboard.writeText(codeDisplay.textContent).then(() => {
-            // Feedback visual - encontrar o botão corretamente
+            // Feedback visual
             const copyBtn = document.querySelector('button[onclick="copyContractCode()"]');
             if (copyBtn) {
                 const originalText = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                copyBtn.innerHTML = '<i class="bi bi-check"></i> Copiado!';
                 copyBtn.className = 'btn btn-success btn-sm';
                 
                 setTimeout(() => {
                     copyBtn.innerHTML = originalText;
-                    copyBtn.className = 'btn btn-outline-primary btn-sm';
+                    copyBtn.className = 'btn btn-outline-info btn-sm';
                 }, 2000);
             }
         }).catch(err => {
