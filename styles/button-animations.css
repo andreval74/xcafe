@@ -1,30 +1,75 @@
 /* Button Animations Simples - Sistema simplificado para botão Criar Token */
 
-/* Configuração da cor padrão */
+/* ============================================================================ */
+/* SISTEMA GENÉRICO DE CORES PARA ETAPAS - REUTILIZÁVEL */
+/* ============================================================================ */
+
+/* Configuração das cores para as 5 etapas + inicial + final */
 :root {
-    --btn-default-color: #ED5A22;
-    --btn-success-color: #28a745;
-    --btn-error-color: #dc3545;
-    --btn-working-color: #6c757d;
+    --btn-default-color: #ED5A22;    /* Laranja - Estado inicial */
+    --btn-step1-color: #495057;      /* Cinza escuro - Etapa 1 */
+    --btn-step2-color: #6c757d;      /* Cinza médio - Etapa 2 */
+    --btn-step3-color: #adb5bd;      /* Cinza claro - Etapa 3 */
+    --btn-step4-color: #007bff;      /* Azul - Etapa 4 */
+    --btn-success-color: #28a745;    /* Verde - Estado final */
+    --btn-error-color: #dc3545;      /* Vermelho - Estado erro */
 }
 
-/* Estilo base do botão - COR LARANJA PADRÃO */
-#create-token-btn {
+/* ============================================================================ */
+/* CLASSES DE BOTÃO PARA CADA ETAPA */
+/* ============================================================================ */
+
+/* Estado inicial - COR LARANJA */
+#create-token-btn,
+.btn-primary-custom {
     background-color: var(--btn-default-color) !important;
     border-color: var(--btn-default-color) !important;
     color: white !important;
     transition: all 0.3s ease;
 }
 
-#create-token-btn:hover {
+#create-token-btn:hover,
+.btn-primary-custom:hover {
     background-color: #d44a1a !important;
     border-color: #d44a1a !important;
 }
 
-/* Estado trabalhando - CINZA */
+/* Etapa 1 - Cinza escuro */
+.btn-working-step1 {
+    background-color: var(--btn-step1-color) !important;
+    border-color: var(--btn-step1-color) !important;
+    color: white !important;
+    animation: pulse-simple 1.5s infinite;
+}
+
+/* Etapa 2 - Cinza médio */
+.btn-working-step2 {
+    background-color: var(--btn-step2-color) !important;
+    border-color: var(--btn-step2-color) !important;
+    color: white !important;
+    animation: pulse-simple 1.5s infinite;
+}
+
+/* Etapa 3 - Cinza claro */
+.btn-working-step3 {
+    background-color: var(--btn-step3-color) !important;
+    border-color: var(--btn-step3-color) !important;
+    color: white !important;
+    animation: pulse-simple 1.5s infinite;
+}
+
+/* Etapa 4 - Azul */
+.btn-working-step4 {
+    background-color: var(--btn-step4-color) !important;
+    border-color: var(--btn-step4-color) !important;
+    color: white !important;
+    animation: pulse-simple 1.5s infinite;
+}
+
+/* Estado trabalhando genérico - CINZA (mantido para compatibilidade) */
 .btn-working {
-    background-color: var(--btn-working-color) !important;
-    border-color: var(--btn-working-color) !important;
+    background-color: var(--btn-step2-color) !important;
+    border-color: var(--btn-step2-color) !important;
     color: white !important;
     animation: pulse-simple 1.5s infinite;
 }

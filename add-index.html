@@ -44,10 +44,10 @@
             <div class="creator-header border-bottom border-secondary pb-4 mb-4">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h1 class="display-6 fw-bold text-white mb-2">
-                    <i class="bi bi-coin me-2"></i>Criador de Contratos Inteligentes
+                  <h1 class="display-6 fw-bold text-white mb-0">
+                    <i class="bi bi-coin me-2"></i>Gerador de Contratos Inteligentes
                   </h1>
-                  <p class="text-secondary mb-0">Crie seu contrato inteligente ERC-20 com segurança</p>
+                  <p class="text-secondary mb-0">Tenha o seu contrato inteligente ERC-20 com segurança</p>
                 </div>
                 <div class="d-none d-md-block">
                   <img src="imgs/xcafe.png" alt="xcafe" style="height: 60px;">
@@ -156,8 +156,15 @@
 
                   <!-- Botão Criar Token -->
                   <div class="mt-4">
-                    <button id="create-token-btn" type="button" class="btn btn-lg shadow-lg"
-                      style="width: 100%; font-weight: bold; display: none;">
+                    <button id="create-token-btn" type="button" class="btn btn-lg shadow-lg btn-primary-custom"
+                      style="width: 100%; font-weight: bold; display: none;"
+                      data-steps='[
+                        {"text": "... Gerar Contrato e Token ....", "icon": "bi-gear-fill"},
+                        {"text": "... Compilando .....", "icon": "bi-code-slash"},
+                        {"text": "... Deploy ......", "icon": "bi-upload"},
+                        {"text": "... Configurando ....", "icon": "bi-sliders"},
+                        {"text": ".... Contrato e Token Criados com Sucesso ......", "icon": "bi-check-circle-fill"}
+                      ]'>
                       <i class="bi bi-rocket-takeoff me-2"></i>Criar Token
                     </button>
                   </div>

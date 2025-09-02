@@ -214,6 +214,10 @@ function updateVisualProgress() {
         
         if (hasRequiredFields) {
             createTokenBtn.style.display = 'block';
+            // Garantir que o botão tenha a classe correta para cor laranja
+            if (!createTokenBtn.className.includes('btn-primary-custom')) {
+                createTokenBtn.className = 'btn btn-lg shadow-lg btn-primary-custom';
+            }
             console.log('✅ Botão "Criar Token" mostrado (3 campos obrigatórios preenchidos)');
             createTokenBtn.onclick = () => {
                 console.log('🚀 Botão "Criar Token" clicado');
@@ -234,8 +238,7 @@ function updateVisualProgress() {
                 // Atualizar dados com preenchimento automático
                 onTokenDataChange();
                 
-                // Fazer deploy direto
-                deployToken();
+                // handleTokenCreation já será chamado pelo evento click do botão
             };
         } else {
             createTokenBtn.style.display = 'none';
@@ -698,6 +701,10 @@ function checkFormProgress() {
             const createTokenBtn = document.getElementById('create-token-btn');
             if (createTokenBtn) {
                 createTokenBtn.style.display = 'block';
+                // Garantir que o botão tenha a classe correta para cor laranja
+                if (!createTokenBtn.className.includes('btn-primary-custom')) {
+                    createTokenBtn.className = 'btn btn-lg shadow-lg btn-primary-custom';
+                }
             }
             
             updateProgressIndicator(true);
@@ -776,37 +783,22 @@ async function handleTokenCreation() {
     const createTokenBtn = document.getElementById('create-token-btn');
     
     try {
-        // ETAPA 1: Gerando
-        setButtonWorking(createTokenBtn, '... Gerando ...', 'bi-gear-fill');
-        await sleep(1500);
+        // Executar etapas lendo do HTML com callback para deploy real
+        const success = await executeButtonStepsFromHTML('create-token-btn', 1800, async () => {
+            // Durante a etapa 3 (Deploy), executar o deploy real
+            const result = await deployToken();
+            if (!result) {
+                throw new Error('Falha no deploy do token');
+            }
+        });
         
-        // ETAPA 2: Compilando
-        setButtonWorking(createTokenBtn, '... Compilando .....', 'bi-code-slash');
-        await sleep(2000);
-        
-        // ETAPA 3: Deploy
-        setButtonWorking(createTokenBtn, '... Deploy ......', 'bi-upload');
-        const result = await deployToken();
-        
-        if (result) {
-            // ETAPA 4: Finalizando
-            setButtonWorking(createTokenBtn, '.... Finalizando .....', 'bi-check2-circle');
-            await sleep(1500);
-            
-            // ETAPA 5: Configurando
-            setButtonWorking(createTokenBtn, '.... Configurando ....', 'bi-sliders');
-            await sleep(1500);
-            
-            // ETAPA 6: Sucesso Final - VERDE E DESABILITADO
-            setButtonFinalSuccess(createTokenBtn, 'CONTRATO GERADO COM SUCESSO');
-            
+        if (success) {
             // Mostrar seções finais após 2 segundos
             setTimeout(() => {
                 showFinalSections();
             }, 2000);
-            
         } else {
-            throw new Error('Deploy falhou - resultado inválido');
+            throw new Error('Erro durante execução das etapas');
         }
         
     } catch (error) {
@@ -818,10 +810,210 @@ async function handleTokenCreation() {
         
         // Restaurar botão após 7 segundos
         setTimeout(() => {
-            resetButtonToDefault(createTokenBtn);
+            resetButtonToInitial('create-token-btn', 'Criar Token', 'bi-rocket-takeoff');
         }, 7000);
     }
 }
+
+// ========================================================================================
+// SISTEMA GENÉRICO DE BOTÃO COM ETAPAS - REUTILIZÁVEL PARA QUALQUER SISTEMA
+// ========================================================================================
+
+// Cores padrão para as 5 etapas + estado inicial (valores hexadecimais diretos)
+const STEP_COLORS_HEX = {
+    0: '#ED5A22',    // Laranja - Estado inicial
+    1: '#495057',    // Cinza escuro - Primeira etapa  
+    2: '#6c757d',    // Cinza médio - Segunda etapa
+    3: '#adb5bd',    // Cinza claro - Terceira etapa
+    4: '#007bff',    // Azul - Quarta etapa
+    5: '#28a745'     // Verde - Estado final
+};
+
+// Classes CSS para backup
+const STEP_COLORS = {
+    0: 'btn-primary-custom',    // Laranja #ED5A22 - Estado inicial
+    1: 'btn-working-step1',     // Cinza escuro - Primeira etapa  
+    2: 'btn-working-step2',     // Cinza médio - Segunda etapa
+    3: 'btn-working-step3',     // Cinza claro - Terceira etapa
+    4: 'btn-working-step4',     // Azul - Quarta etapa
+    5: 'btn-success-final'      // Verde - Estado final
+};
+
+/**
+ * FUNÇÃO ROBUSTA: Aplica estilo diretamente no elemento + classe CSS
+ */
+function forceButtonStyle(button, stepIndex, text, icon = 'bi-gear-fill') {
+    const hexColor = STEP_COLORS_HEX[stepIndex];
+    const cssClass = STEP_COLORS[stepIndex];
+    
+    // FORÇAR estilo diretamente no elemento (mais confiável)
+    button.style.backgroundColor = `${hexColor} !important`;
+    button.style.borderColor = `${hexColor} !important`;
+    button.style.color = 'white !important';
+    button.style.width = '100%';
+    button.style.fontWeight = 'bold';
+    
+    // Aplicar classe CSS também (para animações)
+    button.className = `btn btn-lg shadow-lg ${cssClass}`;
+    
+    // Conteúdo do botão
+    button.innerHTML = `<i class="${icon} spin-simple me-2"></i>${text}`;
+    
+    console.log(`🎨 FORÇADO - Etapa ${stepIndex}: Cor ${hexColor}, Classe ${cssClass}, Texto "${text}"`);
+}
+
+/**
+ * FUNÇÃO GENÉRICA: Executa etapas sequenciais no botão lendo do HTML
+ * @param {string} buttonId - ID do botão
+ * @param {number} delayMs - Delay entre etapas em milissegundos
+ * @param {Function} callback - Função callback executada durante o processo
+ * @returns {Promise<boolean>} - true se sucesso, false se erro
+ */
+async function executeButtonStepsFromHTML(buttonId, delayMs = 2000, callback = null) {
+    const button = document.getElementById(buttonId);
+    if (!button) return false;
+    
+    // Ler etapas do data-attribute do HTML
+    const stepsData = button.getAttribute('data-steps');
+    if (!stepsData) {
+        console.error('❌ Nenhuma etapa encontrada no atributo data-steps');
+        return false;
+    }
+    
+    let steps;
+    try {
+        steps = JSON.parse(stepsData);
+    } catch (error) {
+        console.error('❌ Erro ao parsear data-steps:', error);
+        return false;
+    }
+    
+    // Desabilitar botão durante o processo
+    button.disabled = true;
+    
+    try {
+        // Executar cada etapa
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            
+            // USAR SISTEMA ROBUSTO para garantir que cores sejam aplicadas
+            forceButtonStyle(button, i + 1, step.text, step.icon);
+            
+            // Executar callback na etapa 3 (Deploy)
+            if (i === 2 && callback && typeof callback === 'function') {
+                console.log('🚀 Executando callback no Deploy (etapa 3)...');
+                await callback();
+                console.log('✅ Callback do Deploy finalizado');
+            }
+            
+            // Aguardar delay antes da próxima etapa (exceto na última)
+            if (i < steps.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+        }
+        
+        // FORÇAR estado final VERDE e DESABILITADO PERMANENTEMENTE COM MÁXIMA ROBUSTEZ
+        button.style.backgroundColor = '#28a745 !important';
+        button.style.borderColor = '#28a745 !important';
+        button.style.color = 'white !important';
+        button.style.width = '100%';
+        button.style.fontWeight = 'bold';
+        button.style.pointerEvents = 'none !important';
+        button.style.cursor = 'not-allowed !important';
+        button.style.opacity = '1 !important';
+        
+        // Classe CSS adicional
+        button.className = 'btn btn-lg shadow-lg btn-success-final';
+        
+        // Desabilitar completamente
+        button.disabled = true;
+        button.setAttribute('disabled', 'disabled');
+        
+        // Remover todos os event listeners para evitar reativação
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        console.log('✅ ESTADO FINAL FORÇADO - Botão está VERDE, DESABILITADO e TOTALMENTE INATIVO');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro durante execução das etapas:', error);
+        setButtonError(button, 'Erro no processo');
+        return false;
+    }
+}
+
+/**
+ * FUNÇÃO GENÉRICA: Executa etapas sequenciais no botão com etapas passadas por parâmetro
+ * @param {string} buttonId - ID do botão
+ * @param {Array} steps - Array com objetos {text: string, icon?: string, animation?: string}
+ * @param {number} delayMs - Delay entre etapas em milissegundos
+ * @param {Function} callback - Função callback executada após completar
+ * @returns {Promise<boolean>} - true se sucesso, false se erro
+ */
+async function executeButtonSteps(buttonId, steps, delayMs = 2000, callback = null) {
+    const button = document.getElementById(buttonId);
+    if (!button) return false;
+    
+    // Desabilitar botão durante o processo
+    button.disabled = true;
+    
+    try {
+        // Executar cada etapa
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            const colorClass = STEP_COLORS[i + 1] || 'btn-working';
+            
+            // Aplicar cor e texto da etapa
+            button.className = `btn btn-lg shadow-lg ${colorClass}`;
+            button.style.width = '100%';
+            button.style.fontWeight = 'bold';
+            button.innerHTML = `<i class="${step.icon || 'bi-gear-fill'} ${step.animation || 'spin-simple'} me-2"></i>${step.text}`;
+            
+            console.log(`🔄 Etapa ${i + 1}: ${step.text}`);
+            
+            // Aguardar delay antes da próxima etapa (exceto na última)
+            if (i < steps.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+        }
+        
+        // Executar callback se fornecido
+        if (callback && typeof callback === 'function') {
+            await callback();
+        }
+        
+        console.log('✅ Todas as etapas do botão completadas com sucesso');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro durante execução das etapas:', error);
+        setButtonError(button, 'Erro no processo');
+        return false;
+    }
+}
+
+/**
+ * FUNÇÃO GENÉRICA: Reseta botão ao estado inicial
+ * @param {string} buttonId - ID do botão
+ * @param {string} initialText - Texto inicial
+ * @param {string} initialIcon - Ícone inicial
+ */
+function resetButtonToInitial(buttonId, initialText = 'Criar Token', initialIcon = 'bi-rocket-takeoff') {
+    const button = document.getElementById(buttonId);
+    if (!button) return;
+    
+    button.disabled = false;
+    button.className = 'btn btn-lg shadow-lg btn-primary-custom';
+    button.style.width = '100%';
+    button.style.fontWeight = 'bold';
+    button.innerHTML = `<i class="${initialIcon} me-2"></i>${initialText}`;
+    console.log(`🔄 Botão resetado: ${initialText}`);
+}
+
+// ========================================================================================
+// FUNÇÕES ESPECÍFICAS ANTIGAS - MANTIDAS PARA COMPATIBILIDADE
+// ========================================================================================
 
 /**
  * Define botão no estado de trabalho (cinza + spinner) com ícone personalizado
@@ -919,38 +1111,61 @@ function sleep(ms) {
  * Função de teste simples para TODAS as etapas
  */
 async function testButtonComplete() {
-    const btn = document.getElementById('create-token-btn');
-    if (!btn) return;
+    console.log('🧪 Testando sistema genérico de etapas...');
     
-    console.log('🧪 Testando TODAS as etapas...');
+    // Definir as 5 etapas para teste
+    const testSteps = [
+        { text: '... Gerar Contrato e Token ....', icon: 'bi-gear-fill', animation: 'spin-simple' },
+        { text: '... Compilando .....', icon: 'bi-code-slash', animation: 'pulse-simple' },
+        { text: '... Deploy ......', icon: 'bi-upload', animation: 'bounce-simple' },
+        { text: '... Configurando ....', icon: 'bi-sliders', animation: 'spin-simple' },
+        { text: '.... Contrato e Token Criados com Sucesso ......', icon: 'bi-check-circle-fill', animation: 'bounce-simple' }
+    ];
     
-    // ETAPA 1: Gerando
-    setButtonWorking(btn, '... Gerando ...', 'bi-gear-fill');
-    await sleep(2000);
+    // Executar etapas com delay de 2 segundos
+    const success = await executeButtonSteps('create-token-btn', testSteps, 2000);
     
-    // ETAPA 2: Compilando
-    setButtonWorking(btn, '... Compilando .....', 'bi-code-slash');
-    await sleep(2000);
-    
-    // ETAPA 3: Deploy
-    setButtonWorking(btn, '... Deploy ......', 'bi-upload');
-    await sleep(2000);
-    
-    // ETAPA 4: Finalizando
-    setButtonWorking(btn, '.... Finalizando .....', 'bi-check2-circle');
-    await sleep(1500);
-    
-    // ETAPA 5: Configurando
-    setButtonWorking(btn, '.... Configurando ....', 'bi-sliders');
-    await sleep(1500);
-    
-    // ETAPA 6: SUCESSO FINAL - VERDE E DESABILITADO
-    setButtonFinalSuccess(btn, 'CONTRATO GERADO COM SUCESSO');
-    
-    console.log('✅ Teste completo finalizado - Botão deve estar VERDE e DESABILITADO');
+    if (success) {
+        console.log('✅ Teste completo - Todas as 5 etapas executadas com sucesso!');
+    } else {
+        console.log('❌ Teste falhou');
+    }
 }
 
-// Para testar: testButtonComplete()
+async function testButtonFromHTML() {
+    console.log('🧪 Testando sistema ROBUSTO com etapas do HTML...');
+    
+    const button = document.getElementById('create-token-btn');
+    if (!button) {
+        console.error('❌ Botão não encontrado!');
+        return;
+    }
+    
+    // Mostrar botão se estiver oculto para teste
+    button.style.display = 'block';
+    
+    // Executar etapas lendo do HTML
+    const success = await executeButtonStepsFromHTML('create-token-btn', 2000);
+    
+    if (success) {
+        console.log('✅ Teste completo - Verificar se botão está VERDE e TOTALMENTE DESABILITADO');
+        
+        // Verificação adicional
+        setTimeout(() => {
+            const finalButton = document.getElementById('create-token-btn');
+            console.log('🔍 Estado final do botão:', {
+                backgroundColor: finalButton.style.backgroundColor,
+                disabled: finalButton.disabled,
+                className: finalButton.className,
+                pointerEvents: finalButton.style.pointerEvents
+            });
+        }, 1000);
+    } else {
+        console.log('❌ Teste falhou');
+    }
+}
+
+// Para testar: testButtonFromHTML()
 
 /**
  * Configura listeners de eventos
