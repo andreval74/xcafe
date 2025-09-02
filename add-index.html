@@ -157,8 +157,7 @@
                   <!-- Botão Criar Token -->
                   <div class="mt-4">
                     <button id="create-token-btn" type="button" class="btn btn-lg shadow-lg btn-primary-custom"
-                      style="width: 100%; font-weight: bold; display: none;"
-                      data-steps='[
+                      style="width: 100%; font-weight: bold; display: none;" data-steps='[
                         {"text": "... Gerar Contrato e Token ....", "icon": "bi-gear-fill"},
                         {"text": "... Compilando .....", "icon": "bi-code-slash"},
                         {"text": "... Deploy ......", "icon": "bi-upload"},
@@ -200,12 +199,15 @@
                         <button class="btn btn-outline-info" type="button" id="copy-contract-btn" title="Copiar">
                           <i class="bi bi-clipboard"></i>
                         </button>
-                        <button class="btn btn-outline-primary" type="button" id="view-contract-btn" title="Ver no Explorer">
+                        <button class="btn btn-outline-primary" type="button" id="view-contract-btn"
+                          title="Ver no Explorer">
                           <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-outline-warning" type="button" id="add-to-metamask-btn" title="Adicionar ao MetaMask">
-                          <img src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg" 
-                               alt="MetaMask" style="width: 16px; height: 16px;">
+                        <button class="btn btn-outline-warning" type="button" id="add-to-metamask-btn"
+                          title="Adicionar ao MetaMask">
+                          <img
+                            src="https://raw.githubusercontent.com/MetaMask/brand-resources/master/SVG/metamask-fox.svg"
+                            alt="MetaMask" style="width: 16px; height: 16px;">
                         </button>
                       </div>
                     </div>
@@ -223,7 +225,8 @@
                         <button class="btn btn-outline-info" type="button" id="copy-hash-btn" title="Copiar">
                           <i class="bi bi-clipboard"></i>
                         </button>
-                        <button class="btn btn-outline-primary" type="button" id="view-hash-btn" title="Ver no Explorer">
+                        <button class="btn btn-outline-primary" type="button" id="view-hash-btn"
+                          title="Ver no Explorer">
                           <i class="bi bi-eye"></i>
                         </button>
                       </div>
@@ -240,7 +243,7 @@
                 <h4 class="text-primary mb-1">
                   <i class="bi bi-file-break me-2"></i>4. Verificação do Contrato do Token
                 </h4>
-                <p class="text-muted">Verificar e baixar o código fonte do contrato.</p>
+                <p class="text-muted">Visualizar o código fonte e verificar o contrato na blockchain.</p>
               </div>
 
               <div class="card bg-dark border-success shadow mb-4">
@@ -251,6 +254,25 @@
                 </div>
 
                 <div class="card-body">
+                  <!-- como verificar um contrato -->
+                  <div class="row mt-3" id="network-info-section" style="display: none;">
+                    <div class="col-12">
+                      <div class="alert alert-info mb-0">
+                        <strong>Como usar os botões:</strong>
+                        <li><strong>Visualizar Contrato:</strong> Abre uma janela com o código fonte para visualização, cópia e download</li>
+                        <li><strong>Verificar Contrato:</strong> Abre a página de verificação da blockchain (BSCScan/EtherScan)</li>
+                        <br>
+                        <strong>Para verificação manual no explorer:</strong>
+                        <li>Clique em "Verificar Contrato" para ir ao site da blockchain</li>
+                        <li>Configure os campos conforme os dados informados</li>
+                        <li>Use "Visualizar Contrato" para copiar o código fonte</li>
+                        <li>Cole o código no site e clique em "Verify and Publish"</li>
+                        <strong>Pronto seu contrato esta Verificado e Pronto para ser usado.</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- dados para verificação do contrato -->
                   <div class="row g-4">
                     <div class="col-6">
                       <label for="network-display" class="form-label text-white">
@@ -258,7 +280,6 @@
                       </label>
                       <label for="network-display" class="form-label text-success">v0.8.30+commit.8a97fa7a</label>
                     </div>
-
                     <div class="col-6">
                       <label for="network-display" class="form-label text-white">
                         <i class="bi bi-tag text-primary me-2"></i>Optimization
@@ -282,15 +303,15 @@
                     </div>
                   </div>
 
-                  <!-- botões de ação -->
+                  <!-- botões de ação para verificação do contrato -->
                   <div class="row g-3 mt-3">
                     <div class="col-md-6">
-                      <button id="download-contract-btn" class="btn btn-primary w-100 shadow">
-                        <i class="bi bi-download me-2"></i>Baixar Código Solidity
+                      <button id="view-contract-btn" class="btn btn-success w-100 shadow">
+                        <i class="bi bi-eye me-2"></i>Visualizar Contrato
                       </button>
                     </div>
                     <div class="col-md-6">
-                      <button id="open-verification-btn" class="btn btn-warning w-100 shadow">
+                      <button id="verify-contract-btn" class="btn w-100 shadow" style="background-color: #ED5A22; border-color: #ED5A22; color: white;">
                         <i class="bi bi-shield-check me-2"></i>Verificar Contrato
                       </button>
                     </div>
@@ -307,15 +328,15 @@
                 </div>
             </section>
 
-          <!-- Botão Limpar Tudo -->
-          <div class="mt-3">
-            <button id="clear-all-btn" class="btn btn-warning w-100">
-              <i class="bi bi-arrow-clockwise me-2"></i>Limpar e Recomeçar
-            </button>
+            <!-- Botão Limpar Tudo -->
+            <div class="mt-3">
+              <button id="clear-all-btn" class="btn btn-warning w-100">
+                <i class="bi bi-arrow-clockwise me-2"></i>Limpar e Recomeçar
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
 
     <!-- Campos ocultos para compatibilidade -->

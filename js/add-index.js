@@ -206,11 +206,27 @@ function updateVisualProgress() {
         const walletStatus = Wallet.getStatus();
         const isWalletConnected = walletStatus.connected || wallet.connected;
         
+        // DEBUG: Log do estado da carteira
+        console.log('🔍 DEBUG Botão - Estado carteira:', {
+            walletStatus: walletStatus,
+            isWalletConnected: isWalletConnected,
+            walletGlobal: wallet
+        });
+        
         // Verificar se tem apenas os 3 campos obrigatórios: nome, símbolo e supply
         const hasRequiredFields = isWalletConnected && 
                                  tokenData.name && tokenData.name.trim().length >= 3 &&
                                  tokenData.symbol && tokenData.symbol.trim().length >= 2 &&
                                  tokenData.totalSupply && tokenData.totalSupply.length > 0;
+        
+        // DEBUG: Log dos campos obrigatórios
+        console.log('🔍 DEBUG Botão - Campos:', {
+            isWalletConnected: isWalletConnected,
+            nome: tokenData.name,
+            simbolo: tokenData.symbol,
+            supply: tokenData.totalSupply,
+            hasRequiredFields: hasRequiredFields
+        });
         
         if (hasRequiredFields) {
             createTokenBtn.style.display = 'block';
@@ -302,115 +318,80 @@ function enableSection(sectionId) {
 /**
  * Carrega o template base.sol e substitui as variáveis
  */
-async function loadSolidityTemplate() {
+// ========================================================================================
+// SISTEMA DE CONTRATOS LIMPO - CARREGA TEMPLATES DA PASTA /contratos/
+// ========================================================================================
+
+/**
+ * Carrega template de contrato da pasta /contratos/
+ * @param {string} contractName - Nome do arquivo (ex: 'base', 'simple')
+ * @returns {Promise<string>} - Código do contrato .sol
+ */
+async function loadContractTemplate(contractName = 'base') {
     try {
-        const response = await fetch('./contratos/base.sol');
+        const response = await fetch(`contratos/${contractName}.sol`);
         if (!response.ok) {
-            throw new Error('Não foi possível carregar o template base.sol');
+            throw new Error(`Erro ao carregar contrato: ${response.status}`);
         }
-        return await response.text();
+        const contractCode = await response.text();
+        console.log(`✅ Template ${contractName}.sol carregado da pasta /contratos/`);
+        return contractCode;
     } catch (error) {
-        console.warn('⚠️ Erro ao carregar template base.sol, usando template interno:', error);
-        // Template de fallback básico caso não consiga carregar o base.sol
-        return `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
-
-/*
-Gerado por:
-Smart Contract Cafe - Fallback Template
-https://smartcontract.cafe
-
-INFORMAÇÕES DE VERIFICAÇÃO:
-- Compiler Version: v0.8.30+commit.8a97fa7a
-- Optimization: Enabled (200 runs)
-- License: MIT
-*/
-
-contract {{TOKEN_SYMBOL}} {
-    string public name = "{{TOKEN_NAME}}";
-    string public symbol = "{{TOKEN_SYMBOL}}";
-    uint8 public decimals = {{DECIMALS}};
-    uint256 public totalSupply = {{TOKEN_SUPPLY}} * (10 ** uint256(decimals));
-    
-    mapping(address => uint256) private _balances;
-    mapping(address => mapping(address => uint256)) private _allowances;
-    
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-    
-    constructor() {
-        _balances[{{OWNER_ADDRESS}}] = totalSupply;
-        emit Transfer(address(0), {{OWNER_ADDRESS}}, totalSupply);
-    }
-    
-    function balanceOf(address account) public view returns (uint256) {
-        return _balances[account];
-    }
-    
-    function transfer(address recipient, uint256 amount) public returns (bool) {
-        require(_balances[msg.sender] >= amount, "Insufficient balance");
-        _balances[msg.sender] -= amount;
-        _balances[recipient] += amount;
-        emit Transfer(msg.sender, recipient, amount);
-        return true;
-    }
-    
-    function approve(address spender, uint256 amount) public returns (bool) {
-        _allowances[msg.sender][spender] = amount;
-        emit Approval(msg.sender, spender, amount);
-        return true;
-    }
-    
-    function allowance(address owner, address spender) public view returns (uint256) {
-        return _allowances[owner][spender];
-    }
-    
-    function transferFrom(address from, address to, uint256 amount) public returns (bool) {
-        require(_balances[from] >= amount, "Insufficient balance");
-        require(_allowances[from][msg.sender] >= amount, "Allowance exceeded");
-        
-        _balances[from] -= amount;
-        _balances[to] += amount;
-        _allowances[from][msg.sender] -= amount;
-        
-        emit Transfer(from, to, amount);
-        return true;
-    }
-}
-
-/*
-Template de fallback gerado pelo xcafe Token Creator
-https://xcafe.com
-*/`;
+        console.error(`❌ Erro ao carregar template ${contractName}:`, error);
+        throw error;
     }
 }
 
 /**
- * Gera contrato Solidity usando template base.sol
+ * Aplica variáveis do token no template do contrato
+ * @param {string} templateCode - Código template com placeholders
+ * @param {Object} tokenData - Dados do token
+ * @returns {string} - Código final do contrato
  */
-async function generateSolidityContract(tokenData) {
+function applyTokenDataToTemplate(templateCode, tokenData) {
+    let contractCode = templateCode;
+    
+    // Aplicar substituições dos placeholders
+    const replacements = {
+        '{{TOKEN_NAME}}': tokenData.name,
+        '{{TOKEN_SYMBOL}}': tokenData.symbol,
+        '{{DECIMALS}}': tokenData.decimals || '18',
+        '{{TOKEN_SUPPLY}}': tokenData.totalSupply,
+        '{{OWNER_ADDRESS}}': tokenData.owner,
+        '{{TOKEN_LOGO_URI}}': tokenData.image || '',
+        '{{TOKEN_ORIGINAL}}': '0x80c09daC9dC95669B03C2d82967Af62e93d0Fe84'
+    };
+    
+    // Fazer as substituições
+    for (const [placeholder, value] of Object.entries(replacements)) {
+        contractCode = contractCode.replace(new RegExp(placeholder, 'g'), value);
+    }
+    
+    console.log('✅ Placeholders aplicados no template do contrato');
+    return contractCode;
+}
+
+/**
+ * Gera contrato final a partir do template selecionado
+ * @param {Object} tokenData - Dados do token
+ * @param {string} templateName - Nome do template (padrão: 'base')
+ * @returns {Promise<string>} - Código final do contrato
+ */
+async function generateContractFromTemplate(tokenData, templateName = 'base') {
     try {
-        // Carregar template base.sol
-        const template = await loadSolidityTemplate();
+        console.log(`🔨 Gerando contrato a partir do template: ${templateName}.sol`);
         
-        // Aplicar checksum ao endereço do owner
-        const ownerAddressChecksum = ethers.utils.getAddress(tokenData.owner);
+        // 1. Carregar template da pasta /contratos/
+        const templateCode = await loadContractTemplate(templateName);
         
-        // Substituir variáveis do template
-        const contractCode = template
-            .replace(/{{TOKEN_NAME}}/g, tokenData.name)
-            .replace(/{{TOKEN_SYMBOL}}/g, tokenData.symbol)
-            .replace(/{{DECIMALS}}/g, tokenData.decimals || '18')
-            .replace(/{{TOKEN_SUPPLY}}/g, tokenData.totalSupply)
-            .replace(/{{OWNER_ADDRESS}}/g, ownerAddressChecksum)
-            .replace(/{{TOKEN_LOGO_URI}}/g, '') // Logo URI vazio por padrão
-            .replace(/{{TOKEN_ORIGINAL}}/g, '0x80c09daC9dC95669B03C2d82967Af62e93d0Fe84'); // Endereço BTCBR em checksum correto
-            
-        console.log('✅ Contrato Solidity gerado com sucesso usando template base.sol');
-        return contractCode;
+        // 2. Aplicar dados do token
+        const finalContract = applyTokenDataToTemplate(templateCode, tokenData);
+        
+        console.log('✅ Contrato gerado com sucesso a partir do template');
+        return finalContract;
         
     } catch (error) {
-        console.error('❌ Erro ao gerar contrato Solidity:', error);
+        console.error('❌ Erro ao gerar contrato:', error);
         throw error;
     }
 }
@@ -437,9 +418,9 @@ async function downloadSolidityFile() {
             contractCode = AppState.deployResult.sourceCode;
             console.log('📄 Usando código fonte real da API deployada');
         } else {
-            // 2. Gerar usando template atualizado
-            contractCode = await generateSolidityContract(tokenData);
-            console.log('📄 Usando template local atualizado');
+            // 2. Gerar usando template da pasta /contratos/
+            contractCode = await generateContractFromTemplate(tokenData, 'base');
+            console.log('📄 Usando template base.sol da pasta /contratos/');
         }
         
         // Adicionar header com informações de verificação
@@ -494,6 +475,164 @@ Data: ${new Date().toLocaleDateString('pt-BR')}
         console.error('❌ Erro ao gerar arquivo:', error);
         alert('Erro ao gerar arquivo Solidity: ' + error.message);
     }
+}
+
+/**
+ * Mostra modal com o contrato para visualização, cópia e download
+ */
+async function showContractModal() {
+    const { tokenData } = AppState;
+    
+    if (!tokenData.name || !tokenData.symbol) {
+        alert('Preencha os dados do token antes de visualizar o contrato');
+        return;
+    }
+
+    try {
+        console.log('📄 Carregando contrato para visualização...');
+        
+        let contractCode = '';
+        
+        // 1. Priorizar código real da API (se já fez deploy)
+        if (AppState.deployResult && AppState.deployResult.sourceCode) {
+            contractCode = AppState.deployResult.sourceCode;
+            console.log('📄 Usando código fonte real da API deployada');
+        } else {
+            // 2. Gerar código usando sistema de templates
+            contractCode = await generateContractFromTemplate(tokenData, 'base');
+            console.log('📄 Código gerado usando template');
+        }
+
+        // Criar modal dinâmico
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'contractViewModal';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content bg-dark border-primary">
+                    <div class="modal-header border-bottom border-secondary">
+                        <h5 class="modal-title text-white">
+                            <i class="bi bi-file-earmark-code me-2"></i>Contrato: ${tokenData.symbol}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Código fonte do contrato ${tokenData.name} (${tokenData.symbol})
+                            </small>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="copyContractFromModal()">
+                                    <i class="bi bi-clipboard me-1"></i>Copiar
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="downloadContractFromModal()">
+                                    <i class="bi bi-download me-1"></i>Baixar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-black rounded p-3" style="max-height: 60vh; overflow-y: auto;">
+                            <pre id="contract-source-code" class="text-light mb-0" style="font-size: 12px; line-height: 1.4;">${escapeHtml(contractCode)}</pre>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remover modal anterior se existir
+        const existingModal = document.getElementById('contractViewModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Adicionar ao DOM e mostrar
+        document.body.appendChild(modal);
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+
+        // Remover do DOM quando fechar
+        modal.addEventListener('hidden.bs.modal', () => {
+            modal.remove();
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao carregar contrato:', error);
+        alert('Erro ao carregar contrato: ' + error.message);
+    }
+}
+
+/**
+ * Copia o contrato do modal para o clipboard
+ */
+function copyContractFromModal() {
+    const codeElement = document.getElementById('contract-source-code');
+    if (codeElement) {
+        const contractCode = codeElement.textContent;
+        navigator.clipboard.writeText(contractCode).then(() => {
+            // Feedback visual
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check me-1"></i>Copiado!';
+            btn.classList.remove('btn-outline-success');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.add('btn-outline-success');
+                btn.classList.remove('btn-success');
+            }, 2000);
+        }).catch(err => {
+            console.error('Erro ao copiar:', err);
+            alert('Erro ao copiar contrato');
+        });
+    }
+}
+
+/**
+ * Faz download do contrato a partir do modal
+ */
+function downloadContractFromModal() {
+    const codeElement = document.getElementById('contract-source-code');
+    if (codeElement) {
+        const contractCode = codeElement.textContent;
+        const fileName = `${AppState.tokenData.symbol}_Contract.sol`;
+        
+        const blob = new Blob([contractCode], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        // Feedback visual
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check me-1"></i>Baixado!';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-primary');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.add('btn-outline-primary');
+            btn.classList.remove('btn-primary');
+        }, 2000);
+    }
+}
+
+/**
+ * Escapa HTML para exibição segura
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 /**
@@ -695,6 +834,9 @@ function checkFormProgress() {
     if (isWalletConnected) {
         enableSection('section-basic-info');
         
+        // DEBUG: Log do formulário completo
+        console.log('🔍 DEBUG Progressive - isFormComplete:', isFormComplete);
+        
         // Seção 3: Mostrar se formulário completo
         if (isFormComplete) {
             // Mostrar botão criar token
@@ -705,6 +847,7 @@ function checkFormProgress() {
                 if (!createTokenBtn.className.includes('btn-primary-custom')) {
                     createTokenBtn.className = 'btn btn-lg shadow-lg btn-primary-custom';
                 }
+                console.log('✅ Botão "Criar Token" mostrado via progressive flow');
             }
             
             updateProgressIndicator(true);
@@ -840,26 +983,32 @@ const STEP_COLORS = {
 };
 
 /**
- * FUNÇÃO ROBUSTA: Aplica estilo diretamente no elemento + classe CSS
+ * FUNÇÃO ULTRA-ROBUSTA: Aplica estilo com máxima força bruta
  */
 function forceButtonStyle(button, stepIndex, text, icon = 'bi-gear-fill') {
     const hexColor = STEP_COLORS_HEX[stepIndex];
     const cssClass = STEP_COLORS[stepIndex];
     
-    // FORÇAR estilo diretamente no elemento (mais confiável)
-    button.style.backgroundColor = `${hexColor} !important`;
-    button.style.borderColor = `${hexColor} !important`;
-    button.style.color = 'white !important';
-    button.style.width = '100%';
-    button.style.fontWeight = 'bold';
+    // FORÇA BRUTA 1: Remover todos os estilos inline conflitantes
+    button.removeAttribute('style');
     
-    // Aplicar classe CSS também (para animações)
+    // FORÇA BRUTA 2: Aplicar estilo inline com setProperty (bypassa !important)
+    button.style.setProperty('background-color', hexColor, 'important');
+    button.style.setProperty('border-color', hexColor, 'important');
+    button.style.setProperty('color', 'white', 'important');
+    button.style.setProperty('width', '100%', 'important');
+    button.style.setProperty('font-weight', 'bold', 'important');
+    
+    // FORÇA BRUTA 3: Aplicar classe CSS
     button.className = `btn btn-lg shadow-lg ${cssClass}`;
     
-    // Conteúdo do botão
+    // FORÇA BRUTA 4: Conteúdo do botão
     button.innerHTML = `<i class="${icon} spin-simple me-2"></i>${text}`;
     
-    console.log(`🎨 FORÇADO - Etapa ${stepIndex}: Cor ${hexColor}, Classe ${cssClass}, Texto "${text}"`);
+    // FORÇA BRUTA 5: Forçar repaint
+    button.offsetHeight; // Trigger reflow
+    
+    console.log(`🎨 FORÇA BRUTA APLICADA - Etapa ${stepIndex}: Cor ${hexColor}, Texto "${text}"`);
 }
 
 /**
@@ -899,41 +1048,57 @@ async function executeButtonStepsFromHTML(buttonId, delayMs = 2000, callback = n
             // USAR SISTEMA ROBUSTO para garantir que cores sejam aplicadas
             forceButtonStyle(button, i + 1, step.text, step.icon);
             
-            // Executar callback na etapa 3 (Deploy)
-            if (i === 2 && callback && typeof callback === 'function') {
-                console.log('🚀 Executando callback no Deploy (etapa 3)...');
-                await callback();
-                console.log('✅ Callback do Deploy finalizado');
-            }
-            
-            // Aguardar delay antes da próxima etapa (exceto na última)
+            // Aguardar delay ANTES do callback para etapa ser visível
             if (i < steps.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, delayMs));
             }
+            
+            // Executar callback APÓS delay na etapa 3 (Deploy)
+            if (i === 2 && callback && typeof callback === 'function') {
+                console.log('🚀 Executando callback no Deploy (etapa 3)...');
+                try {
+                    await callback();
+                    console.log('✅ Callback do Deploy finalizado com sucesso');
+                } catch (callbackError) {
+                    console.error('❌ Erro no callback do Deploy:', callbackError);
+                    throw callbackError;
+                }
+            }
         }
         
-        // FORÇAR estado final VERDE e DESABILITADO PERMANENTEMENTE COM MÁXIMA ROBUSTEZ
-        button.style.backgroundColor = '#28a745 !important';
-        button.style.borderColor = '#28a745 !important';
-        button.style.color = 'white !important';
-        button.style.width = '100%';
-        button.style.fontWeight = 'bold';
-        button.style.pointerEvents = 'none !important';
-        button.style.cursor = 'not-allowed !important';
-        button.style.opacity = '1 !important';
+        // ESTADO FINAL COM FORÇA BRUTA MÁXIMA - TRAVAMENTO ABSOLUTO
+        console.log('🔒 Aplicando travamento absoluto do botão...');
         
-        // Classe CSS adicional
+        // 1. Remover todos os estilos conflitantes
+        button.removeAttribute('style');
+        
+        // 2. Aplicar cor verde com força bruta
+        button.style.setProperty('background-color', '#28a745', 'important');
+        button.style.setProperty('border-color', '#28a745', 'important');
+        button.style.setProperty('color', 'white', 'important');
+        button.style.setProperty('width', '100%', 'important');
+        button.style.setProperty('font-weight', 'bold', 'important');
+        button.style.setProperty('pointer-events', 'none', 'important');
+        button.style.setProperty('cursor', 'not-allowed', 'important');
+        button.style.setProperty('opacity', '0.85', 'important');
+        
+        // 3. Aplicar classe CSS final
         button.className = 'btn btn-lg shadow-lg btn-success-final';
         
-        // Desabilitar completamente
+        // 4. Desabilitação múltipla
         button.disabled = true;
         button.setAttribute('disabled', 'disabled');
+        button.setAttribute('aria-disabled', 'true');
         
-        // Remover todos os event listeners para evitar reativação
+        // 5. Remover TODOS os event listeners clonando o elemento
+        const parent = button.parentNode;
         const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
+        parent.replaceChild(newButton, button);
         
-        console.log('✅ ESTADO FINAL FORÇADO - Botão está VERDE, DESABILITADO e TOTALMENTE INATIVO');
+        // 6. Forçar repaint
+        newButton.offsetHeight;
+        
+        console.log('✅ TRAVAMENTO ABSOLUTO APLICADO - Botão está 100% inativo e verde');
         return true;
         
     } catch (error) {
@@ -1168,6 +1333,52 @@ async function testButtonFromHTML() {
 // Para testar: testButtonFromHTML()
 
 /**
+ * FUNÇÃO DE DEBUG: Força exibição do botão para testes
+ */
+function forceShowButton() {
+    const button = document.getElementById('create-token-btn');
+    if (button) {
+        button.style.display = 'block';
+        button.style.backgroundColor = '#ED5A22';
+        button.style.borderColor = '#ED5A22';
+        button.style.color = 'white';
+        button.disabled = false;
+        console.log('🔧 Botão forçado a aparecer para teste');
+        return true;
+    } else {
+        console.error('❌ Botão não encontrado!');
+        return false;
+    }
+}
+
+/**
+ * FUNÇÃO DE DEBUG: Verifica estado completo
+ */
+function debugButtonState() {
+    const button = document.getElementById('create-token-btn');
+    const walletStatus = Wallet.getStatus();
+    
+    console.log('🔍 DEBUG COMPLETO:', {
+        botaoEncontrado: !!button,
+        botaoDisplay: button ? button.style.display : 'N/A',
+        carteira: walletStatus,
+        tokenData: tokenData,
+        wallet: wallet
+    });
+    
+    if (button) {
+        console.log('🔍 Botão elemento:', {
+            display: button.style.display,
+            className: button.className,
+            disabled: button.disabled,
+            visible: button.offsetParent !== null
+        });
+    }
+}
+
+// Para debug: debugButtonState() ou forceShowButton()
+
+/**
  * Configura listeners de eventos
  */
 function setupEventListeners() {
@@ -1258,37 +1469,6 @@ function setupResultButtons() {
         });
     }
     
-    // Ver contrato no explorer (novo botão)
-    const viewContractBtn = document.getElementById('view-contract-btn');
-    if (viewContractBtn) {
-        viewContractBtn.addEventListener('click', () => {
-            const contractAddress = document.getElementById('contract-address-display').value;
-            if (contractAddress) {
-                // Determinar a rede baseada no estado ou usar BSC Testnet como padrão
-                const networkId = AppState.wallet.network?.chainId || '97';
-                let explorerUrl;
-                
-                switch(networkId) {
-                    case '1':
-                    case 1:
-                        explorerUrl = `https://etherscan.io/address/${contractAddress}`;
-                        break;
-                    case '56':
-                    case 56:
-                        explorerUrl = `https://bscscan.com/address/${contractAddress}`;
-                        break;
-                    case '97':
-                    case 97:
-                    default:
-                        explorerUrl = `https://testnet.bscscan.com/address/${contractAddress}`;
-                        break;
-                }
-                
-                window.open(explorerUrl, '_blank');
-            }
-        });
-    }
-    
     // Ver hash da transação no explorer (novo botão)
     const viewHashBtn = document.getElementById('view-hash-btn');
     if (viewHashBtn) {
@@ -1326,16 +1506,17 @@ function setupResultButtons() {
         addToMetamaskBtn.addEventListener('click', addTokenToMetaMask);
     }
     
-    // Download do contrato
-    const downloadContractBtn = document.getElementById('download-contract-btn');
-    if (downloadContractBtn) {
-        downloadContractBtn.addEventListener('click', downloadContractCode);
+    
+    // Visualizar contrato (novo botão)
+    const viewContractBtn = document.getElementById('view-contract-btn');
+    if (viewContractBtn) {
+        viewContractBtn.addEventListener('click', showContractModal);
     }
     
     // Verificar contrato
-    const openVerificationBtn = document.getElementById('open-verification-btn');
-    if (openVerificationBtn) {
-        openVerificationBtn.addEventListener('click', openContractVerification);
+    const verifyContractBtn = document.getElementById('verify-contract-btn');
+    if (verifyContractBtn) {
+        verifyContractBtn.addEventListener('click', openContractVerification);
     }
     
     // Limpar tudo
@@ -1695,17 +1876,6 @@ async function previewContract() {
 }
 
 /**
- * Copia código do contrato para clipboard
- */
-function copyContractCode() {
-    const codeElement = document.getElementById('contract-code');
-    if (codeElement) {
-        const contractCode = codeElement.textContent;
-        copyToClipboard(contractCode);
-    }
-}
-
-/**
  * Fecha modal programaticamente
  */
 function closeModal(modalId) {
@@ -1840,6 +2010,9 @@ async function deployToken() {
             showDeployResult(true);
             showFinalSections();
         }, 1000);
+        
+        console.log('✅ Deploy concluído com sucesso!');
+        return true; // CRÍTICO: Retornar true quando bem-sucedido
         
     } catch (error) {
         console.error('❌ Erro no deploy:', error);
@@ -2129,13 +2302,16 @@ async function testApiStatus() {
 }
 
 /**
- * Deploy personalizado usando o template base.sol
+ * Deploy personalizado usando template da pasta /contratos/
  */
 async function deployWithCustomContract() {
     const { tokenData, wallet } = AppState;
     
     try {
         updateDeployStatus('📋 Carregando template do contrato...');
+        
+        // 1. Gerar contrato a partir do template base.sol
+        const contractCode = await generateContractFromTemplate(tokenData, 'base');
         
         updateDeployStatus('🔗 Compilando contrato...');
         
@@ -2146,7 +2322,7 @@ async function deployWithCustomContract() {
         
         const api = new XcafeHybridAPI();
         
-        // Deploy usando API padrão - ela gerencia template e compilação
+        // Deploy usando API padrão (que já usa templates internos)
         const result = await api.createToken({
             name: tokenData.name,
             symbol: tokenData.symbol,
@@ -2155,7 +2331,7 @@ async function deployWithCustomContract() {
             owner: tokenData.owner
         });
         
-        console.log('✅ Token criado com API padrão:', result);
+        console.log('✅ Token criado com API (usa templates internos):', result);
         
         updateDeployStatus('✅ Deploy concluído!');
         
@@ -2703,17 +2879,17 @@ function copyContractAddress(address) {
  */
 function downloadContractFiles() {
     // Configurar botões de download silenciosamente
-    const downloadContractBtn = document.getElementById('download-contract-btn');
-    const openVerificationBtn = document.getElementById('open-verification-btn');
+    const viewContractBtn = document.getElementById('view-contract-btn');
+    const verifyContractBtn = document.getElementById('verify-contract-btn');
     const addToMetamaskBtn = document.getElementById('add-to-metamask-btn');
     const shareTokenBtn = document.getElementById('share-token-btn');
     
-    if (downloadContractBtn) {
-        downloadContractBtn.onclick = () => downloadSolidityFile();
+    if (viewContractBtn) {
+        viewContractBtn.onclick = () => showContractModal();
     }
     
-    if (openVerificationBtn) {
-        openVerificationBtn.onclick = () => openVerificationUrl();
+    if (verifyContractBtn) {
+        verifyContractBtn.onclick = () => openVerificationUrl();
     }
     
     if (addToMetamaskBtn) {
@@ -2725,17 +2901,7 @@ function downloadContractFiles() {
     }
 }
 
-function downloadSolidityFile() {
-    if (!AppState.deployResult?.sourceCode) {
-        alert('Código Solidity não disponível');
-        return;
-    }
-    
-    const filename = `${AppState.tokenData.symbol}_Token.sol`;
-    const content = AppState.deployResult.sourceCode;
-    
-    downloadFile(filename, content, 'text/plain');
-}
+// FUNÇÃO DUPLICADA REMOVIDA - downloadSolidityFile() já existe acima
 
 function downloadABI() {
     if (!AppState.deployResult?.compilation?.abi) {
@@ -2914,45 +3080,17 @@ async function downloadContractCode() {
         if (AppState.deployResult.sourceCode) {
             contractCode = AppState.deployResult.sourceCode;
         } else {
-            // Gerar código básico para deploy simulado
+            // Gerar código básico para deploy simulado usando template
             const tokenData = AppState.deployResult.deployData;
-            contractCode = `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-/*
-Token: ${tokenData.name || 'Token'}
-Símbolo: ${tokenData.symbol || 'TKN'}
-Supply Total: ${tokenData.totalSupply || '1000000'}
-Decimais: ${tokenData.decimals || '18'}
-Proprietário: ${tokenData.owner || 'N/A'}
-
-Gerado por: Smart Contract Cafe
-https://smartcontract.cafe
-*/
-
-contract ${tokenData.symbol || 'Token'} {
-    string public name = "${tokenData.name || 'Token'}";
-    string public symbol = "${tokenData.symbol || 'TKN'}";
-    uint8 public decimals = ${tokenData.decimals || '18'};
-    uint256 public totalSupply = ${tokenData.totalSupply || '1000000'} * 10**decimals;
-    
-    mapping(address => uint256) public balanceOf;
-    
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    
-    constructor() {
-        balanceOf[msg.sender] = totalSupply;
-        emit Transfer(address(0), msg.sender, totalSupply);
-    }
-    
-    function transfer(address to, uint256 value) public returns (bool) {
-        require(balanceOf[msg.sender] >= value, "Insufficient balance");
-        balanceOf[msg.sender] -= value;
-        balanceOf[to] += value;
-        emit Transfer(msg.sender, to, value);
-        return true;
-    }
-}`;
+            try {
+                contractCode = await generateContractFromTemplate(tokenData, 'simple');
+            } catch (error) {
+                console.warn('⚠️ Falha ao carregar template, usando fallback básico');
+                contractCode = `// Fallback básico - Template não encontrado
+// Token: ${tokenData.name || 'Token'}
+// Símbolo: ${tokenData.symbol || 'TKN'}
+// Gerado por: Smart Contract Cafe`;
+            }
         }
         
         const fileName = `${AppState.deployResult.deployData.symbol || 'Token'}_Contract.sol`;
@@ -3394,6 +3532,9 @@ window.resetApp = resetApp;
 window.scrollToSection = scrollToSection;
 window.copyContractAddress = copyContractAddress;
 window.downloadSolidityFile = downloadSolidityFile;
+window.showContractModal = showContractModal;
+window.copyContractFromModal = copyContractFromModal;
+window.downloadContractFromModal = downloadContractFromModal;
 window.previewContract = previewContract;
 window.copyContractCode = copyContractCode;
 window.closeModal = closeModal;
@@ -3412,21 +3553,6 @@ window.verifyDeployedContract = verifyDeployedContract;
 window.compareContracts = compareContracts;
 window.copyApiCode = copyApiCode;
 window.copyTemplateCode = copyTemplateCode;
-
-/**
- * Carrega e processa o template do contrato simple.sol
- */
-async function loadContractTemplate() {
-    try {
-        // Usar template simplificado para evitar problemas de verificação
-        const response = await fetch('./contratos/simple.sol');
-        const template = await response.text();
-        return template;
-    } catch (error) {
-        console.error('Erro ao carregar template do contrato:', error);
-        throw new Error('Não foi possível carregar o template do contrato');
-    }
-}
 
 /**
  * Substitui os placeholders do template com os dados do token
@@ -3754,7 +3880,12 @@ async function verifyDeployedContract() {
 async function generateFallbackContract(deployData) {
     console.warn('⚠️ Gerando contrato fallback - pode não funcionar na verificação');
     
-    return `// SPDX-License-Identifier: MIT
+    try {
+        // Tentar usar o sistema de templates primeiro
+        return await generateContractFromTemplate(deployData, 'simple');
+    } catch (error) {
+        console.warn('⚠️ Template fallback também falhou, usando contrato mínimo');
+        return `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
 contract ${deployData.symbol} {
@@ -3806,6 +3937,7 @@ contract ${deployData.symbol} {
         return _allowances[owner][spender];
     }
 }`;
+    }
 }
 
 /**
