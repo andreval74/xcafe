@@ -259,8 +259,10 @@
                     <div class="col-12">
                       <div class="alert alert-info mb-0">
                         <strong>Como usar os botões:</strong>
-                        <li><strong>Visualizar Contrato:</strong> Abre uma janela com o código fonte para visualização, cópia e download</li>
-                        <li><strong>Verificar Contrato:</strong> Abre a página de verificação da blockchain (BSCScan/EtherScan)</li>
+                        <li><strong>Visualizar Contrato:</strong> Abre uma janela com o código fonte para visualização,
+                          cópia e download</li>
+                        <li><strong>Verificar Contrato:</strong> Abre a página de verificação da blockchain
+                          (BSCScan/EtherScan)</li>
                         <br>
                         <strong>Para verificação manual no explorer:</strong>
                         <li>Clique em "Verificar Contrato" para ir ao site da blockchain</li>
@@ -271,61 +273,64 @@
                       </div>
                     </div>
                   </div>
-
-                  <!-- dados para verificação do contrato -->
-                  <div class="row g-4">
-                    <div class="col-6">
-                      <label for="network-display" class="form-label text-white">
-                        <i class="bi bi-tag text-primary me-2"></i>Compiler Version
-                      </label>
-                      <label for="network-display" class="form-label text-success">v0.8.30+commit.8a97fa7a</label>
-                    </div>
-                    <div class="col-6">
-                      <label for="network-display" class="form-label text-white">
-                        <i class="bi bi-tag text-primary me-2"></i>Optimization
-                      </label>
-                      <label for="network-display" class="form-label text-success">Enabled - 200 runs</label>
-                    </div>
-                  </div>
-                  <div class="row g-4">
-                    <div class="col-6">
-                      <label for="network-display" class="form-label text-white">
-                        <i class="bi bi-tag text-primary me-2"></i>License Type:
-                      </label>
-                      <label for="network-display" class="form-label text-success">MIT License</label>
-                    </div>
-
-                    <div class="col-6">
-                      <label for="network-display" class="form-label text-white">
-                        <i class="bi bi-tag text-primary me-2"></i>EVM Version:
-                      </label>
-                      <label for="network-display" class="form-label text-success"> Default</label>
-                    </div>
-                  </div>
-
-                  <!-- botões de ação para verificação do contrato -->
-                  <div class="row g-3 mt-3">
-                    <div class="col-md-6">
-                      <button id="view-contract-btn" class="btn btn-success w-100 shadow">
-                        <i class="bi bi-eye me-2"></i>Visualizar Contrato
-                      </button>
-                    </div>
-                    <div class="col-md-6">
-                      <button id="verify-contract-btn" class="btn w-100 shadow" style="background-color: #ED5A22; border-color: #ED5A22; color: white;">
-                        <i class="bi bi-shield-check me-2"></i>Verificar Contrato
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="row g-4">
-                    <div class="col-12">
-                      <small class="text-muted text-center">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Use essas configurações exatas para verificar o contrato no BSCScan ou EtherScan
-                      </small>
-                    </div>
-                  </div>
                 </div>
+                
+                  <!-- dados para verificação do contrato -->
+                  <div class="card-body">
+                    <div class="row g-4">
+                      <div class="col-6">
+                        <label for="network-display" class="form-label text-white">
+                          <i class="bi bi-tag text-primary me-2"></i>Compiler Version
+                        </label>
+                        <label for="network-display" class="form-label text-success">v0.8.30+commit.8a97fa7a</label>
+                      </div>
+                      <div class="col-6">
+                        <label for="network-display" class="form-label text-white">
+                          <i class="bi bi-tag text-primary me-2"></i>Optimization
+                        </label>
+                        <label for="network-display" class="form-label text-success">Enabled - 200 runs</label>
+                      </div>
+                    </div>
+                    <div class="row g-4">
+                      <div class="col-6">
+                        <label for="network-display" class="form-label text-white">
+                          <i class="bi bi-tag text-primary me-2"></i>License Type
+                        </label>
+                        <label for="network-display" class="form-label text-success">MIT License</label>
+                      </div>
+
+                      <div class="col-6">
+                        <label for="network-display" class="form-label text-white">
+                          <i class="bi bi-tag text-primary me-2"></i>EVM Version:
+                        </label>
+                        <label for="network-display" class="form-label text-success"> Default</label>
+                      </div>
+                    </div>
+
+                    <!-- botões de ação para verificação do contrato -->
+                    <div class="row g-3 mt-3">
+                      <div class="col-md-6">
+                        <button id="view-contract-btn" class="btn btn-success w-100 shadow">
+                          <i class="bi bi-eye me-2"></i>Visualizar Contrato
+                        </button>
+                      </div>
+                      <div class="col-md-6">
+                        <button id="verify-contract-btn" class="btn w-100 shadow"
+                          style="background-color: #ED5A22; border-color: #ED5A22; color: white;">
+                          <i class="bi bi-shield-check me-2"></i>Verificar Contrato
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="row g-4">
+                      <div class="col-12">
+                        <small class="text-muted text-center">
+                          <i class="bi bi-info-circle me-1"></i>
+                          Use essas configurações exatas para verificar o contrato no BSCScan ou EtherScan
+                        </small>
+                      </div>
+                    </div>
+                  </div>
             </section>
 
             <!-- Botão Limpar Tudo -->
