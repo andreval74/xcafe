@@ -481,56 +481,46 @@ Data: ${new Date().toLocaleDateString('pt-BR')}
  * Mostra modal com o contrato para visualização, cópia e download
  */
 async function showContractModal(providedCode = null, providedTitle = null) {
-    console.log('🚀 showContractModal chamada!', { providedCode: !!providedCode, providedTitle });
-    
-    const { tokenData } = AppState;
+    console.log('🚀 showContractModal executada!');
     
     let contractCode = '';
-    let modalTitle = '';
+    let modalTitle = 'Visualizar Contrato';
     
-    // Se foi fornecido código, usar ele diretamente
+    // Se foi fornecido código específico, usar ele
     if (providedCode) {
         contractCode = providedCode;
         modalTitle = providedTitle || 'Contrato Solidity';
     } else {
-        // Verificar se tokenData existe para gerar código
-        if (!tokenData || !tokenData.name || !tokenData.symbol) {
-            alert('Preencha os dados do token antes de visualizar o contrato');
-            console.warn('⚠️ Dados do token não encontrados:', tokenData);
-            return;
-        }
+        // Usar dados do AppState ou dados de exemplo
+        const tokenData = AppState.tokenData || {
+            name: 'Token Exemplo',
+            symbol: 'TKN', 
+            totalSupply: '1000000',
+            decimals: '18'
+        };
         
         modalTitle = `Contrato: ${tokenData.symbol}`;
         
-        try {
-            console.log('📄 Carregando contrato para visualização...');
-            console.log('📋 Token data:', tokenData);
-            
-            // 1. Priorizar código real da API (se já fez deploy)
-            if (AppState.deployResult && AppState.deployResult.sourceCode) {
-                contractCode = AppState.deployResult.sourceCode;
-                modalTitle = `Contrato Deployado: ${tokenData.symbol}`;
-                console.log('📄 Usando código fonte real da API deployada');
-            } else {
-                // 2. Tentar gerar código usando sistema de templates
-                try {
-                    contractCode = await generateContractFromTemplate(tokenData, 'base');
-                    console.log('📄 Código gerado usando template');
-                } catch (templateError) {
-                    console.warn('⚠️ Erro ao carregar template, usando contrato básico:', templateError);
-                    // 3. Fallback para contrato básico
-                    contractCode = `// SPDX-License-Identifier: MIT
+        // Verificar se há código do deploy
+        if (AppState.deployResult?.sourceCode) {
+            contractCode = AppState.deployResult.sourceCode;
+            modalTitle = `Contrato Deployado: ${tokenData.symbol}`;
+        } else {
+            // Gerar contrato básico
+            contractCode = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-contract ${tokenData.symbol || 'Token'} {
-    string public name = "${tokenData.name || 'Token'}";
-    string public symbol = "${tokenData.symbol || 'TKN'}";
-    uint8 public decimals = ${tokenData.decimals || 18};
-    uint256 public totalSupply = ${tokenData.totalSupply || 1000000} * 10**decimals;
+contract ${tokenData.symbol} {
+    string public name = "${tokenData.name}";
+    string public symbol = "${tokenData.symbol}";
+    uint8 public decimals = ${tokenData.decimals};
+    uint256 public totalSupply = ${tokenData.totalSupply} * 10**decimals;
     
     mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
     
     event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
     
     constructor() {
         balanceOf[msg.sender] = totalSupply;
@@ -544,79 +534,107 @@ contract ${tokenData.symbol || 'Token'} {
         emit Transfer(msg.sender, to, value);
         return true;
     }
+    
+    function approve(address spender, uint256 value) public returns (bool) {
+        allowance[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+    
+    function transferFrom(address from, address to, uint256 value) public returns (bool) {
+        require(balanceOf[from] >= value, "Insufficient balance");
+        require(allowance[from][msg.sender] >= value, "Allowance exceeded");
+        balanceOf[from] -= value;
+        balanceOf[to] += value;
+        allowance[from][msg.sender] -= value;
+        emit Transfer(from, to, value);
+        return true;
+    }
 }`;
-                }
-            }
-        } catch (error) {
-            console.error('❌ Erro ao carregar contrato:', error);
-            alert('Erro ao carregar contrato: ' + error.message);
-            return;
         }
     }
-
-    try {
-        console.log('📄 Contrato carregado, criando modal...');
-        
-        // Criar modal dinâmico
-        const modal = document.createElement('div');
-        modal.className = 'modal fade';
-        modal.id = 'contractViewModal';
-        modal.innerHTML = `
+    
+    // Criar modal Bootstrap
+    const modalId = 'contractModal-' + Date.now();
+    const modalHTML = `
+        <div class="modal fade" id="${modalId}" tabindex="-1">
             <div class="modal-dialog modal-lg">
-                <div class="modal-content bg-dark border-primary">
-                    <div class="modal-header border-bottom border-secondary">
-                        <h5 class="modal-title text-white">
+                <div class="modal-content bg-dark text-white border-primary">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title">
                             <i class="bi bi-file-earmark-code me-2"></i>${modalTitle}
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Código fonte do contrato ${tokenData?.name || 'Token'} (${tokenData?.symbol || 'TKN'})
-                            </small>
+                            <small class="text-muted">Código fonte do contrato ERC-20</small>
                             <div class="btn-group">
-                                <button type="button" class="btn btn-outline-success btn-sm" onclick="copyContractFromModal()">
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="copyModalCode('${modalId}')">
                                     <i class="bi bi-clipboard me-1"></i>Copiar
                                 </button>
-                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="downloadContractFromModal()">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="downloadModalCode('${modalId}')">
                                     <i class="bi bi-download me-1"></i>Baixar
                                 </button>
                             </div>
                         </div>
                         <div class="bg-black rounded p-3" style="max-height: 60vh; overflow-y: auto;">
-                            <pre id="contract-source-code" class="text-light mb-0" style="font-size: 12px; line-height: 1.4;">${escapeHtml(contractCode)}</pre>
+                            <pre id="code-${modalId}" class="text-light mb-0" style="font-size: 11px; line-height: 1.4; white-space: pre-wrap;">${contractCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
                         </div>
                     </div>
-                    <div class="modal-footer border-top border-secondary">
+                    <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                     </div>
                 </div>
             </div>
-        `;
-
-        // Remover modal anterior se existir
-        const existingModal = document.getElementById('contractViewModal');
-        if (existingModal) {
-            existingModal.remove();
-        }
-
-        // Adicionar ao DOM e mostrar
-        document.body.appendChild(modal);
-        const bootstrapModal = new bootstrap.Modal(modal);
-        bootstrapModal.show();
-
-        // Remover do DOM quando fechar
-        modal.addEventListener('hidden.bs.modal', () => {
-            modal.remove();
-        });
-
-    } catch (error) {
-        console.error('❌ Erro ao carregar contrato:', error);
-        alert('Erro ao carregar contrato: ' + error.message);
-    }
+        </div>
+    `;
+    
+    // Remover modal anterior
+    document.querySelectorAll('[id^="contractModal-"]').forEach(m => m.remove());
+    
+    // Adicionar ao DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById(modalId));
+    modal.show();
+    
+    // Limpar quando fechar
+    document.getElementById(modalId).addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+    
+    console.log('✅ Modal exibida com sucesso!');
 }
+
+// Funções auxiliares para o modal
+window.copyModalCode = function(modalId) {
+    const codeEl = document.getElementById('code-' + modalId);
+    if (codeEl) {
+        navigator.clipboard.writeText(codeEl.textContent).then(() => {
+            alert('Código copiado para a área de transferência!');
+        }).catch(() => {
+            alert('Erro ao copiar código');
+        });
+    }
+};
+
+window.downloadModalCode = function(modalId) {
+    const codeEl = document.getElementById('code-' + modalId);
+    if (codeEl) {
+        const code = codeEl.textContent;
+        const symbol = AppState.tokenData?.symbol || 'Contract';
+        const blob = new Blob([code], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${symbol}.sol`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('Arquivo baixado: ' + `${symbol}.sol`);
+    }
+};
 
 /**
  * Copia o contrato do modal para o clipboard
@@ -739,10 +757,20 @@ function updateDownloadButtonText() {
  * Gera URL do explorer para transação
  */
 function getExplorerTxUrl(txHash, chainId) {
+    if (!txHash) return '#';
+    
+    // Normalizar chainId para decimal
+    if (typeof chainId === 'string' && chainId.startsWith('0x')) {
+        chainId = parseInt(chainId, 16);
+    } else if (typeof chainId === 'string') {
+        chainId = parseInt(chainId, 10);
+    }
+    
     const explorers = {
         1: `https://etherscan.io/tx/${txHash}`,
-        137: `https://polygonscan.com/tx/${txHash}`,
         56: `https://bscscan.com/tx/${txHash}`,
+        97: `https://testnet.bscscan.com/tx/${txHash}`,
+        137: `https://polygonscan.com/tx/${txHash}`,
         8453: `https://basescan.org/tx/${txHash}`,
         11155111: `https://sepolia.etherscan.io/tx/${txHash}`
     };
@@ -3101,34 +3129,63 @@ function downloadFile(filename, content, mimeType) {
 }
 
 function openVerificationUrl() {
+    console.log('🔍 Abrindo URL de verificação...');
+    
     if (!AppState.deployResult?.contractAddress) {
         alert('Endereço do contrato não disponível');
         return;
     }
     
-    const chainId = AppState.wallet.network?.chainId || 97;
+    // Obter chainId correto - converter para decimal se necessário
+    let chainId = AppState.wallet.network?.chainId;
+    
+    // Se chainId é string hexadecimal, converter para decimal
+    if (typeof chainId === 'string' && chainId.startsWith('0x')) {
+        chainId = parseInt(chainId, 16);
+    } else if (typeof chainId === 'string') {
+        chainId = parseInt(chainId, 10);
+    }
+    
+    // Fallback para BSC Testnet se não detectar
+    chainId = chainId || 97;
+    
+    console.log('🌐 Chain ID detectado:', chainId);
+    console.log('📋 Endereço do contrato:', AppState.deployResult.contractAddress);
+    
     let verificationUrl = '';
+    let networkName = '';
     
     switch (chainId) {
         case 1: // Ethereum Mainnet
             verificationUrl = `https://etherscan.io/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            networkName = 'Ethereum Mainnet';
             break;
         case 56: // BSC Mainnet
             verificationUrl = `https://bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            networkName = 'BSC Mainnet';
             break;
         case 97: // BSC Testnet
             verificationUrl = `https://testnet.bscscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            networkName = 'BSC Testnet';
             break;
-        case 137: // Polygon
+        case 137: // Polygon Mainnet
             verificationUrl = `https://polygonscan.com/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            networkName = 'Polygon Mainnet';
             break;
-        case 8453: // Base
+        case 8453: // Base Mainnet
             verificationUrl = `https://basescan.org/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            networkName = 'Base Mainnet';
+            break;
+        case 11155111: // Sepolia Testnet
+            verificationUrl = `https://sepolia.etherscan.io/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            networkName = 'Sepolia Testnet';
             break;
         default:
             verificationUrl = `https://etherscan.io/verifyContract?a=${AppState.deployResult.contractAddress}`;
+            networkName = 'Ethereum (padrão)';
     }
     
+    console.log(`✅ Abrindo verificação para ${networkName}:`, verificationUrl);
     window.open(verificationUrl, '_blank');
 }
 
@@ -3664,12 +3721,20 @@ function getExplorerTxUrl(txHash, chainId) {
 function getExplorerContractUrl(contractAddress, chainId) {
     if (!contractAddress) return '#';
     
+    // Normalizar chainId para decimal
+    if (typeof chainId === 'string' && chainId.startsWith('0x')) {
+        chainId = parseInt(chainId, 16);
+    } else if (typeof chainId === 'string') {
+        chainId = parseInt(chainId, 10);
+    }
+    
     switch (chainId) {
         case 1: return `https://etherscan.io/address/${contractAddress}`;
         case 56: return `https://bscscan.com/address/${contractAddress}`;
         case 97: return `https://testnet.bscscan.com/address/${contractAddress}`;
         case 137: return `https://polygonscan.com/address/${contractAddress}`;
         case 8453: return `https://basescan.org/address/${contractAddress}`;
+        case 11155111: return `https://sepolia.etherscan.io/address/${contractAddress}`;
         default: return `https://etherscan.io/address/${contractAddress}`;
     }
 }
@@ -3681,8 +3746,8 @@ window.scrollToSection = scrollToSection;
 window.copyContractAddress = copyContractAddress;
 window.downloadSolidityFile = downloadSolidityFile;
 window.showContractModal = showContractModal;
-window.copyContractFromModal = copyContractFromModal;
-window.downloadContractFromModal = downloadContractFromModal;
+window.copyModalCode = copyModalCode;
+window.downloadModalCode = downloadModalCode;
 window.previewContract = previewContract;
 window.copyContractCode = copyContractCode;
 window.closeModal = closeModal;
@@ -3690,127 +3755,83 @@ window.testApiStatus = testApiStatus;
 window.downloadContractFiles = downloadContractFiles;
 window.downloadABI = downloadABI;
 
-// Função de teste para simular deploy concluído
-window.testContractButtons = function() {
-    console.log('🧪 === TESTE COMPLETO DOS BOTÕES DE CONTRATO ===');
+// Configuração DIRETA dos botões ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM carregado, configurando botões...');
     
-    // 1. Configurar AppState para teste
-    console.log('1. Configurando dados de teste...');
-    AppState.tokenData = {
+    // Aguardar um pouco para garantir que tudo está carregado
+    setTimeout(() => {
+        const viewBtn = document.getElementById('view-contract-btn');
+        const verifyBtn = document.getElementById('verify-contract-btn');
+        
+        if (viewBtn) {
+            console.log('✅ Configurando botão Visualizar Contrato...');
+            viewBtn.onclick = function(e) {
+                e.preventDefault();
+                console.log('🖱️ BOTÃO VISUALIZAR CLICADO!');
+                
+                // Garantir dados mínimos
+                if (!AppState.tokenData) {
+                    AppState.tokenData = {
+                        name: 'Token Exemplo',
+                        symbol: 'TKN',
+                        totalSupply: '1000000',
+                        decimals: '18'
+                    };
+                }
+                
+                try {
+                    showContractModal();
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro ao abrir modal: ' + error.message);
+                }
+            };
+            console.log('✅ Botão Visualizar configurado!');
+        }
+        
+        if (verifyBtn) {
+            console.log('✅ Configurando botão Verificar Contrato...');
+            verifyBtn.onclick = function(e) {
+                e.preventDefault();
+                console.log('🖱️ BOTÃO VERIFICAR CLICADO!');
+                try {
+                    openVerificationUrl();
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro ao abrir verificação: ' + error.message);
+                }
+            };
+            console.log('✅ Botão Verificar configurado!');
+        }
+    }, 1000);
+});
+
+// Função de teste para simular deploy concluído
+// Função de teste simplificada para debug quando necessário
+window.testContractButtons = function() {
+    console.log('🔧 Testando botões de contrato...');
+    
+    // Garantir dados básicos
+    AppState.tokenData = AppState.tokenData || {
         name: 'Test Token',
         symbol: 'TST',
         totalSupply: '1000000',
         decimals: '18'
     };
     
-    AppState.deployResult = {
-        contractAddress: '0x1234567890123456789012345678901234567890',
-        sourceCode: `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
-
-contract TestToken {
-    string public name = "Test Token";
-    string public symbol = "TST";
-    uint8 public decimals = 18;
-    uint256 public totalSupply = 1000000 * 10**18;
-    
-    constructor() {
-        // Token de teste criado!
-    }
-}`
-    };
-    
-    AppState.wallet = {
-        network: { chainId: 97 }
-    };
-    
-    console.log('✅ AppState configurado');
-    
-    // 2. Mostrar seção de verificação
-    console.log('2. Exibindo seção de verificação...');
+    // Mostrar seção se necessário
     const section = document.getElementById('section-veri');
     if (section) {
         section.style.display = 'block';
-        section.style.opacity = '1';
         section.style.visibility = 'visible';
-        console.log('✅ Seção section-veri exibida');
-    } else {
-        console.warn('⚠️ Seção section-veri não encontrada');
+        section.style.opacity = '1';
     }
     
-    // 3. Verificar se os botões existem ANTES de configurar
-    console.log('3. Verificando botões no DOM...');
-    const viewBtn = document.getElementById('view-contract-btn');
-    const verifyBtn = document.getElementById('verify-contract-btn');
-    
-    console.log('   - view-contract-btn:', !!viewBtn);
-    console.log('   - verify-contract-btn:', !!verifyBtn);
-    
-    if (!viewBtn) {
-        console.error('❌ PROBLEMA: Botão view-contract-btn não encontrado!');
-        
-        // Debug: listar todos os botões na seção
-        const allButtons = section ? section.querySelectorAll('button') : document.querySelectorAll('button');
-        console.log('🔍 Botões encontrados na página:', allButtons.length);
-        allButtons.forEach((btn, i) => {
-            console.log(`   ${i+1}. ID: "${btn.id}", Classes: "${btn.className}", Texto: "${btn.textContent.trim()}"`);
-        });
-        
-        return;
-    }
-    
-    // 4. Testar função showContractModal diretamente
-    console.log('4. Testando função showContractModal...');
-    try {
-        if (typeof showContractModal === 'function') {
-            console.log('✅ Função showContractModal existe');
-            
-            // Teste direto da função
-            console.log('   Testando execução direta...');
-            showContractModal();
-            console.log('✅ Função executou sem erro');
-        } else {
-            console.error('❌ Função showContractModal não existe!');
-            return;
-        }
-    } catch (error) {
-        console.error('❌ Erro ao testar showContractModal:', error);
-        return;
-    }
-    
-    // 5. Configurar botões
-    console.log('5. Configurando botões...');
+    // Configurar botões
     configureContractButtons();
     
-    // 6. Verificar configuração
-    console.log('6. Verificando configuração dos botões...');
-    if (viewBtn) {
-        console.log('   view-contract-btn:');
-        console.log('     - onclick definido:', !!viewBtn.onclick);
-        console.log('     - disabled:', viewBtn.disabled);
-        console.log('     - opacity:', viewBtn.style.opacity);
-        console.log('     - display:', viewBtn.style.display);
-        console.log('     - pointerEvents:', viewBtn.style.pointerEvents);
-    }
-    
-    // 7. Teste automático do botão (se solicitado)
-    console.log('7. Preparado para teste manual!');
-    console.log('✅ Execute: document.getElementById("view-contract-btn").click()');
-    console.log('✅ Ou clique no botão verde "Visualizar Contrato" na interface');
-    
-    // 8. Auto-teste após delay (opcional)
-    setTimeout(() => {
-        if (viewBtn && confirm('Deseja testar o botão automaticamente?')) {
-            console.log('🤖 Testando clique automático...');
-            try {
-                viewBtn.click();
-            } catch (error) {
-                console.error('❌ Erro no teste automático:', error);
-            }
-        }
-    }, 2000);
-    
-    console.log('🧪 === TESTE CONFIGURADO COM SUCESSO ===');
+    console.log('✅ Teste concluído');
 };
 window.downloadBytecode = downloadBytecode;
 window.openVerificationUrl = openVerificationUrl;
