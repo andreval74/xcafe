@@ -751,7 +751,7 @@ function updateProgressIndicator(isComplete) {
 }
 
 /**
- * Manipula criação do token com validação e animações
+ * Manipula criação do token com sistema simples de feedback
  */
 async function handleTokenCreation() {
     console.log('🚀 Iniciando criação do token...');
@@ -773,35 +773,34 @@ async function handleTokenCreation() {
         return;
     }
     
-    // Iniciar processo com animações
     const createTokenBtn = document.getElementById('create-token-btn');
     
     try {
-        // Etapa 1: Gerando
-        updateButtonStatus(createTokenBtn, 'generating', 'bi-gear-fill', '... Gerando ...', 'btn-info');
+        // ETAPA 1: Gerando
+        setButtonWorking(createTokenBtn, '... Gerando ...', 'bi-gear-fill');
         await sleep(1500);
         
-        // Etapa 2: Compilando
-        updateButtonStatus(createTokenBtn, 'compiling', 'bi-code-slash', '... Compilando .....', 'btn-primary');
+        // ETAPA 2: Compilando
+        setButtonWorking(createTokenBtn, '... Compilando .....', 'bi-code-slash');
         await sleep(2000);
         
-        // Etapa 3: Deploy
-        updateButtonStatus(createTokenBtn, 'deploying', 'bi-upload', '... Deploy ......', 'btn-secondary');
+        // ETAPA 3: Deploy
+        setButtonWorking(createTokenBtn, '... Deploy ......', 'bi-upload');
         const result = await deployToken();
         
         if (result) {
-            // Etapa 4: Finalizando
-            updateButtonStatus(createTokenBtn, 'finalizing', 'bi-check2-circle', '.... Finalizando .....', 'btn-warning');
-            await sleep(1000);
-            
-            // Etapa 5: Configurando
-            updateButtonStatus(createTokenBtn, 'configuring', 'bi-sliders', '.... Configurando ....', 'btn-info');
+            // ETAPA 4: Finalizando
+            setButtonWorking(createTokenBtn, '.... Finalizando .....', 'bi-check2-circle');
             await sleep(1500);
             
-            // Etapa 6: Sucesso
-            updateButtonStatus(createTokenBtn, 'success', 'bi-check-circle-fill', '.... Contrato e Token Criados com Sucesso ......', 'btn-success');
+            // ETAPA 5: Configurando
+            setButtonWorking(createTokenBtn, '.... Configurando ....', 'bi-sliders');
+            await sleep(1500);
             
-            // Mostrar seções finais
+            // ETAPA 6: Sucesso Final - VERDE E DESABILITADO
+            setButtonFinalSuccess(createTokenBtn, 'CONTRATO GERADO COM SUCESSO');
+            
+            // Mostrar seções finais após 2 segundos
             setTimeout(() => {
                 showFinalSections();
             }, 2000);
@@ -813,27 +812,9 @@ async function handleTokenCreation() {
     } catch (error) {
         console.error('❌ Erro na criação do token:', error);
         
-        // Determinar tipo de erro e mensagem apropriada
-        let errorMessage = 'Erro desconhecido';
-        
-        if (error.message) {
-            if (error.message.includes('User denied')) {
-                errorMessage = 'Transação cancelada pelo usuário';
-            } else if (error.message.includes('insufficient funds')) {
-                errorMessage = 'Saldo insuficiente para gas';
-            } else if (error.message.includes('network')) {
-                errorMessage = 'Erro de conexão de rede';
-            } else if (error.message.includes('compilation')) {
-                errorMessage = 'Erro na compilação';
-            } else if (error.message.includes('timeout')) {
-                errorMessage = 'Timeout na operação';
-            } else {
-                errorMessage = error.message.substring(0, 50) + '...';
-            }
-        }
-        
-        // Mostrar erro no botão
-        updateButtonStatus(createTokenBtn, 'error', 'bi-exclamation-triangle-fill', `ERRO: ${errorMessage}`, 'btn-danger');
+        // Mostrar erro
+        const errorMsg = getSimpleErrorMessage(error);
+        setButtonError(createTokenBtn, `... ERRO: ${errorMsg} ...`);
         
         // Restaurar botão após 7 segundos
         setTimeout(() => {
@@ -843,58 +824,88 @@ async function handleTokenCreation() {
 }
 
 /**
- * Atualiza o status visual do botão com animações
+ * Define botão no estado de trabalho (cinza + spinner) com ícone personalizado
  */
-function updateButtonStatus(button, status, icon, text, colorClass) {
+function setButtonWorking(button, text, icon = 'bi-gear-fill') {
     if (!button) return;
     
-    // Remover classes de cor anteriores
-    button.className = button.className.replace(/btn-(warning|success|danger|info|primary|secondary)/g, '');
-    
-    // Adicionar nova classe de cor
-    button.classList.add(colorClass);
-    
-    // Adicionar classe de animação baseada no status
-    button.classList.remove('btn-pulse', 'btn-spin', 'btn-bounce');
-    
-    switch(status) {
-        case 'generating':
-        case 'compiling':
-        case 'deploying':
-            button.classList.add('btn-pulse');
-            break;
-        case 'finalizing':
-        case 'configuring':
-            button.classList.add('btn-spin');
-            break;
-        case 'success':
-            button.classList.add('btn-bounce');
-            break;
-        case 'error':
-            button.classList.add('btn-shake');
-            break;
-    }
-    
-    // Atualizar conteúdo
+    button.className = 'btn btn-lg shadow-lg btn-working';
+    button.style.width = '100%';
+    button.style.fontWeight = 'bold';
     button.innerHTML = `<i class="bi ${icon} me-2"></i>${text}`;
-    button.disabled = (status !== 'success' && status !== 'error');
+    button.disabled = true;
     
-    console.log(`🎨 Botão atualizado: ${status} - ${text}`);
+    console.log(`⚙️ Botão: ${text}`);
 }
 
 /**
- * Restaura o botão ao estado padrão
+ * Define botão no estado de sucesso FINAL (verde e permanentemente desabilitado)
+ */
+function setButtonFinalSuccess(button, text) {
+    if (!button) return;
+    
+    button.className = 'btn btn-lg shadow-lg btn-success-final';
+    button.style.width = '100%';
+    button.style.fontWeight = 'bold';
+    button.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>${text}`;
+    button.disabled = true; // DESABILITADO PERMANENTEMENTE
+    
+    console.log(`✅ Botão FINAL: ${text}`);
+}
+
+/**
+ * Define botão no estado de erro (vermelho)
+ */
+function setButtonError(button, text) {
+    if (!button) return;
+    
+    button.className = 'btn btn-lg shadow-lg btn-error-final';
+    button.style.width = '100%';
+    button.style.fontWeight = 'bold';
+    button.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>${text}`;
+    button.disabled = false; // Permite tentar novamente
+    
+    console.log(`❌ Botão: ${text}`);
+}
+
+/**
+ * Restaura o botão ao estado padrão (laranja #ED5A22)
  */
 function resetButtonToDefault(button) {
     if (!button) return;
     
-    button.className = 'btn btn-warning btn-lg shadow-lg';
+    button.className = 'btn btn-lg shadow-lg';
     button.style.width = '100%';
     button.style.fontWeight = 'bold';
     button.innerHTML = '<i class="bi bi-rocket-takeoff me-2"></i>Criar Token';
     button.disabled = false;
     
-    console.log('🔄 Botão restaurado ao estado padrão');
+    console.log('🔄 Botão restaurado');
+}
+
+/**
+ * Converte erros complexos em mensagens simples
+ */
+function getSimpleErrorMessage(error) {
+    if (!error.message) return 'Erro desconhecido';
+    
+    const msg = error.message.toLowerCase();
+    
+    if (msg.includes('user denied') || msg.includes('rejected')) {
+        return 'Transação cancelada';
+    }
+    if (msg.includes('insufficient funds')) {
+        return 'Saldo insuficiente';
+    }
+    if (msg.includes('network') || msg.includes('connection')) {
+        return 'Erro de rede';
+    }
+    if (msg.includes('timeout')) {
+        return 'Timeout';
+    }
+    
+    // Retornar primeiras 30 chars da mensagem original
+    return error.message.substring(0, 30) + '...';
 }
 
 /**
@@ -905,37 +916,41 @@ function sleep(ms) {
 }
 
 /**
- * Função de teste para as animações (apenas em desenvolvimento)
+ * Função de teste simples para TODAS as etapas
  */
-async function testButtonAnimations() {
-    const createTokenBtn = document.getElementById('create-token-btn');
-    if (!createTokenBtn) return;
+async function testButtonComplete() {
+    const btn = document.getElementById('create-token-btn');
+    if (!btn) return;
     
-    console.log('🧪 Testando animações do botão...');
+    console.log('🧪 Testando TODAS as etapas...');
     
-    // Simular todas as etapas
-    updateButtonStatus(createTokenBtn, 'generating', 'bi-gear-fill', '... Gerando ...', 'btn-info');
+    // ETAPA 1: Gerando
+    setButtonWorking(btn, '... Gerando ...', 'bi-gear-fill');
     await sleep(2000);
     
-    updateButtonStatus(createTokenBtn, 'compiling', 'bi-code-slash', '... Compilando .....', 'btn-primary');
+    // ETAPA 2: Compilando
+    setButtonWorking(btn, '... Compilando .....', 'bi-code-slash');
     await sleep(2000);
     
-    updateButtonStatus(createTokenBtn, 'deploying', 'bi-upload', '... Deploy ......', 'btn-secondary');
+    // ETAPA 3: Deploy
+    setButtonWorking(btn, '... Deploy ......', 'bi-upload');
     await sleep(2000);
     
-    updateButtonStatus(createTokenBtn, 'finalizing', 'bi-check2-circle', '.... Finalizando .....', 'btn-warning');
-    await sleep(2000);
+    // ETAPA 4: Finalizando
+    setButtonWorking(btn, '.... Finalizando .....', 'bi-check2-circle');
+    await sleep(1500);
     
-    updateButtonStatus(createTokenBtn, 'configuring', 'bi-sliders', '.... Configurando ....', 'btn-info');
-    await sleep(2000);
+    // ETAPA 5: Configurando
+    setButtonWorking(btn, '.... Configurando ....', 'bi-sliders');
+    await sleep(1500);
     
-    updateButtonStatus(createTokenBtn, 'success', 'bi-check-circle-fill', '.... Contrato e Token Criados com Sucesso ......', 'btn-success');
-    await sleep(3000);
+    // ETAPA 6: SUCESSO FINAL - VERDE E DESABILITADO
+    setButtonFinalSuccess(btn, 'CONTRATO GERADO COM SUCESSO');
     
-    resetButtonToDefault(createTokenBtn);
+    console.log('✅ Teste completo finalizado - Botão deve estar VERDE e DESABILITADO');
 }
 
-// Para testar as animações no console do navegador, digite: testButtonAnimations()
+// Para testar: testButtonComplete()
 
 /**
  * Configura listeners de eventos
@@ -2269,11 +2284,18 @@ function disableSection(sectionId) {
 }
 
 /**
- * Mostra as seções finais (3 e 4) sempre juntas
+ * Mostra as seções finais (3 e 4) sempre juntas e garante botão no estado final
  */
 function showFinalSections() {
     enableSection('section-result');
     enableSection('section-veri');
+    
+    // Garantir que o botão esteja no estado final correto
+    const createTokenBtn = document.getElementById('create-token-btn');
+    if (createTokenBtn) {
+        setButtonFinalSuccess(createTokenBtn, 'CONTRATO GERADO COM SUCESSO');
+    }
+    
     console.log('✅ Seções finais (3 e 4) habilitadas juntas');
     
     // Scroll suave para a seção de resultado
