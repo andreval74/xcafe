@@ -612,8 +612,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Trigger data update
         onTokenDataChange();
         
-        // Atualizar progresso visual
-        updateVisualProgress();
+        // Verificar progresso e mostrar seções conforme necessário
+        checkFormProgress();
     };
     
     window.onWalletDisconnected = function() {
@@ -624,8 +624,8 @@ document.addEventListener('DOMContentLoaded', function() {
         AppState.wallet.address = '';
         AppState.wallet.network = null;
         
-        // Atualizar progresso visual
-        updateVisualProgress();
+        // Verificar progresso (vai esconder seções subsequentes)
+        checkFormProgress();
     };
     
     initializeApp();
@@ -642,28 +642,112 @@ function initializeApp() {
         checkWalletConnection();
     }, 1000);
     
-    // RESTAURAR: Sistema de validação por seções (mas manter layout atual visível)
-    setupSectionValidation();
+    // RESTAURAR: Sistema progressivo de seções
+    initializeProgressiveFlow();
 }
 
 /**
- * Configura sistema de validação das seções (mantém layout visível)
+ * Inicializa o fluxo progressivo das seções
  */
-function setupSectionValidation() {
-    // Manter todas as seções visíveis para trabalhar no layout
-    const allSections = document.querySelectorAll('.creation-section');
-    allSections.forEach((section) => {
-        section.classList.add('active', 'section-enabled');
-        section.style.display = 'block';
+function initializeProgressiveFlow() {
+    // Mostrar apenas a primeira seção inicialmente
+    showOnlyFirstSection();
+    
+    // Configurar validação dos campos
+    setupFieldValidation();
+    
+    console.log('📋 Sistema progressivo ativo - seções aparecem conforme preenchimento');
+}
+
+/**
+ * Configura validação em tempo real dos campos
+ */
+function setupFieldValidation() {
+    // Campos obrigatórios para avançar para próxima seção
+    const requiredFields = ['tokenName', 'tokenSymbol', 'totalSupply', 'ownerAddress'];
+    
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('input', checkFormProgress);
+            field.addEventListener('blur', checkFormProgress);
+        }
     });
     
-    // Garantir que o botão está visível (event listener já configurado em setupEventListeners)
-    const createTokenBtn = document.getElementById('create-token-btn');
-    if (createTokenBtn) {
-        createTokenBtn.style.display = 'block';
-    }
+    // Verificar progresso inicial
+    setTimeout(checkFormProgress, 500);
+}
+
+/**
+ * Verifica progresso do formulário e mostra seções conforme necessário
+ */
+function checkFormProgress() {
+    const isWalletConnected = AppState.wallet.connected;
+    const isFormComplete = validateBasicTokenData();
     
-    console.log('🎨 Layout visível + Validação ativa');
+    // Seção 1: Sempre visível
+    enableSection('section-wallet');
+    
+    // Seção 2: Mostrar se wallet conectada
+    if (isWalletConnected) {
+        enableSection('section-basic-info');
+        
+        // Seção 3: Mostrar se formulário completo
+        if (isFormComplete) {
+            // Mostrar botão criar token
+            const createTokenBtn = document.getElementById('create-token-btn');
+            if (createTokenBtn) {
+                createTokenBtn.style.display = 'block';
+            }
+            
+            updateProgressIndicator(true);
+        } else {
+            // Esconder botão criar token se formulário incompleto
+            const createTokenBtn = document.getElementById('create-token-btn');
+            if (createTokenBtn) {
+                createTokenBtn.style.display = 'none';
+            }
+            
+            updateProgressIndicator(false);
+            
+            // Esconder seção de resultado se formulário incompleto
+            disableSection('section-result');
+            disableSection('section-veri');
+        }
+    } else {
+        // Se wallet não conectada, esconder seções subsequentes
+        disableSection('section-basic-info');
+        disableSection('section-result');
+        disableSection('section-veri');
+    }
+}
+
+/**
+ * Valida dados básicos do token
+ */
+function validateBasicTokenData() {
+    const tokenName = document.getElementById('tokenName')?.value.trim();
+    const tokenSymbol = document.getElementById('tokenSymbol')?.value.trim();
+    const totalSupply = document.getElementById('totalSupply')?.value.trim();
+    const ownerAddress = document.getElementById('ownerAddress')?.value.trim();
+    
+    return tokenName && tokenSymbol && totalSupply && ownerAddress;
+}
+
+/**
+ * Atualiza indicador de progresso
+ */
+function updateProgressIndicator(isComplete) {
+    const progressIndicator = document.getElementById('progress-indicator');
+    const missingFields = document.getElementById('missing-fields');
+    
+    if (isComplete) {
+        if (progressIndicator) progressIndicator.style.display = 'block';
+        if (missingFields) missingFields.style.display = 'none';
+    } else {
+        if (progressIndicator) progressIndicator.style.display = 'none';
+        if (missingFields) missingFields.style.display = 'block';
+    }
 }
 
 /**
@@ -691,7 +775,22 @@ async function handleTokenCreation() {
     
     // Prosseguir com criação do token
     try {
-        await deployToken();
+        const result = await deployToken();
+        
+        // Se deploy foi bem-sucedido, mostrar seções de resultado
+        if (result) {
+            enableSection('section-result');
+            enableSection('section-veri');
+            
+            // Scroll para a seção de resultado
+            setTimeout(() => {
+                const resultSection = document.getElementById('section-result');
+                if (resultSection) {
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 500);
+        }
+        
     } catch (error) {
         console.error('❌ Erro na criação do token:', error);
         alert('Erro ao criar token. Verifique o console para detalhes.');
@@ -1954,13 +2053,18 @@ function enableSection(sectionId) {
     if (section) {
         section.classList.add('section-enabled', 'active');
         section.style.display = 'block';
-        
-        // Remover active das outras seções mas manter visíveis
-        document.querySelectorAll('.creation-section').forEach(s => {
-            if (s.id !== sectionId) {
-                s.classList.remove('active');
-            }
-        });
+        section.style.opacity = '1';
+        section.style.pointerEvents = 'all';
+    }
+}
+
+function disableSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.classList.remove('section-enabled', 'active');
+        section.style.display = 'none';
+        section.style.opacity = '0.6';
+        section.style.pointerEvents = 'none';
     }
 }
 
@@ -1969,14 +2073,18 @@ function showOnlyFirstSection() {
     allSections.forEach((section, index) => {
         if (index === 0) {
             // Primeira seção: mostrar e ativar
-            section.classList.add('active', 'section-enabled');
-            section.style.display = 'block';
+            enableSection(section.id);
         } else {
-            // Outras seções: esconder mas manter no DOM
-            section.classList.remove('active', 'section-enabled');
-            section.style.display = 'none';
+            // Outras seções: esconder
+            disableSection(section.id);
         }
     });
+    
+    // Esconder botão criar token inicialmente
+    const createTokenBtn = document.getElementById('create-token-btn');
+    if (createTokenBtn) {
+        createTokenBtn.style.display = 'none';
+    }
 }
 
 function resetApp() {
