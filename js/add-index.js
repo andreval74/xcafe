@@ -777,18 +777,10 @@ async function handleTokenCreation() {
     try {
         const result = await deployToken();
         
-        // Se deploy foi bem-sucedido, mostrar seções de resultado
+        // Se deploy foi bem-sucedido, mostrar seções finais (3 e 4 juntas)
         if (result) {
-            enableSection('section-result');
-            enableSection('section-veri');
-            
-            // Scroll para a seção de resultado
-            setTimeout(() => {
-                const resultSection = document.getElementById('section-result');
-                if (resultSection) {
-                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 500);
+            showFinalSections();
+            console.log('✅ Seções finais (3 e 4) exibidas após deploy bem-sucedido');
         }
         
     } catch (error) {
@@ -883,6 +875,68 @@ function setupResultButtons() {
             if (contractAddress && AppState.deployResult) {
                 const explorerUrl = AppState.deployResult.explorerUrl || 
                     `https://testnet.bscscan.com/address/${contractAddress}`;
+                window.open(explorerUrl, '_blank');
+            }
+        });
+    }
+    
+    // Ver contrato no explorer (novo botão)
+    const viewContractBtn = document.getElementById('view-contract-btn');
+    if (viewContractBtn) {
+        viewContractBtn.addEventListener('click', () => {
+            const contractAddress = document.getElementById('contract-address-display').value;
+            if (contractAddress) {
+                // Determinar a rede baseada no estado ou usar BSC Testnet como padrão
+                const networkId = AppState.wallet.network?.chainId || '97';
+                let explorerUrl;
+                
+                switch(networkId) {
+                    case '1':
+                    case 1:
+                        explorerUrl = `https://etherscan.io/address/${contractAddress}`;
+                        break;
+                    case '56':
+                    case 56:
+                        explorerUrl = `https://bscscan.com/address/${contractAddress}`;
+                        break;
+                    case '97':
+                    case 97:
+                    default:
+                        explorerUrl = `https://testnet.bscscan.com/address/${contractAddress}`;
+                        break;
+                }
+                
+                window.open(explorerUrl, '_blank');
+            }
+        });
+    }
+    
+    // Ver hash da transação no explorer (novo botão)
+    const viewHashBtn = document.getElementById('view-hash-btn');
+    if (viewHashBtn) {
+        viewHashBtn.addEventListener('click', () => {
+            const txHash = document.getElementById('transaction-hash-display').value;
+            if (txHash) {
+                // Determinar a rede baseada no estado ou usar BSC Testnet como padrão
+                const networkId = AppState.wallet.network?.chainId || '97';
+                let explorerUrl;
+                
+                switch(networkId) {
+                    case '1':
+                    case 1:
+                        explorerUrl = `https://etherscan.io/tx/${txHash}`;
+                        break;
+                    case '56':
+                    case 56:
+                        explorerUrl = `https://bscscan.com/tx/${txHash}`;
+                        break;
+                    case '97':
+                    case 97:
+                    default:
+                        explorerUrl = `https://testnet.bscscan.com/tx/${txHash}`;
+                        break;
+                }
+                
                 window.open(explorerUrl, '_blank');
             }
         });
@@ -1403,11 +1457,10 @@ async function deployToken() {
         // Deploy usando template personalizado base.sol
         await deployWithCustomContract();
         
-        // Mostrar resultado
+        // Mostrar resultado (seções 3 e 4 juntas)
         setTimeout(() => {
-            scrollToSection('section-result');
             showDeployResult(true);
-            enableSection('section-result');
+            showFinalSections();
         }, 1000);
         
     } catch (error) {
@@ -1434,9 +1487,8 @@ async function deployToken() {
             updateDeployStatus('✅ Simulação concluída!');
             
             setTimeout(() => {
-                scrollToSection('section-result');
                 showDeployResult(true);
-                enableSection('section-result');
+                showFinalSections();
             }, 1000);
             
         } catch (simulationError) {
@@ -2066,6 +2118,23 @@ function disableSection(sectionId) {
         section.style.opacity = '0.6';
         section.style.pointerEvents = 'none';
     }
+}
+
+/**
+ * Mostra as seções finais (3 e 4) sempre juntas
+ */
+function showFinalSections() {
+    enableSection('section-result');
+    enableSection('section-veri');
+    console.log('✅ Seções finais (3 e 4) habilitadas juntas');
+    
+    // Scroll suave para a seção de resultado
+    setTimeout(() => {
+        const resultSection = document.getElementById('section-result');
+        if (resultSection) {
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 300);
 }
 
 function showOnlyFirstSection() {
