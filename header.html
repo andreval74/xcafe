@@ -44,22 +44,8 @@
             </ul>
 
             <!-- Wallet Connection Container - Controlado pelo JS -->
-            <div id="wallet-container" class="d-flex align-items-center">
-                <!-- Botão e elementos serão criados pelo JavaScript -->
-            </div>
+            <div id="wallet-container" class="d-flex align-items-center"></div>
         </div>
     </div>
 </nav>
 
-<script>
-// Active page highlighting
-document.addEventListener('DOMContentLoaded', function() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    const navLinks = document.querySelectorAll('.nav-link[href]');
-    navLinks.forEach(link => {
-        if (link.getAttribute('href') === currentPage) {
-            link.classList.add('active');
-        }
-    });
-});
-</script>
