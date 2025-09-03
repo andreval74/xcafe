@@ -52,6 +52,9 @@ class Wallet {
         // Configurar event listeners
         this.setupEventListeners();
         
+        // Configurar botão do header (compatibilidade com wallet-universal)
+        this.setupHeaderButton();
+        
         // Verificar conexão existente
         this.checkExistingConnection();
         
@@ -94,6 +97,57 @@ class Wallet {
                 }, 500);
             });
         }
+    }
+    
+    /**
+     * Configura botão do header (compatibilidade com wallet-universal)
+     */
+    static setupHeaderButton() {
+        const container = document.getElementById('wallet-container');
+        
+        if (!container) {
+            // Tentar novamente após um delay
+            setTimeout(() => this.setupHeaderButton(), 1000);
+            return;
+        }
+
+        // Se já configurado, não fazer nada
+        if (container.hasAttribute('data-wallet-configured')) {
+            return;
+        }
+
+        console.log('✅ Container wallet-container encontrado, criando botão do header...');
+        
+        // Criar interface do botão no header
+        container.innerHTML = `
+            <button id="wallet-btn-header" class="btn btn-outline-primary me-2">
+                <i class="bi bi-wallet2 me-1"></i>
+                <span id="wallet-text-header">Conectar Wallet</span>
+            </button>
+        `;
+
+        const headerBtn = container.querySelector('#wallet-btn-header');
+        const headerText = container.querySelector('#wallet-text-header');
+        const headerIcon = container.querySelector('i.bi-wallet2');
+
+        if (headerBtn) {
+            headerBtn.addEventListener('click', async () => {
+                if (walletConnected) {
+                    this.disconnect();
+                } else {
+                    await this.connect();
+                }
+            });
+
+            // Armazenar referências para atualização de UI
+            this.headerButton = headerBtn;
+            this.headerText = headerText;
+            this.headerIcon = headerIcon;
+        }
+
+        // Marcar como configurado
+        container.setAttribute('data-wallet-configured', 'true');
+        console.log('✅ Botão do header configurado');
     }
     
     /**
@@ -230,6 +284,9 @@ class Wallet {
                 // Re-configura event listeners
                 this.setupEventListeners();
                 
+                // Re-configura botão do header
+                this.setupHeaderButton();
+                
                 // Se já estava conectado, atualiza UI
                 if (walletConnected && walletAddress) {
                     console.log('🔄 Atualizando UI para conexão existente...');
@@ -240,6 +297,18 @@ class Wallet {
                     console.log('⚠️ Nenhuma conexão existente detectada');
                 }
                 
+                return true;
+            }
+            
+            // Verificar se ao menos o container do header existe
+            const walletContainer = document.getElementById('wallet-container');
+            if (walletContainer) {
+                console.log('✅ Container wallet-container encontrado!');
+                this.setupHeaderButton();
+                
+                if (walletConnected && walletAddress) {
+                    this.updateWalletUI();
+                }
                 return true;
             }
             
@@ -430,6 +499,9 @@ class Wallet {
             // Habilitar seções dependentes
             this.enableDependentSections();
             
+            // Atualizar botão do header (compatibilidade com wallet-universal)
+            this.updateHeaderButton(true);
+            
         } else {
             console.log('⚠️ Atualizando para estado desconectado');
             
@@ -454,6 +526,33 @@ class Wallet {
             
             // Desabilitar seções dependentes
             this.disableDependentSections();
+            
+            // Atualizar botão do header (compatibilidade com wallet-universal)
+            this.updateHeaderButton(false);
+        }
+    }
+    
+    /**
+     * Atualiza botão do header (compatibilidade com wallet-universal)
+     */
+    static updateHeaderButton(connected) {
+        if (!this.headerButton || !this.headerText || !this.headerIcon) {
+            return;
+        }
+
+        if (connected && walletAddress) {
+            // Conectado - mostrar endereço resumido
+            const shortAddress = `${walletAddress.substring(0, 6)}...${walletAddress.substring(38)}`;
+            this.headerText.textContent = shortAddress;
+            this.headerButton.className = 'btn btn-success me-2';
+            this.headerButton.title = `Conectado à ${networkData?.name || 'rede desconhecida'}\nClique para desconectar`;
+            this.headerIcon.className = 'bi bi-check-circle me-1';
+        } else {
+            // Desconectado
+            this.headerText.textContent = 'Conectar Wallet';
+            this.headerButton.className = 'btn btn-outline-primary me-2';
+            this.headerButton.title = 'Conectar com MetaMask';
+            this.headerIcon.className = 'bi bi-wallet2 me-1';
         }
     }
     
