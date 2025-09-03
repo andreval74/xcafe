@@ -103,7 +103,7 @@ body {
   color: var(--bs-body-color) !important;
   font-family: var(--bs-body-font-family) !important;
   line-height: var(--bs-body-line-height) !important;
-  padding-top: 76px; /* EspaÃ§o para navbar Bootstrap */
+  padding-top: 56px; /* Espaço para navbar Bootstrap fixed-top */
   min-height: 100vh;
   overflow-x: hidden;
 }

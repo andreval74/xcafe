@@ -25,7 +25,7 @@
     
     <!-- Meta tags SEO -->
     <meta name="description" content="Xcafe - O ecossistema mais completo para criação, gestão e negociação de tokens blockchain. Crie tokens ERC-20 sem conhecimento técnico em múltiplas blockchains.">
-    <meta name="keywords" content="xcafe, criar token, blockchain, ethereum, polygon, NFT, Web3, tokenização, contratos inteligentes, DeFi, DAO">
+    <meta name="keywords" content="Xcafe, criar token, blockchain, ethereum, polygon, NFT, Web3, tokenização, contratos inteligentes, DeFi, DAO">
     <meta name="author" content="Xcafe Team">
     
     <!-- Open Graph -->
@@ -33,7 +33,7 @@
     <meta property="og:description" content="O ecossistema mais completo para democratizar a criação de ativos digitais">
     <meta property="og:image" content="imgs/xcafe-512x512.png">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://xcafe.io">
+    <meta property="og:url" content="https://xcafe.app">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -436,30 +436,11 @@
     <!-- Template Loader -->
     <script src="js/template-loader.js"></script>
     
+    <!-- Wallet Universal System - Funciona com template-loader -->
+    <script src="js/shared/wallet-universal.js"></script>
+    
     <!-- Stats Animation -->
-    <script>
-        // Animação das estatísticas
-        const animateStats = () => {
-            const stats = document.querySelectorAll('.stat-item h3');
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.transform = 'scale(1.1)';
-                        entry.target.style.transition = 'transform 0.3s ease';
-                        setTimeout(() => {
-                            entry.target.style.transform = 'scale(1)';
-                        }, 300);
-                    }
-                });
-            });
-            
-            stats.forEach(stat => observer.observe(stat));
-        };
-
-        // Inicializar animações quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', animateStats);
-    </script>
+    <script src="js/shared/animacoes.js"></script>
 </body>
 
 </html>

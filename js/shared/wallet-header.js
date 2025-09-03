@@ -40,14 +40,17 @@ class WalletHeader {
      * Configura elementos DOM
      */
     setupElements() {
-        this.connectButton = document.getElementById('connectWallet');
-        this.walletText = document.getElementById('walletText');
+        // Procurar por container da wallet
+        const walletContainer = document.getElementById('wallet-container');
         
-        if (!this.connectButton || !this.walletText) {
-            console.log('⚠️ Elementos da wallet não encontrados ainda...');
+        if (!walletContainer) {
+            console.log('⚠️ Container da wallet não encontrado ainda...');
             setTimeout(() => this.setupElements(), 1000);
             return;
         }
+        
+        // Criar botão da wallet dinamicamente
+        this.createWalletButton(walletContainer);
         
         console.log('✅ Elementos encontrados, configurando eventos...');
         
@@ -59,6 +62,66 @@ class WalletHeader {
         
         // Setup event listeners do MetaMask
         this.setupMetaMaskEvents();
+    }
+
+    /**
+     * Cria o botão da wallet dinamicamente
+     */
+    createWalletButton(container) {
+        // Limpar container
+        container.innerHTML = '';
+        
+        // Criar botão
+        this.connectButton = document.createElement('button');
+        this.connectButton.className = 'btn btn-outline-primary me-2';
+        this.connectButton.id = 'connectWallet';
+        
+        // Criar ícone
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-wallet2 me-1';
+        
+        // Criar texto
+        this.walletText = document.createElement('span');
+        this.walletText.textContent = 'Conectar Wallet';
+        this.walletText.id = 'walletText';
+        
+        // Montar botão
+        this.connectButton.appendChild(icon);
+        this.connectButton.appendChild(this.walletText);
+        
+        // Adicionar ao container
+        container.appendChild(this.connectButton);
+        
+        // Adicionar dropdown de tradução se necessário
+        this.addTranslateDropdown(container);
+        
+        console.log('✅ Botão da wallet criado dinamicamente');
+    }
+
+    /**
+     * Adiciona dropdown de tradução
+     */
+    addTranslateDropdown(container) {
+        const dropdownDiv = document.createElement('div');
+        dropdownDiv.className = 'dropdown';
+        
+        const dropdownButton = document.createElement('button');
+        dropdownButton.className = 'btn btn-outline-secondary dropdown-toggle';
+        dropdownButton.type = 'button';
+        dropdownButton.setAttribute('data-bs-toggle', 'dropdown');
+        dropdownButton.setAttribute('aria-expanded', 'false');
+        
+        const globeIcon = document.createElement('i');
+        globeIcon.className = 'bi bi-globe';
+        dropdownButton.appendChild(globeIcon);
+        
+        const dropdownMenu = document.createElement('div');
+        dropdownMenu.className = 'dropdown-menu dropdown-menu-end';
+        dropdownMenu.setAttribute('data-component', 'translate-component');
+        
+        dropdownDiv.appendChild(dropdownButton);
+        dropdownDiv.appendChild(dropdownMenu);
+        container.appendChild(dropdownDiv);
     }
 
     /**
