@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - XCAFE Widget System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .card {
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(248, 93, 35, 0.2);
+        }
+        
+        .form-control, .form-select {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            color: #ffffff !important;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            border-color: #f85d23 !important;
+            box-shadow: 0 0 0 0.2rem rgba(248, 93, 35, 0.25) !important;
+            color: #ffffff !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f85d23, #f59e0b);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #e04e1a, #d97706);
+            transform: translateY(-1px);
+        }
+        
+        .navbar-brand .text-primary {
+            color: #f85d23 !important;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, rgba(248, 93, 35, 0.1), rgba(245, 158, 11, 0.1));
+            border: 2px solid rgba(248, 93, 35, 0.3);
+        }
+        
+        .credit-package {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .credit-package:hover {
+            transform: translateY(-5px);
+            border-color: #f85d23 !important;
+        }
+        
+        .credit-package.selected {
+            border-color: #f85d23 !important;
+            background-color: rgba(248, 93, 35, 0.1) !important;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success {
+            background-color: #10b981;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+        }
+        
+        .status-pending {
+            background-color: #f59e0b;
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+        }
+        
+        .status-error {
+            background-color: #ef4444;
+            box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+        }
+        
+        .api-key-display {
+            font-family: 'Courier New', monospace;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .loading-shimmer {
+            background: linear-gradient(90deg, 
+                rgba(248, 93, 35, 0.1) 0%, 
+                rgba(248, 93, 35, 0.3) 50%, 
+                rgba(248, 93, 35, 0.1) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-coffee me-2"></i>
+                <span class="text-primary">XCAFE</span> Widget System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="logout()">Sair</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-4">
+        <!-- User Info & Balance -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card balance-card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-wallet me-2"></i>Saldo de Créditos
+                                </h5>
+                                <h2 class="text-primary mb-0" id="user-balance">0</h2>
+                                <small class="text-muted">créditos disponíveis</small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <p class="mb-1"><strong>Usuário:</strong> <span id="user-address">Conectando...</span></p>
+                                <p class="mb-0"><small class="text-muted">Última atualização: <span id="last-update">-</span></small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="card-title">Status da Conexão</h6>
+                        <div id="connection-status">
+                            <span class="status-indicator status-pending"></span>
+                            <span>Verificando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credit Purchase Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>Comprar Créditos
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="credit-packages">
+                            <!-- Packages will be loaded here -->
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Resumo da Compra</h6>
+                                        <div id="purchase-summary">
+                                            <p class="mb-1">Créditos: <span id="selected-credits">0</span></p>
+                                            <p class="mb-1">Preço: <span id="selected-price">0</span> USDT</p>
+                                            <p class="mb-0"><small class="text-muted">Taxa de rede: Variável</small></p>
+                                        </div>
+                                        <button class="btn btn-primary w-100 mt-3" id="buy-credits-btn" disabled>
+                                            <i class="fas fa-credit-card me-2"></i>Comprar com MetaMask
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Informações Importantes</h6>
+                                        <ul class="list-unstyled small">
+                                            <li><i class="fas fa-info-circle text-primary me-2"></i>Pagamento em USDT via MetaMask</li>
+                                            <li><i class="fas fa-shield-alt text-success me-2"></i>Transação segura na blockchain</li>
+                                            <li><i class="fas fa-clock text-warning me-2"></i>Créditos liberados após confirmação</li>
+                                            <li><i class="fas fa-tag text-info me-2"></i>Verificação por tag de operação</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Keys Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-key me-2"></i>Chaves de API
+                        </h5>
+                        <button class="btn btn-sm btn-primary" onclick="generateApiKey()">
+                            <i class="fas fa-plus me-1"></i>Nova Chave
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="api-keys-list">
+                            <!-- API keys will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credits Management Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-coins me-2"></i>Sistema de Créditos USDT
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="creditsManager.loadUserBalance()">
+                                <i class="fas fa-sync-alt"></i> Atualizar
+                            </button>
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#verifyTransactionModal">
+                                <i class="fas fa-search"></i> Verificar Transação
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Credit Packages -->
+                        <div class="row mb-4" id="credit-packages">
+                            <!-- Packages will be loaded here by credits.js -->
+                        </div>
+                        
+                        <!-- Transaction History -->
+                        <div class="mt-4">
+                            <h6 class="mb-3">
+                                <i class="fas fa-history me-2"></i>Histórico de Transações
+                            </h6>
+                            <div id="transaction-history">
+                                <!-- Transaction history will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>Histórico de Transações
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Tipo</th>
+                                        <th>Créditos</th>
+                                        <th>Valor (USDT)</th>
+                                        <th>Status</th>
+                                        <th>Hash</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-history">
+                                    <!-- Transactions will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Transaction Modal -->
+    <div class="modal fade" id="verifyTransactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Verificar Transação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Hash da Transação:</label>
+                        <input type="text" class="form-control" id="verify-tx-hash" placeholder="0x...">
+                        <div class="form-text">Cole o hash da transação USDT para verificar o status.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="creditsManager.verifyTransaction()">
+                        Verificar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/credits.js"></script>
+</body>
+</html>

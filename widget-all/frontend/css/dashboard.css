@@ -1,0 +1,597 @@
+/* Dashboard Styles for Widget SaaS Platform */
+
+/* Content Sections */
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stats Cards */
+.stats-card {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stats-content h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #374151;
+}
+
+.stats-content p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Credit Packages */
+.credit-packages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.package-item {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    background: #f9fafb;
+}
+
+.package-item:hover {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(37,99,235,0.15);
+}
+
+.package-item.package-popular {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+}
+
+.package-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.package-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.package-header h6 {
+    margin: 0;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.package-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #007bff;
+}
+
+.package-credits {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.package-discount {
+    color: #28a745;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* API Keys Table */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    background-color: #f8f9fa;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.api-key-display {
+    font-family: 'Courier New', monospace;
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.key-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.btn-action {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-suspended {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Charts */
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+}
+
+.card-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Integration Tabs */
+.integration-tabs .nav-tabs {
+    border-bottom: 2px solid #e9ecef;
+}
+
+.integration-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+}
+
+.integration-tabs .nav-link.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    background: none;
+}
+
+.integration-tabs pre {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+.integration-tabs code {
+    color: #2c3e50;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+/* Key Usage List */
+#keyUsageList {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.key-usage-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+.key-usage-item:hover {
+    background-color: #f8f9fa;
+}
+
+.key-usage-item:last-child {
+    border-bottom: none;
+}
+
+.key-usage-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.key-usage-count {
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* Purchase Summary */
+.purchase-summary {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.purchase-summary .row {
+    margin-bottom: 0.5rem;
+}
+
+.purchase-summary .row:last-child {
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Transaction History */
+#transactionHistory .table-sm td {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.transaction-type {
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.transaction-purchase {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.transaction-usage {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.transaction-refund {
+    background-color: #cce7ff;
+    color: #004085;
+}
+
+/* Loading States */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h5 {
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.empty-state p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .stats-content h3 {
+        font-size: 1.5rem;
+    }
+    
+    .credit-packages {
+        grid-template-columns: 1fr;
+    }
+    
+    .package-item {
+        padding: 1rem;
+    }
+    
+    .key-actions {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .api-key-display {
+        font-size: 0.7rem;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .stats-content h3 {
+        font-size: 1.25rem;
+    }
+    
+    .package-credits {
+        font-size: 1.25rem;
+    }
+    
+    .integration-tabs pre {
+        font-size: 0.75rem;
+        padding: 0.75rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .stats-card {
+        background: #2c3e50;
+        border-color: #34495e;
+    }
+    
+    .stats-content h3 {
+        color: #ecf0f1;
+    }
+    
+    .stats-content p {
+        color: #bdc3c7;
+    }
+    
+    .package-item {
+        background: #2c3e50;
+        border-color: #34495e;
+    }
+    
+    .package-header h6 {
+        color: #ecf0f1;
+    }
+    
+    .package-credits {
+        color: #ecf0f1;
+    }
+    
+    .card {
+        background: #2c3e50;
+    }
+    
+    .card-header {
+        background: #34495e;
+        border-color: #4a5f7a;
+    }
+    
+    .card-header h5 {
+        color: #ecf0f1;
+    }
+    
+    .table {
+        color: #ecf0f1;
+    }
+    
+    .table th {
+        background-color: #34495e;
+        color: #ecf0f1;
+    }
+    
+    .api-key-display {
+        background: #34495e;
+        color: #ecf0f1;
+    }
+    
+    .integration-tabs pre {
+        background: #34495e;
+        border-color: #4a5f7a;
+    }
+    
+    .integration-tabs code {
+        color: #ecf0f1;
+    }
+    
+    .purchase-summary {
+        background: #34495e;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .btn,
+    .modal,
+    .toast-container {
+        display: none !important;
+    }
+    
+    .content-section {
+        display: block !important;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+    
+    .stats-card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+        break-inside: avoid;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .api-key-display {
+        background: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+/* Accessibility */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.nav-link:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .stats-card {
+        border-width: 2px;
+    }
+    
+    .package-item {
+        border-width: 3px;
+    }
+    
+    .status-badge {
+        border: 1px solid currentColor;
+    }
+    
+    .btn {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .stats-card,
+    .package-item,
+    .content-section {
+        transition: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}
