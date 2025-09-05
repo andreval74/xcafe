@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Widget SaaS</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .main-content {
+            min-height: 100vh;
+            background: #ffffff;
+        }
+        
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            background: #e9ecef !important;
+            color: #495057 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-0">
+                <div class="p-3">
+                    <h5 class="text-primary">
+                        <i class="fas fa-cube me-2"></i>
+                        Widget SaaS
+                    </h5>
+                </div>
+                
+                <nav class="nav flex-column px-3">
+                    <a class="nav-link active" href="#dashboard" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Dashboard
+                    </a>
+                    <a class="nav-link" href="#api-keys" data-section="api-keys">
+                        <i class="fas fa-key me-2"></i>
+                        API Keys
+                    </a>
+                    <a class="nav-link" href="#recharge" data-section="recharge">
+                        <i class="fas fa-coins me-2"></i>
+                        Recarga
+                    </a>
+                    <a class="nav-link" href="#widget-demo" data-section="widget-demo">
+                        <i class="fas fa-play me-2"></i>
+                        Demo Widget
+                    </a>
+                </nav>
+                
+                <div class="mt-auto p-3">
+                    <div class="text-center">
+                        <div class="mb-2">
+                            <i class="fas fa-wallet text-primary"></i>
+                            <span id="sidebar-balance">0</span> créditos
+                        </div>
+                        <small class="text-muted" id="sidebar-wallet">Carregando...</small>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm w-100 mt-2" id="disconnect-btn">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        Desconectar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Dashboard Section -->
+                <div id="section-dashboard" class="section-content p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Dashboard</h2>
+                        <div class="badge bg-success">
+                            <i class="fas fa-circle me-1"></i>
+                            Conectado
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Créditos</h6>
+                                            <h3 id="dashboard-credits">0</h3>
+                                        </div>
+                                        <i class="fas fa-coins fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>API Keys</h6>
+                                            <h3 id="dashboard-keys">0</h3>
+                                        </div>
+                                        <i class="fas fa-key fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Uso Hoje</h6>
+                                            <h3 id="dashboard-usage">0</h3>
+                                        </div>
+                                        <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-warning text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Total Gasto</h6>
+                                            <h3 id="dashboard-spent">$0</h3>
+                                        </div>
+                                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="row g-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Ações Rápidas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <button class="btn btn-primary w-100" onclick="showSection('recharge')">
+                                                <i class="fas fa-plus me-2"></i>
+                                                Comprar Créditos
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-success w-100" onclick="showSection('api-keys')">
+                                                <i class="fas fa-key me-2"></i>
+                                                Nova API Key
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-info w-100" onclick="showSection('widget-demo')">
+                                                <i class="fas fa-play me-2"></i>
+                                                Testar Widget
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Status da Conta</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <strong>Carteira:</strong>
+                                        <br>
+                                        <small class="font-monospace" id="dashboard-wallet">Carregando...</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Membro desde:</strong>
+                                        <br>
+                                        <small id="dashboard-member">Carregando...</small>
+                                    </div>
+                                    <div class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>
+                                        Verificado
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- API Keys Section -->
+                <div id="section-api-keys" class="section-content p-4 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>API Keys</h2>
+                        <button class="btn btn-primary" onclick="createApiKey()">
+                            <i class="fas fa-plus me-2"></i>
+                            Nova API Key
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="api-keys-list">
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                                    <p>Carregando API keys...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recharge Section -->
+                <div id="section-recharge" class="section-content p-4 d-none">
+                    <h2 class="mb-4">Recarregar Créditos</h2>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>Basic</h5>
+                                    <div class="h2 text-primary">$10</div>
+                                    <p class="text-muted">100 créditos</p>
+                                    <button class="btn btn-outline-primary" onclick="purchasePackage(1)">
+                                        Comprar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white text-center">
+                                    <strong>Mais Popular</strong>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h5>Standard</h5>
+                                    <div class="h2 text-primary">$40</div>
+                                    <p class="text-muted">500 créditos</p>
+                                    <button class="btn btn-primary" onclick="purchasePackage(2)">
+                                        Comprar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>Premium</h5>
+                                    <div class="h2 text-primary">$70</div>
+                                    <p class="text-muted">1000 créditos</p>
+                                    <button class="btn btn-outline-primary" onclick="purchasePackage(3)">
+                                        Comprar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="payment-section" class="mt-4 d-none">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Instruções de Pagamento</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <strong>1.</strong> Envie exatamente <strong id="payment-amount">0 USDT</strong> para o endereço abaixo
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Endereço de Pagamento:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="payment-address" 
+                                               value="0x742d35Cc6735Bd72eEbc5ac64f752E5EA824A203" readonly>
+                                        <button class="btn btn-outline-secondary" onclick="copyAddress()">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Hash da Transação:</label>
+                                    <input type="text" class="form-control" id="tx-hash" 
+                                           placeholder="Cole o hash da transação aqui">
+                                </div>
+                                
+                                <button class="btn btn-success" onclick="validatePayment()">
+                                    <i class="fas fa-check me-2"></i>
+                                    Validar Pagamento
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Widget Demo Section -->
+                <div id="section-widget-demo" class="section-content p-4 d-none">
+                    <h2 class="mb-4">Demo do Widget</h2>
+                    
+                    <div class="alert alert-info">
+                        <strong>Importante:</strong> Você precisa de uma API key ativa para usar o widget.
+                    </div>
+                    
+                    <div id="widget-container">
+                        <!-- Widget será carregado aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.0/dist/ethers.umd.min.js"></script>
+    <script src="/widget.js"></script>
+    
+    <script>
+        class DashboardApp {
+            constructor() {
+                this.currentUser = null;
+                this.apiKeys = [];
+                this.userStats = {};
+                this.init();
+            }
+
+            async init() {
+                // Check wallet connection
+                await this.checkWalletConnection();
+                
+                if (!this.currentUser) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                // Setup navigation
+                this.setupNavigation();
+                
+                // Load dashboard data
+                await this.loadDashboardData();
+                
+                // Setup event listeners
+                this.setupEventListeners();
+            }
+
+            async checkWalletConnection() {
+                if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (accounts.length > 0) {
+                            this.currentUser = {
+                                address: accounts[0]
+                            };
+                            
+                            // Update UI
+                            const shortAddress = accounts[0].substring(0, 6) + '...' + accounts[0].substring(38);
+                            document.getElementById('sidebar-wallet').textContent = shortAddress;
+                            document.getElementById('dashboard-wallet').textContent = shortAddress;
+                        }
+                    } catch (error) {
+                        console.error('Error checking wallet:', error);
+                    }
+                }
+            }
+
+            setupNavigation() {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = link.dataset.section;
+                        this.showSection(section);
+                        
+                        // Update active nav
+                        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                    });
+                });
+            }
+
+            showSection(sectionName) {
+                // Hide all sections
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.classList.add('d-none');
+                });
+                
+                // Show selected section
+                document.getElementById(`section-${sectionName}`).classList.remove('d-none');
+                
+                // Load section-specific data
+                switch(sectionName) {
+                    case 'api-keys':
+                        this.loadApiKeys();
+                        break;
+                    case 'widget-demo':
+                        this.loadWidgetDemo();
+                        break;
+                }
+            }
+
+            async loadDashboardData() {
+                try {
+                    // Load user profile
+                    const response = await fetch('/api/user/profile', {
+                        headers: {
+                            'Authorization': `Bearer ${this.currentUser.address}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.userStats = data.stats;
+                        this.updateDashboardUI();
+                    }
+                    
+                    // Load balance
+                    await this.loadBalance();
+                    
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                }
+            }
+
+            async loadBalance() {
+                try {
+                    const response = await fetch('/api/credits/balance', {
+                        headers: {
+                            'Authorization': `Bearer ${this.currentUser.address}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        const balance = data.balance || 0;
+                        document.getElementById('sidebar-balance').textContent = balance;
+                        document.getElementById('dashboard-credits').textContent = balance;
+                    }
+                } catch (error) {
+                    console.error('Error loading balance:', error);
+                }
+            }
+
+            updateDashboardUI() {
+                if (this.userStats) {
+                    document.getElementById('dashboard-keys').textContent = this.userStats.keys || 0;
+                    document.getElementById('dashboard-usage').textContent = this.userStats.usage_today || 0;
+                    document.getElementById('dashboard-spent').textContent = `$${(this.userStats.total_spent || 0).toFixed(2)}`;
+                    
+                    if (this.userStats.member_since) {
+                        const date = new Date(this.userStats.member_since);
+                        document.getElementById('dashboard-member').textContent = date.toLocaleDateString('pt-BR');
+                    }
+                }
+            }
+
+            async loadApiKeys() {
+                try {
+                    const response = await fetch('/api/user/keys', {
+                        headers: {
+                            'Authorization': `Bearer ${this.currentUser.address}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.apiKeys = data.keys;
+                        this.renderApiKeys();
+                    }
+                } catch (error) {
+                    console.error('Error loading API keys:', error);
+                }
+            }
+
+            renderApiKeys() {
+                const container = document.getElementById('api-keys-list');
+                
+                if (this.apiKeys.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-key fa-3x mb-3"></i>
+                            <h5>Nenhuma API Key criada</h5>
+                            <p>Crie sua primeira API key para começar a usar o widget</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = this.apiKeys.map(key => {
+                    const maskedKey = key.api_key.substring(0, 8) + '...' + key.api_key.substring(key.api_key.length - 4);
+                    return `
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">${key.name}</h6>
+                                        <code class="text-muted">${maskedKey}</code>
+                                        <div class="small text-muted mt-1">
+                                            ${key.usage_count} usos • Criada em ${new Date(key.created_at).toLocaleDateString('pt-BR')}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-success">${key.status}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            async createApiKey() {
+                const name = prompt('Nome da API Key:');
+                if (!name) return;
+                
+                try {
+                    const response = await fetch('/api/user/keys', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.currentUser.address}`
+                        },
+                        body: JSON.stringify({ name })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`API Key criada: ${data.apiKey}`);
+                        this.loadApiKeys();
+                        this.loadDashboardData();
+                    } else {
+                        alert('Erro: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error creating API key:', error);
+                    alert('Erro ao criar API key');
+                }
+            }
+
+            purchasePackage(packageId) {
+                const packages = {
+                    1: { price: 10, credits: 100 },
+                    2: { price: 40, credits: 500 },
+                    3: { price: 70, credits: 1000 }
+                };
+                
+                const pkg = packages[packageId];
+                if (pkg) {
+                    document.getElementById('payment-amount').textContent = `${pkg.price} USDT`;
+                    document.getElementById('payment-section').classList.remove('d-none');
+                    
+                    // Store package info for validation
+                    this.selectedPackage = { id: packageId, ...pkg };
+                }
+            }
+
+            async validatePayment() {
+                const txHash = document.getElementById('tx-hash').value.trim();
+                if (!txHash || !this.selectedPackage) {
+                    alert('Por favor, insira o hash da transação');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/payment/validate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.currentUser.address}`
+                        },
+                        body: JSON.stringify({
+                            txHash,
+                            network: 'ethereum',
+                            packageId: this.selectedPackage.id,
+                            expectedAmount: this.selectedPackage.price
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        alert(`Pagamento confirmado! ${data.creditsAdded} créditos adicionados.`);
+                        this.loadBalance();
+                        this.loadDashboardData();
+                        document.getElementById('payment-section').classList.add('d-none');
+                        document.getElementById('tx-hash').value = '';
+                    } else {
+                        alert('Erro: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error validating payment:', error);
+                    alert('Erro ao validar pagamento');
+                }
+            }
+
+            copyAddress() {
+                const addressInput = document.getElementById('payment-address');
+                addressInput.select();
+                navigator.clipboard.writeText(addressInput.value);
+                alert('Endereço copiado!');
+            }
+
+            loadWidgetDemo() {
+                if (this.apiKeys.length === 0) {
+                    document.getElementById('widget-container').innerHTML = `
+                        <div class="alert alert-warning">
+                            <strong>Aviso:</strong> Você precisa criar uma API key primeiro.
+                            <button class="btn btn-sm btn-primary ms-2" onclick="dashboardApp.showSection('api-keys')">
+                                Criar API Key
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Initialize widget with first API key
+                const apiKey = this.apiKeys[0].api_key;
+                
+                document.getElementById('widget-container').innerHTML = `
+                    <div id="xcafe-widget-demo"></div>
+                `;
+                
+                // Initialize widget
+                window.initXCAFEWidget({
+                    apiKey: apiKey,
+                    containerId: 'xcafe-widget-demo'
+                });
+            }
+
+            setupEventListeners() {
+                document.getElementById('disconnect-btn').addEventListener('click', () => {
+                    localStorage.removeItem('wallet_connected');
+                    localStorage.removeItem('wallet_address');
+                    window.location.href = '/login';
+                });
+            }
+        }
+
+        // Global functions for onclick handlers
+        let dashboardApp;
+
+        function showSection(section) {
+            dashboardApp.showSection(section);
+        }
+
+        function createApiKey() {
+            dashboardApp.createApiKey();
+        }
+
+        function purchasePackage(id) {
+            dashboardApp.purchasePackage(id);
+        }
+
+        function validatePayment() {
+            dashboardApp.validatePayment();
+        }
+
+        function copyAddress() {
+            dashboardApp.copyAddress();
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            dashboardApp = new DashboardApp();
+        });
+    </script>
+</body>
+</html>

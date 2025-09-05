@@ -1,13 +1,13 @@
 {
-  "name": "widget-saas-system",
-  "version": "1.0.0",
-  "description": "Sistema SaaS de Widget com Recarga e Comissão - Plataforma para integração de widgets de compra de tokens",
-  "main": "backend/server.js",
+  "name": "widget-saas-platform",
+  "version": "2.0.0",
+  "description": "Sistema SaaS unificado para criação de tokens com pagamento USDT",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js",
-    "build": "echo 'Build completed - Static files ready'",
-    "test": "echo 'Tests not implemented yet'"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "init-db": "node -e \"require('./server.js')\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "widget",

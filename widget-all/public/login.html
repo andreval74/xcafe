@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Widget SaaS</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .login-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container d-flex align-items-center justify-content-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                    <div class="login-card p-5 text-center">
+                        <!-- Logo -->
+                        <div class="mb-4">
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-cube text-white fa-2x"></i>
+                            </div>
+                        </div>
+                        
+                        <h2 class="mb-3">Widget SaaS</h2>
+                        <p class="text-muted mb-4">Conecte sua carteira para acessar o dashboard</p>
+                        
+                        <!-- Status Messages -->
+                        <div id="status-message" class="alert d-none" role="alert"></div>
+                        
+                        <!-- Connect Wallet Button -->
+                        <button id="connect-wallet-btn" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fab fa-ethereum me-2"></i>
+                            Conectar MetaMask
+                        </button>
+                        
+                        <!-- Loading State -->
+                        <div id="loading-state" class="d-none">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <p class="text-muted">Conectando carteira...</p>
+                        </div>
+                        
+                        <!-- Connected State -->
+                        <div id="connected-state" class="d-none">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Conectado!</strong>
+                                <br>
+                                <small id="wallet-address" class="font-monospace"></small>
+                            </div>
+                            
+                            <a href="/dashboard" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Ir para Dashboard
+                            </a>
+                        </div>
+                        
+                        <!-- Help -->
+                        <div class="mt-4">
+                            <small class="text-muted">
+                                Não tem MetaMask? 
+                                <a href="https://metamask.io/download/" target="_blank" class="text-primary">
+                                    Instalar MetaMask
+                                </a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.0/dist/ethers.umd.min.js"></script>
+    
+    <script>
+        class WalletLogin {
+            constructor() {
+                this.provider = null;
+                this.userAddress = null;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.checkExistingConnection();
+            }
+
+            setupEventListeners() {
+                document.getElementById('connect-wallet-btn').addEventListener('click', () => {
+                    this.connectWallet();
+                });
+            }
+
+            async checkExistingConnection() {
+                if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (accounts.length > 0) {
+                            this.provider = new ethers.providers.Web3Provider(window.ethereum);
+                            this.userAddress = accounts[0];
+                            this.showConnectedState();
+                        }
+                    } catch (error) {
+                        console.error('Error checking existing connection:', error);
+                    }
+                }
+            }
+
+            async connectWallet() {
+                if (typeof window.ethereum === 'undefined') {
+                    this.showError('MetaMask não encontrado. Por favor, instale a extensão MetaMask.');
+                    return;
+                }
+
+                try {
+                    this.showLoading();
+                    
+                    // Request account access
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    
+                    // Initialize provider
+                    this.provider = new ethers.providers.Web3Provider(window.ethereum);
+                    this.userAddress = await this.provider.getSigner().getAddress();
+                    
+                    // Store connection info
+                    localStorage.setItem('wallet_connected', 'true');
+                    localStorage.setItem('wallet_address', this.userAddress);
+                    
+                    this.showConnectedState();
+                    
+                    // Auto redirect after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Wallet connection error:', error);
+                    this.hideLoading();
+                    
+                    if (error.code === 4001) {
+                        this.showError('Conexão rejeitada pelo usuário.');
+                    } else {
+                        this.showError('Erro ao conectar carteira: ' + error.message);
+                    }
+                }
+            }
+
+            showLoading() {
+                document.getElementById('connect-wallet-btn').classList.add('d-none');
+                document.getElementById('loading-state').classList.remove('d-none');
+                document.getElementById('connected-state').classList.add('d-none');
+                this.hideStatus();
+            }
+
+            hideLoading() {
+                document.getElementById('connect-wallet-btn').classList.remove('d-none');
+                document.getElementById('loading-state').classList.add('d-none');
+            }
+
+            showConnectedState() {
+                document.getElementById('connect-wallet-btn').classList.add('d-none');
+                document.getElementById('loading-state').classList.add('d-none');
+                document.getElementById('connected-state').classList.remove('d-none');
+                
+                // Show formatted address
+                const shortAddress = this.userAddress.substring(0, 6) + '...' + this.userAddress.substring(38);
+                document.getElementById('wallet-address').textContent = shortAddress;
+                
+                this.hideStatus();
+            }
+
+            showError(message) {
+                const statusEl = document.getElementById('status-message');
+                statusEl.className = 'alert alert-danger';
+                statusEl.textContent = message;
+                statusEl.classList.remove('d-none');
+            }
+
+            showSuccess(message) {
+                const statusEl = document.getElementById('status-message');
+                statusEl.className = 'alert alert-success';
+                statusEl.textContent = message;
+                statusEl.classList.remove('d-none');
+            }
+
+            hideStatus() {
+                document.getElementById('status-message').classList.add('d-none');
+            }
+        }
+
+        // Initialize wallet login system
+        document.addEventListener('DOMContentLoaded', function() {
+            new WalletLogin();
+        });
+    </script>
+</body>
+</html>
