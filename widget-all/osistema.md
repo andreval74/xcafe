@@ -1,183 +1,164 @@
-siga abaixo as caracteristicas para criar um sistema completo de widget de venda de tokens com recarga e comissao
+📝 Prompt Completo – IA No-code
+Você é uma IA desenvolvedora de sistemas no-code. Seu papel é criar um sistema SaaS completo de widget de venda de tokens com recarga e comissão, incluindo painel de administração, painel de usuários, backend, banco de dados, smart contract, widget incorporável e sistema de auto-deploy inteligente.
 
-- como vc deve atuar para gerar este sistema:
-<perfil>
-  <descricao>
-    Você é um arquiteto de software veterano, criador de soluções digitais robustas, seguras e duradouras, que combinam eficiência, clareza e escalabilidade, mantendo um código elegante e fácil de evoluir.
-  </descricao>
+🎯 Objetivo do Sistema
+Criar uma plataforma SaaS simples que permita qualquer pessoa sem conhecimento técnico integrar em seu site um widget de venda de tokens.
 
-  <norteTecnico>
-    <ponto>Separe arquivos extensos em módulos compactos para manter a fluidez e a clareza.</ponto>
-    <ponto>Transforme funções longas em blocos menores, focados e reutilizáveis.</ponto>
-    <ponto>Após codificar, faça uma avaliação crítica considerando segurança, escalabilidade e manutenção futura.</ponto>
-    <ponto>Escreva um breve relatório (1 a 2 parágrafos) com reflexões e sugestões de aprimoramento.</ponto>
-    <ponto>Qualquer segredo, senha, chave de API ou token deve existir somente no arquivo <b>.env</b>, nunca no código.</ponto>
-    <ponto>Forneça sempre um <b>.env.example</b> documentando todas as variáveis necessárias, mas sem valores reais.</ponto>
-  </norteTecnico>
+Modelo de negócio: o cliente (dono do site) compra créditos antecipados (recarga).
+Comissão: cada venda gera 2% para a plataforma e 98% para o cliente.
+Todas as vendas passam por um único contrato Sale universal da plataforma.
 
-  <estrategia>
-    <modo>Roteiro de Execução</modo>
-    <passos>
-      <passo>Estude o pedido e investigue o código atual para mapear o impacto das mudanças.</passo>
-      <passo>Formule de 4 a 6 perguntas inteligentes antes de criar o plano caso seja neccessário.</passo>
-      <passo>Monte um roteiro detalhado e obtenha validação antes de começar.</passo>
-      <passo>Execute o plano, informando avanços, próximos passos e etapas restantes.</passo>
-    </passos>
-  </estrategia>
+👥 Público-Alvo
+Donos de sites, ONGs, criadores de conteúdo, startups e agências digitais.
+Pessoas que não sabem programar, mas querem monetizar com blockchain.
 
-  <resolucaoDeFalhas>
-    <modo>Caça-Bugs</modo>
-    <fluxo>
-      <passo>Liste 5 a 7 hipóteses para a falha.</passo>
-      <passo>Afine para 1 ou 2 hipóteses mais prováveis.</passo>
-      <passo>Insira logs estratégicos para validar suspeitas e seguir o fluxo de dados.</passo>
-      <passo>Utilize getConsoleLogs, getConsoleErrors, getNetworkLogs e getNetworkErrors.</passo>
-      <passo>Solicite ou colete logs do servidor quando possível.</passo>
-      <passo>Analise o cenário, proponha ajustes e adicione logs extras se necessário.</passo>
-      <passo>Confirme antes de remover os logs provisórios.</passo>
-    </fluxo>
-  </resolucaoDeFalhas>
+🤖 Como a IA deve atuar
+Organização modular: separar funções em arquivos curtos, reutilizáveis e comentados.
+Fluxo de entrega: criar cada módulo isoladamente, testar e só depois integrar.
+Segurança: nunca incluir chaves no código; usar .env + .env.example.
+Documentação: comentar todo código + resumo de 1 a 2 parágrafos com melhorias.
+Compatibilidade: rodar em desktop e mobile; widget deve ser “copiar e colar”.
+Escalabilidade: banco SQLite no MVP, mas pronto para migração futura.
+Auto-deploy inteligente: verificar o que já está instalado antes de instalar qualquer coisa nova.
 
-  <referencias>
-    <regra>Use arquivos markdown como guia estrutural, sem modificá-los, a menos que solicitado.</regra>
-  </referencias>
+🔑 Escopo do Sistema
+1. Painel Admin (Plataforma)
+Criar, suspender e revogar usuários e chaves de ativação.
+Definir pacotes de recarga (100, 500 créditos etc.).
+Relatórios de uso e comissões.
+Novo módulo: Cadastro de Blockchains e Moedas
+Administradores podem adicionar/remover blockchains suportadas (Ethereum, BSC, Polygon, etc.).
+Administradores podem adicionar/remover moedas aceitas (inicialmente só USDT).
+Definir moeda oficial de compra de créditos (USDT no MVP).
+Configuração só visível e editável por administradores.
 
-  <principios>
-    <regra>Responda sempre em português claro e objetivo.</regra>
-    <regra>Opte por soluções simples e diretas.</regra>
-    <regra>Elimine duplicações e reutilize código existente.</regra>
-    <regra>Não altere além do solicitado sem alinhamento.</regra>
-    <regra>Evite novas tecnologias sem explorar soluções no stack atual.</regra>
-    <regra>Mantenha o código limpo, comentado e bem estruturado.</regra>
-    <regra>Evite scripts descartáveis no projeto.</regra>
-    <regra>Refatore arquivos que ultrapassem 250-300 linhas.</regra>
-    <regra>Use dados falsos apenas em testes isolados, nunca em dev ou prod.</regra>
-    <regra>Nunca substitua o .env sem confirmar.</regra>
-    <regra>Verifique se todas as variáveis de ambiente estão configuradas antes de executar.</regra>
-    <regra>Jamais comitar informações sensíveis ou arquivos .env.</regra>
-  </principios>
-</perfil>
+2. Painel Usuário (Dono do Site)
+Login via MetaMask (carteira = identidade).
+Campos obrigatórios ao cadastrar token:
+Selecionar blockchain a partir de lista predefinida (não digitar).
+Selecionar moeda de compra a partir de lista predefinida (inicialmente USDT).
+Endereço do contrato do token (ERC-20).
+Preço do token (ex.: 1 USDT = 10 tokens).
+Botão Approve integrado → cliente aprova quantidade de tokens para o contrato Sale.
+Painel mostra: tokens aprovados, vendidos e restantes.
+Funções extras: compra de créditos, histórico de transações, geração de snippet <script> do widget.
 
-
-- Funcionalidades principais
-📋 Escopo de Desenvolvimento – Sistema de Widget com Recarga + Comissão
-🎯 Objetivo
-
-Criar uma plataforma SaaS que permita a qualquer pessoa integrar em seu site um widget de compra de tokens.
-O widget só funciona se o usuário tiver saldo de recargas pré-pagas.
-Cada transação gera 2% de comissão automática para a plataforma (paga pelo dono do widget, não pelo cliente final).
-
-🏗️ Módulos do Sistema
-1. Painel da Plataforma (Admin)
-Gerenciar usuários (donos de site).
-Criar / suspender / revogar chaves de ativação.
-Definir preço dos pacotes de recarga (ex: 100 créditos, 500 créditos).
-Relatórios de uso e comissões recebidas.
-
-2. Área do Usuário (Dono do Site)
-Cadastro/Login via MetaMask (carteira é a identidade).
-Teste de contrato e carteira para validar suporte a transações.
-Tela de compra de créditos (recarga).
-Visualização de saldo atual de créditos.
-Histórico de transações.
-Geração de chave de ativação + snippet de script pronto para colar no site.
-Script não muda → apenas o backend verifica saldo automaticamente.
-Botão de Approve integrado:
-Usuário autoriza o Sale Contract direto do painel, sem sair do ambiente.
-Simplifica o processo e evita erros manuais.
-
-3. Backend / API
-Desenvolvido em Node.js (Express).
-Autenticação simples via MetaMask + JWT.
-Verificação de chave de ativação e saldo.
-Controle de créditos (decremento a cada transação).
-Logs e relatórios.
-Integração com blockchain (contrato inteligente).
-Hospedagem inicial: Render.
-Hospedagem de backup: GitHub.
+3. Backend/API
+Node.js (Express).
+Autenticação via MetaMask + JWT.
+Funções principais:
+Verificar saldo de créditos.
+Validar chaves de ativação.
+Registrar logs de transações.
+Controlar decremento de créditos.
+Hospedagem: Render (principal) + GitHub (backup).
 
 4. Banco de Dados
-SQLite no MVP (arquivo único, fácil de transportar).
-Estrutura inicial:
-Usuários
-Chaves de ativação
-Créditos
-Logs de transação
+SQLite no MVP.
+Estrutura inicial: usuários, chaves de ativação, créditos, logs de transações.
+Exportação/importação simples em .txt ou planilha.
 
-5. Widget (Frontend incorporável)
-Código <script> simples em JS puro.
-Renderiza botão “Comprar Token” + formulário básico (valor, token, carteira).
-Conecta com MetaMask / WalletConnect.
-Consulta backend → valida chave e saldo → gera transação no contrato.
-Feedback visual (sucesso, erro, saldo esgotado).
-Mensagem de alerta se créditos acabarem.
+5. Widget Incorporável
+Arquivo <script> em JS puro.
+Botão “Comprar Token” + formulário.
+Integração com MetaMask/WalletConnect.
+Consulta backend → valida saldo de créditos e chave de ativação.
+Executa compra via contrato Sale.
+Feedback visual: sucesso, erro, saldo esgotado.
 
-6. Smart Contract (Blockchain)
-Sale Contract intermediário (contrato de venda universal):
-O dono do token faz approve direto do painel.
-Comprador envia pagamento → contrato transfere 98% para o dono e 2% para a plataforma.
-Funciona sem alterar o contrato do token original.
-Emite eventos de log (auditoria).
-Deploy em rede EVM compatível (Ethereum, BSC, Polygon).
+6. Smart Contract (Sale Contract Universal)
+Contrato único da plataforma.
+Funções:
+Receber pagamento do comprador.
+Distribuir automaticamente 98% para o cliente / 2% para a plataforma.
+Transferir tokens do cliente para o comprador (usando approve prévio).
+Emitir eventos de log para auditoria.
+Compatível com redes EVM (Ethereum, BSC, Polygon).
+
+Regras extras:
+Se tokens aprovados acabarem → venda bloqueada.
+Se créditos acabarem → widget bloqueado.
+
+7. Sistema de Auto-Instalação / Deploy Inteligente
+
+🎯 Objetivo Principal
+Criar um sistema de auto-instalação inteligente com interface “Matrix” que analisa a infraestrutura existente e instala apenas os componentes necessários para o Widget SaaS, preservando o que já funciona, evitando reinstalações desnecessárias e garantindo segurança e integridade dos dados.
+
+🧠 Filosofia "Matrix Inteligente"
+Análise Prévia: detecta Python, Node.js, servidores web, bancos de dados, certificados SSL e conectividade de rede antes de qualquer instalação.
+Instalação Seletiva: instala apenas os módulos ou componentes que estão faltando ou desatualizados.
+Preservação: mantém os componentes existentes plenamente funcionais, preservando dados e configurações.
+Automação Visual: interface cinematográfica, sem cliques manuais, mostrando progresso em tempo real.
+Feedback em Tempo Real: exibe claramente o que está sendo verificado, reaproveitado, atualizado ou instalado.
+
+⚙️ Funcionalidades Principais
+Verificação detalhada do ambiente:
+Linguagens e frameworks (Python, Node.js, Express).
+Bancos de dados (SQLite padrão; MySQL/PostgreSQL opcionais).
+Servidores web (Apache, Nginx, IIS, Express).
+Rede e portas críticas (8000, 8001, 9000).
+Certificados SSL e configuração JWT.
+Recursos do sistema (espaço em disco, permissões, conectividade).
+
+Planejamento inteligente:
+Componentes a instalar, atualizar, manter ou remover.
+Estimativa de tempo e backups necessários.
+
+Decisões automáticas:
+✅ Existente e íntegro → manter.
+🟡 Desatualizado → atualizar preservando dados.
+🔴 Quebrado → remover e reinstalar.
+⚪ Ausente → instalar do zero.
+
+Execução automatizada:
+Instalação seletiva e otimizada.
+Atualização segura de componentes críticos.
+Criação de backups quando necessário.
+Geração de relatório detalhado: detectados, reaproveitados, atualizados e instalados.
+
+Resultado final:
+Sistema 100% funcional (painel admin, painel usuário, backend, APIs, banco, HTTPS).
+Pronto para operação imediata e expansão futura.
+
+💡 Benefícios
+Reduz risco de erros humanos e conflitos de versão.
+Simplifica deploy e manutenção.
+Garante segurança e integridade dos dados.
+Permite escalabilidade futura sem comprometer o ambiente existente.
+Experiência visual intuitiva com feedback contínuo.
 
 ⚙️ Requisitos Técnicos
-LINGUAGEM: HTML / CSS / JS
-API: HOSPEDAGEM NO RENDER caso necessario
-HOSPEDAGEM: Render (API) / GitHub (código) / servidor HTTPS (frontend).
-SMART CONTRATCT: Solidity, deploy via API
-BANCO DE DADOS: se houver necessidade SQLite mas deixe uma função para criar atomatico, de prefenencia tentar não usar
-
-Segurança:
-Saldo controlado apenas no backend (não no frontend).
-Logs de transações armazenados.
-
-💳 Pagamentos de Recarga
-Realizados via MetaMask.
-Ao pagar, sistema registra o hash da transação.
-Backend valida on-chain → incrementa créditos automaticamente.
+Frontend: HTML, CSS, JS.
+Layout: Bootstrap simples (branco, azul claro, cinza claro, ícones cinzas).
+Hospedagem: GitHub (frontend) + Render (API).
+Banco: SQLite no MVP.
+Todo código modular, limpo e comentado.
 
 🛠️ Roadmap de Desenvolvimento (MVP)
 Fase 1 – Estrutura Base
-Deploy do Sale Contract (compra + comissão).
-Backend inicial com CRUD de usuários e chaves.
-Widget básico que conecta carteira e executa transações.
+Deploy do contrato Sale universal.
+Backend CRUD de usuários e chaves.
+Widget inicial com conexão MetaMask.
 
-Fase 2 – Recarga e Créditos
+Fase 2 – Créditos e Recarga
 Implementar pacotes de créditos.
 Backend decrementa créditos a cada transação.
 Tela de recarga no painel do usuário.
-Approve integrado no painel (para simplificar setup do cliente).
+Approve integrado.
 
 Fase 3 – Usabilidade e Segurança
-Logs detalhados (quem comprou, quando, valor).
+Logs detalhados.
 Expiração automática de chaves.
-Notificações (alerta no painel + opção futura email/Telegram).
+Alertas no painel.
 
-Fase 4 – Escalabilidade
-Painel admin avançado (estatísticas, top clientes).
-Relatórios em tempo real de comissões.
-Multi-token (permitir escolha de token de pagamento/comissão).
+Fase 4 – Escalabilidade + Auto Deploy Inteligente
+Estatísticas avançadas.
+Relatórios de comissões.
+Multi-token.
+Auto-deploy com verificação, reaproveitamento e relatório final.
 
-📌 Resultado Esperado
-Usuário leigo: compra créditos → aprova contrato → copia script → cola no site → pronto.
-Plataforma: receita fixa (pacotes) + receita variável (2% comissão).
-Escalabilidade: simples de expandir para novas redes, tokens e pacotes.
-
-- Tecnologias preferidas: 
-todo o sistema deve ser modular reutilizando codigos para não ter repetição de codigos ou de arquivos para a mesma função, o mais limpo, comentado e simples possivel.
-HTML, CSS, JS 
-hospedagem GITHUB
-HOSPEDAGEM EM SERVIDOR HTTPS
-CRIAR UM ARQUIVO TXT PLANILHA PARA SIMPLES CONSULTA DE CREDITOS E CADASTROS OU O QUE VC INDICAR
-VERIFIQUE SEMPRE NA RAIZ DO XCAFE SE JA EXISTE ALGUM CODIGO OU ARQUIVO QUE POSSA SER REAPROVEITADO, COPIANDO PARA DENTRO DO DIRETORIO DO WIDGET-ALL, POIS SÃO SISTEMAS DIFERENTES MAS PODEM COMPARTILHAR CODIGOS E ARQUIVOS
-TODO O CODIGO DEVE SER COMENTADO PARA FACILITAR FUTURAS MANUTENÇÕES
-
-- Tipo de aplicação e o que deve ser criado: 
-deve rodar na web e no celular 
-landing page
-dashboard usuario cadastrado e administrador
-chaves de entrada / login sera a carteira do metamask
-
-- Design/layout desejado:
-css bootstrap simples com cores leves para que possamos colocar em qualquer site qdo for fazer o embed do sistema
-de preferencia usaremos branco, azul claro e cinza claro com icones cinzas
+📌 Regras extras
+Controle centralizado: só admins decidem quais redes e moedas são válidas.
+Experiência simplificada: usuários comuns só escolhem opções já testadas → zero risco de erro.
+Expansão futura fácil: ao liberar nova moeda ou blockchain, todos os usuários veem automaticamente.
+MVP simples: apenas USDT em uma blockchain escolhida (ex.: Polygon).

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Widget SaaS Incorporável</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .demo-header {
+            background: linear-gradient(90deg, #3182ce, #38a169);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .demo-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .demo-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .demo-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+        }
+        
+        .demo-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .code-block {
+            background: #1a1a1a;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .copy-button {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .copy-button:hover {
+            background: #2c5aa0;
+        }
+        
+        .widget-demo {
+            margin-top: 20px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .option-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .option-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #3182ce;
+        }
+        
+        .theme-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .theme-button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .theme-button.active {
+            background: #3182ce;
+            color: white;
+            border-color: #3182ce;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #38a169;
+        }
+        
+        .status-offline {
+            background: #e53e3e;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .demo-title {
+                font-size: 2rem;
+            }
+        }
+        
+        .api-status {
+            background: #e8f5e8;
+            border: 1px solid #38a169;
+            color: #22543d;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .api-status.offline {
+            background: #fed7d7;
+            border-color: #e53e3e;
+            color: #742a2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <div class="demo-title">🚀 Widget SaaS</div>
+            <div class="demo-subtitle">Demonstração do Widget Incorporável</div>
+        </div>
+        
+        <div class="demo-content">
+            <!-- Seção de Código -->
+            <div class="demo-section">
+                <div class="section-title">
+                    💻 Como Incorporar
+                </div>
+                
+                <div id="api-status" class="api-status">
+                    <span class="status-indicator status-online"></span>
+                    API Status: Verificando...
+                </div>
+                
+                <h4>1. Incluir o JavaScript:</h4>
+                <button class="copy-button" onclick="copyCode('js-code')">📋 Copiar</button>
+                <div class="code-block" id="js-code">&lt;script src="http://localhost:8001/static/js/widget-incorporavel.js"&gt;&lt;/script&gt;</div>
+                
+                <h4>2. Adicionar o container:</h4>
+                <button class="copy-button" onclick="copyCode('html-code')">📋 Copiar</button>
+                <div class="code-block" id="html-code">&lt;div id="widget-saas-container"&gt;&lt;/div&gt;</div>
+                
+                <h4>3. Configurar o widget:</h4>
+                <button class="copy-button" onclick="copyCode('config-code')">📋 Copiar</button>
+                <div class="code-block" id="config-code">&lt;script&gt;
+window.WIDGET_SAAS_CONFIG = {
+    containerId: 'widget-saas-container',
+    apiKey: 'sua-api-key-aqui',
+    tokenAddress: '0x...',
+    tokenSymbol: 'XCAFE',
+    tokenPrice: 0.001,
+    currency: 'TBNB',
+    blockchain: 'BSC Testnet',
+    theme: 'light',
+    language: 'pt-BR',
+    testMode: true
+};
+&lt;/script&gt;</div>
+
+                <div class="theme-toggle">
+                    <button class="theme-button active" onclick="switchTheme('light')">☀️ Claro</button>
+                    <button class="theme-button" onclick="switchTheme('dark')">🌙 Escuro</button>
+                </div>
+            </div>
+            
+            <!-- Seção do Widget -->
+            <div class="demo-section">
+                <div class="section-title">
+                    🎯 Widget Demo
+                </div>
+                
+                <div class="widget-demo">
+                    <!-- O widget será renderizado aqui -->
+                    <div id="widget-saas-container"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="padding: 40px;">
+            <div class="section-title">
+                ⚙️ Opções de Configuração
+            </div>
+            
+            <div class="options-grid">
+                <div class="option-card">
+                    <div class="option-title">containerId</div>
+                    <div>ID do elemento HTML onde o widget será renderizado</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">apiKey</div>
+                    <div>Chave de API fornecida pelo Widget SaaS</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">tokenAddress</div>
+                    <div>Endereço do contrato inteligente do token</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">tokenSymbol</div>
+                    <div>Símbolo do token (ex: XCAFE, BTC, ETH)</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">tokenPrice</div>
+                    <div>Preço do token na moeda base</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">currency</div>
+                    <div>Moeda de pagamento (TBNB, BNB, ETH, etc.)</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">blockchain</div>
+                    <div>Nome da blockchain (BSC Testnet, Ethereum, etc.)</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">theme</div>
+                    <div>Tema visual: 'light' ou 'dark'</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">language</div>
+                    <div>Idioma da interface (pt-BR, en-US, es-ES)</div>
+                </div>
+                
+                <div class="option-card">
+                    <div class="option-title">testMode</div>
+                    <div>Modo de teste: true para simular transações</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuração do Widget -->
+    <script>
+        window.WIDGET_API_URL = 'http://localhost:8001/api';
+        window.WIDGET_DEBUG = true;
+        
+        window.WIDGET_SAAS_CONFIG = {
+            containerId: 'widget-saas-container',
+            apiKey: 'demo-api-key-12345',
+            tokenAddress: '0x742d35cc6634c0532925a3b8d0fa6f3b8af93e0f',
+            tokenSymbol: 'XCAFE',
+            tokenPrice: 0.001,
+            currency: 'TBNB',
+            blockchain: 'BSC Testnet',
+            theme: 'light',
+            language: 'pt-BR',
+            testMode: true
+        };
+    </script>
+    
+    <!-- Widget JavaScript -->
+    <script src="static/js/widget-incorporavel.js"></script>
+    
+    <script>
+        // Verificar status da API
+        async function checkApiStatus() {
+            const statusElement = document.getElementById('api-status');
+            
+            try {
+                const response = await fetch('http://localhost:8001/api/health');
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    statusElement.innerHTML = '<span class="status-indicator status-online"></span>API Status: Online ✅';
+                    statusElement.className = 'api-status';
+                } else {
+                    throw new Error('API offline');
+                }
+            } catch (error) {
+                statusElement.innerHTML = '<span class="status-indicator status-offline"></span>API Status: Offline ❌ (Inicie o servidor da API)';
+                statusElement.className = 'api-status offline';
+            }
+        }
+        
+        // Função para copiar código
+        function copyCode(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const button = element.previousElementSibling;
+                const originalText = button.textContent;
+                button.textContent = '✅ Copiado!';
+                button.style.background = '#38a169';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#3182ce';
+                }, 2000);
+            });
+        }
+        
+        // Função para trocar tema
+        function switchTheme(theme) {
+            // Atualizar botões
+            document.querySelectorAll('.theme-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Atualizar configuração do widget
+            window.WIDGET_SAAS_CONFIG.theme = theme;
+            
+            // Recriar widget com novo tema
+            if (window.widget) {
+                window.widget = new window.createWidgetSaaS(window.WIDGET_SAAS_CONFIG);
+            }
+        }
+        
+        // Verificar API ao carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiStatus();
+            
+            // Verificar novamente a cada 30 segundos
+            setInterval(checkApiStatus, 30000);
+        });
+    </script>
+</body>
+</html>
