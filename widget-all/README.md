@@ -1,17 +1,40 @@
-# 🚀 Widget SaaS - Plataforma de Venda de Tokens
+# 🚀 Widget SaaS Platform
 
-Uma plataforma SaaS completa que permite integrar facilmente widgets de venda de tokens em qualquer website. Sistema baseado em créditos pré-pagos com comissão automática de 2%.
+Sistema completo para criação e gerenciamento de widgets de criptomoedas na blockchain BSC.
 
-## 📋 Características Principais
+## ⚡ Instalação Rápida
 
-- **🔌 Plug & Play**: Integração em 5 minutos
-- **💰 Sistema de Créditos**: Pague apenas pelo que usar
-- **🛡️ Seguro**: Smart contracts auditados
-- **📱 Responsivo**: Funciona em todos os dispositivos
-- **🌐 Multi-Rede**: Ethereum, BSC, Polygon, Avalanche
-- **📊 Analytics**: Dashboard completo com estatísticas
+```bash
+# Clone o repositório
+git clone https://github.com/andreval74/xcafe.git
+cd xcafe/widget-all
 
-## 🏗️ Arquitetura do Sistema
+# Execute a instalação automática
+./setup.ps1  # Windows
+./setup.sh   # Linux/Mac
+
+# Inicie o servidor
+python server.py
+```
+
+**Acesse**: http://localhost:8000
+
+## 🎯 Funcionalidades Principais
+
+✅ **Widget Incorporável** - Widgets JavaScript para compra de tokens  
+✅ **Painel Admin** - Interface completa de gerenciamento  
+✅ **API RESTful** - Backend com autenticação JWT  
+✅ **Blockchain BSC** - Integração com MetaMask  
+✅ **Sistema Completo** - Pronto para produção  
+
+## 📁 Arquivos Principais
+
+- `server.py` - Servidor Flask principal
+- `admin-panel.html` - Painel administrativo
+- `demo-widget.html` - Demo do widget
+- `setup.ps1/setup.sh` - Instaladores automáticos
+
+## 📋 Estrutura do Sistema
 
 ```
 widget-all/
