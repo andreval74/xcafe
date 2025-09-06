@@ -1,487 +1,446 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Widget SaaS - Servidor Python Simples
-Servidor de desenvolvimento para a plataforma Widget SaaS
-"""
-
 import os
 import json
 import time
 import hashlib
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import mimetypes
 
+# Imports Web3
+try:
+    import jwt
+    from eth_account.messages import encode_defunct
+    from eth_account import Account
+    WEB3_AVAILABLE = True
+    print("✅ Web3 dependencies loaded successfully")
+except ImportError as e:
+    WEB3_AVAILABLE = False
+    print(f"⚠️ Web3 dependencies not found: {e}")
+
+# JWT Secret
+SECRET_KEY = "xcafe_secret_2024_web3_auth"
+
 class WidgetSaaSHandler(BaseHTTPRequestHandler):
-    """Handler para o servidor Widget SaaS"""
-    
     def __init__(self, *args, **kwargs):
         self.data_dir = "data"
-        self.pages_dir = "pages"
-        self.src_dir = "src"
-        self.modules_dir = "modules"
         super().__init__(*args, **kwargs)
-    
+
+    def verify_signature(self, address, message, signature):
+        if not WEB3_AVAILABLE:
+            return True  # Dev mode
+        try:
+            message_hash = encode_defunct(text=message)
+            recovered_address = Account.recover_message(message_hash, signature=signature)
+            return recovered_address.lower() == address.lower()
+        except Exception as e:
+            print(f"Signature verification error: {e}")
+            return False
+
+    def generate_jwt_token(self, address, user_type):
+        if not WEB3_AVAILABLE:
+            return f"temp_token_{secrets.token_hex(16)}"
+        try:
+            payload = {
+                'address': address.lower(),
+                'userType': user_type,
+                'exp': datetime.utcnow() + timedelta(hours=24),
+                'iat': datetime.utcnow()
+            }
+            return jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+        except Exception as e:
+            print(f"JWT generation error: {e}")
+            return f"temp_token_{secrets.token_hex(16)}"
+
+    def verify_jwt_token(self, token):
+        if not WEB3_AVAILABLE:
+            return {"address": "dev_mode", "userType": "Super Admin"}
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+            return payload
+        except Exception as e:
+            print(f"Invalid token: {e}")
+            return None
+
+    def get_user_type(self, address):
+        address = address.lower()
+        try:
+            with open(f'{self.data_dir}/admins.json', 'r', encoding='utf-8') as f:
+                admins = json.load(f)
+            if address in admins:
+                if admins[address].get('active', True):
+                    return admins[address]['userType']
+                else:
+                    return "inactive"
+        except:
+            pass
+        
+        if self.is_first_admin():
+            return "first_admin"
+        return "normal"
+
+    def is_first_admin(self):
+        try:
+            with open(f'{self.data_dir}/admins.json', 'r', encoding='utf-8') as f:
+                admins = json.load(f)
+                return len(admins) == 0
+        except:
+            return True
+
+    def authenticate_wallet(self, data):
+        try:
+            address = data.get('address', '').lower()
+            message = data.get('message', '')
+            signature = data.get('signature', '')
+            timestamp = data.get('timestamp', 0)
+            
+            if not self.verify_signature(address, message, signature):
+                return {"success": False, "error": "Invalid signature"}
+            
+            if abs(time.time() * 1000 - timestamp) > 300000:
+                return {"success": False, "error": "Expired token"}
+            
+            user_type = self.get_user_type(address)
+            token = self.generate_jwt_token(address, user_type)
+            
+            return {
+                "success": True,
+                "address": address,
+                "userType": user_type,
+                "token": token,
+                "permissions": []
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Authentication error: {str(e)}"}
+
+    def setup_first_admin(self, data):
+        try:
+            address = data.get('address', '').lower()
+            
+            if not self.is_first_admin():
+                return {"success": False, "error": "System already configured"}
+            
+            os.makedirs(self.data_dir, exist_ok=True)
+            
+            admin_data = {
+                address: {
+                    "address": address,
+                    "userType": "Super Admin",
+                    "name": "Super Administrator",
+                    "department": "System",
+                    "permissions": ["full_access", "system_reset"],
+                    "addedBy": "system",
+                    "addedAt": datetime.now().isoformat(),
+                    "active": True
+                }
+            }
+            
+            with open(f'{self.data_dir}/admins.json', 'w', encoding='utf-8') as f:
+                json.dump(admin_data, f, indent=2, ensure_ascii=False)
+            
+            print(f"🚀 System configured with Super Admin: {address}")
+            
+            return {
+                "success": True,
+                "message": "System configured successfully",
+                "admin": admin_data[address]
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Setup error: {str(e)}"}
+
+    def create_admin_web3(self, data):
+        try:
+            token = data.get('token')
+            if not token:
+                return {"success": False, "error": "Authentication token required"}
+            
+            payload = self.verify_jwt_token(token)
+            if not payload:
+                return {"success": False, "error": "Invalid token"}
+            
+            if payload.get('userType') not in ['Super Admin', 'Admin']:
+                return {"success": False, "error": "No permission to create administrators"}
+            
+            new_address = data.get('address', '').lower()
+            user_type = data.get('userType', 'Moderator')
+            name = data.get('name', f'Admin {new_address[:8]}')
+            department = data.get('department', '')
+            
+            if not new_address:
+                return {"success": False, "error": "Wallet address required"}
+            
+            try:
+                with open(f'{self.data_dir}/admins.json', 'r', encoding='utf-8') as f:
+                    admins = json.load(f)
+            except:
+                admins = {}
+            
+            if new_address in admins:
+                return {"success": False, "error": "Wallet is already an administrator"}
+            
+            new_admin = {
+                "address": new_address,
+                "userType": user_type,
+                "name": name,
+                "department": department,
+                "permissions": data.get('permissions', []),
+                "addedBy": payload.get('address'),
+                "addedAt": datetime.now().isoformat(),
+                "active": True
+            }
+            
+            admins[new_address] = new_admin
+            
+            with open(f'{self.data_dir}/admins.json', 'w', encoding='utf-8') as f:
+                json.dump(admins, f, indent=2, ensure_ascii=False)
+            
+            print(f"✅ New admin created: {new_address} ({user_type})")
+            
+            return {
+                "success": True,
+                "message": "Administrator created successfully",
+                "admin": new_admin
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Error creating admin: {str(e)}"}
+
+    def system_reset(self, data):
+        try:
+            token = data.get('token')
+            if not token:
+                return {"success": False, "error": "Authentication token required"}
+            
+            payload = self.verify_jwt_token(token)
+            if not payload or payload.get('userType') != 'Super Admin':
+                return {"success": False, "error": "Only Super Admin can reset the system"}
+            
+            files_to_reset = [
+                f'{self.data_dir}/admins.json',
+                f'{self.data_dir}/users.json',
+                f'{self.data_dir}/config.json'
+            ]
+            
+            for file_path in files_to_reset:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            
+            print("🗑️ System completely reset")
+            
+            return {
+                "success": True,
+                "message": "System reset successfully"
+            }
+        except Exception as e:
+            return {"success": False, "error": f"Reset error: {str(e)}"}
+
+    def get_admin_list(self):
+        try:
+            with open(f'{self.data_dir}/admins.json', 'r', encoding='utf-8') as f:
+                admins = json.load(f)
+            
+            admin_list = []
+            for address, admin in admins.items():
+                admin_safe = admin.copy()
+                admin_list.append(admin_safe)
+            
+            return admin_list
+        except Exception as e:
+            print(f"Error loading admins: {e}")
+            return []
+
     def do_GET(self):
-        """Processar requisições GET"""
         try:
             parsed_url = urlparse(self.path)
-            path = parsed_url.path
+            path = parsed_url.path[1:] if parsed_url.path.startswith('/') else parsed_url.path
             
-            # Remover barra inicial
-            if path.startswith('/'):
-                path = path[1:]
-            
-            # Rotas da API
             if path.startswith('api/'):
-                self.handle_api_get(path, parsed_url.query)
-            # Servir arquivos estáticos
+                self.handle_api_get(path)
             else:
                 self.serve_static_file(path)
-                
         except Exception as e:
-            self.send_error_response(500, f"Erro interno: {str(e)}")
-    
+            print(f"GET error: {e}")
+            self.send_error_response(500, f"Internal error: {str(e)}")
+
     def do_POST(self):
-        """Processar requisições POST"""
         try:
             parsed_url = urlparse(self.path)
-            path = parsed_url.path
+            path = parsed_url.path[1:] if parsed_url.path.startswith('/') else parsed_url.path
             
-            if path.startswith('/'):
-                path = path[1:]
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                try:
+                    data = json.loads(post_data.decode('utf-8'))
+                except:
+                    data = {}
+            else:
+                data = {}
             
             if path.startswith('api/'):
-                # Ler dados do POST
-                content_length = int(self.headers.get('Content-Length', 0))
-                post_data = self.rfile.read(content_length)
-                
-                try:
-                    data = json.loads(post_data.decode('utf-8')) if post_data else {}
-                except json.JSONDecodeError:
-                    data = {}
-                
                 self.handle_api_post(path, data)
             else:
-                self.send_error_response(404, "Endpoint não encontrado")
-                
+                self.send_error_response(404, "Endpoint not found")
         except Exception as e:
-            self.send_error_response(500, f"Erro interno: {str(e)}")
-    
-    def handle_api_get(self, path, query):
-        """Processar rotas GET da API"""
-        
-        # Health check
+            print(f"POST error: {e}")
+            self.send_error_response(500, f"Internal error: {str(e)}")
+
+    def handle_api_get(self, path):
         if path == 'api/health':
             response = {
                 "status": "OK",
                 "timestamp": datetime.now().isoformat(),
                 "version": "1.0.0",
-                "service": "Widget SaaS API"
+                "service": "Widget SaaS API Web3",
+                "web3Available": WEB3_AVAILABLE
             }
             self.send_json_response(response)
             return
         
-        # Estatísticas públicas
         if path == 'api/stats':
-            stats = self.load_system_stats()
+            stats = {
+                "timestamp": datetime.now().isoformat(),
+                "totalAdmins": len(self.get_admin_list()),
+                "systemInitialized": not self.is_first_admin(),
+                "web3Available": WEB3_AVAILABLE
+            }
             self.send_json_response(stats)
             return
         
-        # Validar widget
-        if path.startswith('api/widget/validate/'):
-            widget_id = path.split('/')[-1]
-            widget = self.get_widget_by_id(widget_id)
-            if widget:
-                response = {
-                    "valid": True,
-                    "widget": {
-                        "id": widget["id"],
-                        "name": widget["name"],
-                        "price": widget["price"],
-                        "active": widget.get("active", True)
-                    }
-                }
-            else:
-                response = {"valid": False, "error": "Widget não encontrado"}
-            self.send_json_response(response)
+        if path == 'api/system/status':
+            status = {
+                "initialized": not self.is_first_admin(),
+                "web3Available": WEB3_AVAILABLE,
+                "timestamp": datetime.now().isoformat()
+            }
+            self.send_json_response(status)
             return
         
-        # Listar widgets do usuário
-        if path == 'api/widgets':
-            # Simular autenticação (em produção seria via header)
-            user_address = self.headers.get('X-User-Address', 'demo')
-            widgets = self.get_user_widgets(user_address)
-            self.send_json_response({"widgets": widgets})
+        if path == 'api/admin/list':
+            admin_list = self.get_admin_list()
+            self.send_json_response(admin_list)
             return
         
-        # Dados do usuário
-        if path == 'api/users/me':
-            user_address = self.headers.get('X-User-Address', 'demo')
-            user_data = self.get_user_data(user_address)
-            self.send_json_response(user_data)
-            return
-        
-        # Endpoint não encontrado
-        self.send_error_response(404, "Endpoint não encontrado")
-    
+        self.send_error_response(404, "Endpoint not found")
+
     def handle_api_post(self, path, data):
-        """Processar rotas POST da API"""
-        
-        # Registrar usuário
-        if path == 'api/users/register':
-            user_address = data.get('walletAddress')
-            if not user_address:
-                self.send_error_response(400, "Endereço da carteira obrigatório")
-                return
-            
-            user = self.create_user(user_address)
-            self.send_json_response({"success": True, "user": user})
-            return
-        
-        # Criar widget
-        if path == 'api/widgets':
-            user_address = self.headers.get('X-User-Address', 'demo')
-            widget = self.create_widget(user_address, data)
-            if widget:
-                self.send_json_response({"success": True, "widget": widget})
-            else:
-                self.send_error_response(400, "Erro ao criar widget")
-            return
-        
-        # Comprar créditos
-        if path == 'api/credits/purchase':
-            user_address = self.headers.get('X-User-Address', 'demo')
-            result = self.purchase_credits(user_address, data)
+        if path == 'api/auth/verify':
+            result = self.authenticate_wallet(data)
             self.send_json_response(result)
             return
         
-        # Criar transação
-        if path == 'api/transactions':
-            result = self.create_transaction(data)
+        if path == 'api/system/setup':
+            result = self.setup_first_admin(data)
             self.send_json_response(result)
             return
         
-        # Endpoint não encontrado
-        self.send_error_response(404, "Endpoint não encontrado")
-    
+        if path == 'api/system/reset':
+            result = self.system_reset(data)
+            self.send_json_response(result)
+            return
+
+        if path == 'api/admin/register':
+            result = self.create_admin_web3(data)
+            self.send_json_response(result)
+            return
+        
+        self.send_error_response(404, "Endpoint not found")
+
     def serve_static_file(self, path):
-        """Servir arquivos estáticos"""
-        # Página inicial - redireciona para pages/index.html
         if path == '' or path == 'index.html':
             path = 'index.html'
-        elif path == 'setup.html':
-            path = 'setup.html'
-        elif path == 'dashboard.html':
-            path = 'pages/dashboard.html'
-        elif path == 'demo.html':
-            path = 'demo.html'
-        elif path.endswith('.js') and not '/' in path:
-            # Scripts do módulo
-            if os.path.exists(f"modules/{path}"):
-                path = f"modules/{path}"
-            elif os.path.exists(f"src/{path}"):
-                path = f"src/{path}"
         
-        # Verificar se arquivo existe
         if not os.path.exists(path):
-            self.send_error_response(404, f"Arquivo não encontrado: {path}")
+            self.send_error_response(404, f"File not found: {path}")
             return
         
         try:
             with open(path, 'rb') as f:
                 content = f.read()
             
-            # Determinar tipo MIME
-            mime_type, _ = mimetypes.guess_type(path)
-            if mime_type is None:
+            content_type, _ = mimetypes.guess_type(path)
+            if content_type is None:
                 if path.endswith('.js'):
-                    mime_type = 'application/javascript'
+                    content_type = 'application/javascript'
                 elif path.endswith('.css'):
-                    mime_type = 'text/css'
+                    content_type = 'text/css'
                 elif path.endswith('.html'):
-                    mime_type = 'text/html'
+                    content_type = 'text/html'
                 else:
-                    mime_type = 'application/octet-stream'
+                    content_type = 'application/octet-stream'
             
             self.send_response(200)
-            self.send_header('Content-Type', mime_type + '; charset=utf-8')
+            self.send_header('Content-Type', content_type)
             self.send_header('Content-Length', len(content))
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
             self.end_headers()
             self.wfile.write(content)
-            
         except Exception as e:
-            self.send_error_response(500, f"Erro ao ler arquivo: {str(e)}")
-    
-    def send_json_response(self, data, status_code=200):
-        """Enviar resposta JSON"""
-        json_data = json.dumps(data, ensure_ascii=False, indent=2)
-        self.send_response(status_code)
-        self.send_header('Content-Type', 'application/json; charset=utf-8')
-        self.send_header('Content-Length', len(json_data.encode('utf-8')))
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-User-Address')
-        self.end_headers()
-        self.wfile.write(json_data.encode('utf-8'))
-    
-    def send_error_response(self, status_code, message):
-        """Enviar resposta de erro"""
-        error_data = {
-            "error": True,
-            "message": message,
-            "timestamp": datetime.now().isoformat()
-        }
-        self.send_json_response(error_data, status_code)
-    
-    def load_system_stats(self):
-        """Carregar estatísticas do sistema"""
+            print(f"Error serving file {path}: {e}")
+            self.send_error_response(500, f"Error reading file: {str(e)}")
+
+    def send_json_response(self, data, status=200):
         try:
-            with open(f"{self.data_dir}/system_stats.json", 'r') as f:
-                return json.load(f)
-        except:
-            return {
-                "totalUsers": 127,
-                "totalWidgets": 89,
-                "totalTransactions": 1340,
-                "totalVolume": 45230,
-                "totalCredits": 15000,
-                "lastUpdated": datetime.now().isoformat()
+            json_data = json.dumps(data, ensure_ascii=False, indent=2)
+            self.send_response(status)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            self.end_headers()
+            self.wfile.write(json_data.encode('utf-8'))
+        except Exception as e:
+            print(f"Error sending JSON: {e}")
+            self.send_error_response(500, "Error processing response")
+
+    def send_error_response(self, status, message):
+        try:
+            error_data = {
+                "error": True,
+                "status": status,
+                "message": message,
+                "timestamp": datetime.now().isoformat()
             }
-    
-    def get_user_data(self, user_address):
-        """Obter dados do usuário"""
-        try:
-            with open(f"{self.data_dir}/users.json", 'r') as f:
-                users = json.load(f)
-            
-            user = users.get(user_address, {})
-            if not user:
-                user = self.create_user(user_address)
-            
-            return user
+            self.send_json_response(error_data, status)
         except:
-            return self.create_user(user_address)
-    
-    def create_user(self, user_address):
-        """Criar novo usuário"""
-        user = {
-            "walletAddress": user_address,
-            "apiKey": f"wgt_{secrets.token_hex(16)}",
-            "credits": 100,  # Créditos iniciais de boas-vindas
-            "widgets": [],
-            "transactions": [],
-            "createdAt": datetime.now().isoformat(),
-            "profile": {
-                "displayName": "",
-                "email": ""
-            }
-        }
-        
-        try:
-            # Carregar usuários existentes
-            try:
-                with open(f"{self.data_dir}/users.json", 'r') as f:
-                    users = json.load(f)
-            except:
-                users = {}
-            
-            # Adicionar novo usuário
-            users[user_address] = user
-            
-            # Salvar
-            with open(f"{self.data_dir}/users.json", 'w') as f:
-                json.dump(users, f, indent=2, ensure_ascii=False)
-            
-            return user
-        except Exception as e:
-            print(f"Erro ao criar usuário: {e}")
-            return user
-    
-    def get_user_widgets(self, user_address):
-        """Obter widgets do usuário"""
-        try:
-            with open(f"{self.data_dir}/widgets.json", 'r') as f:
-                widgets = json.load(f)
-            
-            user_widgets = []
-            for widget_id, widget in widgets.items():
-                if widget.get("owner") == user_address:
-                    user_widgets.append(widget)
-            
-            return user_widgets
-        except:
-            return []
-    
-    def get_widget_by_id(self, widget_id):
-        """Obter widget por ID"""
-        try:
-            with open(f"{self.data_dir}/widgets.json", 'r') as f:
-                widgets = json.load(f)
-            return widgets.get(widget_id)
-        except:
-            return None
-    
-    def create_widget(self, user_address, data):
-        """Criar novo widget"""
-        widget_id = f"widget_{int(time.time())}_{secrets.token_hex(4)}"
-        
-        widget = {
-            "id": widget_id,
-            "name": data.get("name", "Meu Token"),
-            "tokenAddress": data.get("tokenAddress", ""),
-            "price": float(data.get("price", 0.1)),
-            "network": data.get("network", "1"),
-            "minPurchase": float(data.get("minPurchase", 1)),
-            "maxPurchase": float(data.get("maxPurchase", 10000)),
-            "theme": data.get("theme", "light"),
-            "description": data.get("description", ""),
-            "owner": user_address,
-            "active": True,
-            "sales": 0,
-            "createdAt": datetime.now().isoformat()
-        }
-        
-        try:
-            # Carregar widgets existentes
-            try:
-                with open(f"{self.data_dir}/widgets.json", 'r') as f:
-                    widgets = json.load(f)
-            except:
-                widgets = {}
-            
-            # Adicionar novo widget
-            widgets[widget_id] = widget
-            
-            # Salvar
-            with open(f"{self.data_dir}/widgets.json", 'w') as f:
-                json.dump(widgets, f, indent=2, ensure_ascii=False)
-            
-            return widget
-        except Exception as e:
-            print(f"Erro ao criar widget: {e}")
-            return None
-    
-    def purchase_credits(self, user_address, data):
-        """Processar compra de créditos"""
-        credits = int(data.get("credits", 100))
-        price = float(data.get("price", 10))
-        
-        try:
-            # Carregar usuários
-            with open(f"{self.data_dir}/users.json", 'r') as f:
-                users = json.load(f)
-            
-            if user_address not in users:
-                return {"success": False, "error": "Usuário não encontrado"}
-            
-            # Adicionar créditos
-            users[user_address]["credits"] += credits
-            
-            # Salvar
-            with open(f"{self.data_dir}/users.json", 'w') as f:
-                json.dump(users, f, indent=2, ensure_ascii=False)
-            
-            return {
-                "success": True,
-                "credits": users[user_address]["credits"],
-                "purchased": credits
-            }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-    
-    def create_transaction(self, data):
-        """Criar nova transação"""
-        transaction = {
-            "id": f"tx_{int(time.time())}_{secrets.token_hex(8)}",
-            "widgetId": data.get("widgetId"),
-            "buyerAddress": data.get("buyerAddress"),
-            "sellerAddress": data.get("sellerAddress"),
-            "amount": float(data.get("amount", 0)),
-            "quantity": float(data.get("quantity", 0)),
-            "status": "pending",
-            "timestamp": datetime.now().isoformat()
-        }
-        
-        try:
-            # Carregar transações
-            try:
-                with open(f"{self.data_dir}/transactions.json", 'r') as f:
-                    transactions = json.load(f)
-            except:
-                transactions = []
-            
-            # Adicionar transação
-            transactions.append(transaction)
-            
-            # Manter apenas últimas 1000 transações
-            if len(transactions) > 1000:
-                transactions = transactions[-1000:]
-            
-            # Salvar
-            with open(f"{self.data_dir}/transactions.json", 'w') as f:
-                json.dump(transactions, f, indent=2, ensure_ascii=False)
-            
-            return {"success": True, "transaction": transaction}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
-    
+            self.send_response(status)
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(message.encode('utf-8'))
+
     def log_message(self, format, *args):
-        """Log personalizado"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{timestamp}] {format % args}")
 
 def main():
-    """Função principal"""
-    # Verificar se estamos no diretório correto
-    if not os.path.exists("data"):
-        print("❌ Diretório 'data' não encontrado. Execute este script no diretório widget-all")
+    if not os.path.exists('auth.html') and not os.path.exists('admin-panel.html'):
+        print("⚠️ Run server in widget-all/ directory")
         return
     
-    if not os.path.exists("pages"):
-        print("❌ Diretório 'pages' não encontrado. Execute este script no diretório widget-all")
-        return
+    HOST = '0.0.0.0'
+    PORT = 8000
     
-    # Configurações do servidor
-    HOST = "0.0.0.0"  # Aceitar conexões de qualquer IP (para produção)
-    PORT = 8000       # Porta padrão (mude para 80 em produção se disponível)
+    server = HTTPServer((HOST, PORT), WidgetSaaSHandler)
     
-    print("🚀 Iniciando Widget SaaS Server...")
-    print(f"📡 Servidor: http://{HOST}:{PORT}")
-    print(f"🌐 Landing: http://{HOST}:{PORT}/")
-    print(f"📊 Dashboard: http://{HOST}:{PORT}/dashboard.html")
-    print(f"🎮 Demo: http://{HOST}:{PORT}/demo.html")
-    print(f"❤️  Health: http://{HOST}:{PORT}/api/health")
+    print("🚀 Starting Widget SaaS Server Web3...")
+    print(f"📡 Server: http://{HOST}:{PORT}")
+    print(f"🔐 Auth: http://{HOST}:{PORT}/auth.html")
+    print(f"🎛️ Admin: http://{HOST}:{PORT}/admin-panel.html")
+    print(f"❤️ Health: http://{HOST}:{PORT}/api/health")
     print(f"📈 Stats: http://{HOST}:{PORT}/api/stats")
-    print("")
-    print("🌍 CONFIGURADO PARA PRODUÇÃO:")
-    print(f"   - Aceita conexões externas (HOST: {HOST})")
-    print(f"   - Porta {PORT} (mude para 80 se necessário)")
-    print(f"   - CORS habilitado para todos domínios")
-    print(f"   - API completa funcionando")
-    print("")
-    print("🛑 Pressione Ctrl+C para parar")
-    print("")
+    print(f"🌐 Web3 Status: {'✅ Active' if WEB3_AVAILABLE else '⚠️ Dev Mode'}")
+    print("🛑 Press Ctrl+C to stop")
     
     try:
-        # Criar servidor
-        server = HTTPServer((HOST, PORT), WidgetSaaSHandler)
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\n🛑 Servidor parado pelo usuário")
-    except Exception as e:
-        print(f"❌ Erro no servidor: {e}")
-        if "Permission denied" in str(e):
-            print("💡 Dica: Use 'sudo python3 server.py' para porta 80")
-        elif "Address already in use" in str(e):
-            print("💡 Dica: Porta ocupada. Mude a PORT para 8080 ou mate o processo")
-        elif "No such file or directory" in str(e):
-            print("💡 Dica: Execute no diretório widget-all onde estão as pastas data/ e pages/")
+        print("\n🛑 Server stopped by user")
+        server.shutdown()
 
 if __name__ == "__main__":
     main()
