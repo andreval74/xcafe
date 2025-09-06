@@ -171,9 +171,11 @@ class WidgetSaaSHandler(BaseHTTPRequestHandler):
     
     def serve_static_file(self, path):
         """Servir arquivos estáticos"""
-        # Página inicial - usar index.html na raiz
+        # Página inicial - redireciona para pages/index.html
         if path == '' or path == 'index.html':
             path = 'index.html'
+        elif path == 'setup.html':
+            path = 'setup.html'
         elif path == 'dashboard.html':
             path = 'pages/dashboard.html'
         elif path == 'demo.html':

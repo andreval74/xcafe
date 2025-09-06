@@ -2,29 +2,31 @@
 =====================================================
 
 ✅ CONFIGURAÇÃO COMPLETA:
-- Arquivo index.html criado na raiz
-- Servidor configurado para auto-inicialização
-- Rota raiz (/) mapeia para index.html
+- index.html → Redireciona para pages/index.html (site oficial)
+- setup.html → Página de instalação e configuração
+- Servidor configurado para auto-redirecionamento
 - Sistema pronto para xcafe.app/widget-all/
 
-📁 ARQUIVOS PRINCIPAIS:
-- index.html (página de instalação principal)
+📁 ESTRUTURA DE ARQUIVOS:
+- index.html (redirecionamento para site oficial)
+- setup.html (instalação e configuração)
+- pages/index.html (site oficial completo)
 - admin-panel.html (painel administrativo)
 - demo-widget.html (demo do widget)
 - server.py (servidor Flask)
 
 🌐 URLS DE ACESSO:
-- Principal: xcafe.app/widget-all/
+- Principal: xcafe.app/widget-all/ → Site oficial
+- Setup: xcafe.app/widget-all/setup.html → Instalação
 - Admin: xcafe.app/widget-all/admin-panel.html
 - Demo: xcafe.app/widget-all/demo-widget.html
 - API: xcafe.app/widget-all/api/health
 
-⚡ INSTALAÇÃO AUTOMÁTICA:
-Quando acessar xcafe.app/widget-all/ o usuário verá:
-1. Status do sistema
-2. Links para painel admin e demo
-3. Comandos de instalação automática
-4. APIs e endpoints disponíveis
-5. Documentação completa
+⚡ FLUXO DO USUÁRIO:
+1. Acessa xcafe.app/widget-all/
+2. Vê loader com redirecionamento automático
+3. É direcionado para o site oficial (pages/index.html)
+4. Pode acessar setup.html para instalação
+5. Acesso direto ao admin e demo
 
 🎯 SISTEMA 100% PRONTO PARA XCAFE.APP!
