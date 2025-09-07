@@ -261,22 +261,21 @@ python server.py
 
 ```
 widget-all/
-├── api/                    # Backend Node.js
-│   ├── server.js          # Servidor principal
-│   └── package.json       # Dependências
-├── modules/               # Módulos compartilhados
-│   ├── data-manager.js    # Gerenciamento de dados
-│   └── auth-manager.js    # Autenticação MetaMask
-├── contracts/             # Smart Contracts
-│   └── UniversalSaleContract.sol
-├── pages/                 # Frontend
-│   ├── index.html         # Landing page
-│   └── dashboard.html     # Dashboard do usuário
-├── src/                   # Widget embeddable
-│   └── widget-sale.js     # Widget principal
-├── data/                  # Armazenamento local
-├── assets/               # Assets estáticos
-└── shared/               # Utilitários compartilhados
+├── server.py              # Servidor Python Web3
+├── auth.html              # Página de autenticação  
+├── dashboard.html         # Dashboard do usuário
+├── admin-panel.html       # Painel administrativo
+├── index.html             # Landing page
+├── js/                    # JavaScript organizado
+│   ├── xcafe-app.js       # Aplicação principal
+│   ├── shared/            # Módulos compartilhados
+│   └── modules/           # Módulos específicos
+├── css/                   # Estilos unificados
+│   └── app.css            # CSS principal
+├── data/                  # Banco de dados SQLite
+│   └── init.sql           # Schema do banco
+├── docs/                  # Documentação
+└── imgs/                  # Imagens e assets
 ```
 
 ## 🚀 Instalação e Configuração
@@ -309,7 +308,7 @@ npm run dev
 
 ### 3. Configuração do Frontend
 
-Abrir `pages/index.html` em um servidor local ou hospedar os arquivos.
+Abrir `index.html` no navegador através do servidor Python (http://127.0.0.1:3000).
 
 ### 4. Deploy do Smart Contract
 

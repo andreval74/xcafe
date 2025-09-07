@@ -7,9 +7,9 @@ O sistema de administradores foi completamente implementado e está funcionando.
 ### 🚀 Acesso Rápido
 
 1. **Iniciar Sistema**: `python server.py` na pasta `widget-all`
-2. **Acessar Painel**: http://localhost:8000/admin-panel.html
-3. **Cadastrar Admin**: http://localhost:8000/admin-register.html
-4. **Testar Sistema**: http://localhost:8000/pages/test-admin.html
+2. **Acessar Painel**: http://localhost:3000/admin-panel.html
+3. **Fazer Login**: http://localhost:3000/auth.html
+4. **Testar Sistema**: http://localhost:3000/api/health
 
 ### 👨‍💼 Como Cadastrar Administradores
 
@@ -98,11 +98,11 @@ const login = await fetch('/api/admin/login', {
 
 ### 🧪 Teste do Sistema
 
-Use a página de teste: http://localhost:8000/pages/test-admin.html
+Use a API de saúde: http://localhost:3000/api/health
 
-1. **Testar Cadastro**: Cria um admin de teste
-2. **Testar Login**: Autentica com as credenciais
-3. **Listar Admins**: Mostra todos os administradores
+1. **Testar Sistema**: Verifica status do servidor
+2. **Testar Web3**: Conecta com MetaMask  
+3. **Listar Status**: Mostra estatísticas do sistema
 
 ### 🔧 APIs Disponíveis
 

@@ -459,7 +459,7 @@ function showMetaMaskInstallModal() {
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body text-center">
-          <img src="../imgs/metamask-fox.svg" alt="MetaMask" style="width: 80px; height: 80px;" class="mb-3">
+          <img src="imgs/metamask-fox.svg" alt="MetaMask" style="width: 80px; height: 80px;" class="mb-3">
           <h6>MetaMask nÃo está instalado</h6>
           <p>Para interagir com a blockchain, vocáª precisa ter o MetaMask instalado no seu navegador.</p>
           <div class="d-grid gap-2">

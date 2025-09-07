@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget SaaS - Plataforma de Venda de Tokens</title>
+    
+    <!-- Meta Tags SEO -->
+    <meta name="description" content="Plataforma SaaS para integrar widget de venda de tokens em qualquer site. Sistema de créditos e comissão automática de 2%.">
+    <meta name="keywords" content="widget, tokens, blockchain, metamask, venda, SaaS">
+    <meta name="author" content="Widget SaaS Team">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- CSS Unificado -->
+    <link href="css/app.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand text-primary" href="#home">
+                <i class="fas fa-cube me-2"></i>
+                Widget SaaS
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Recursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">Como Funciona</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing">Preços</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#demo">Demo</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center">
+                    <div id="connection-status" class="connection-indicator disconnected me-3">
+                        <i class="fas fa-times-circle me-1"></i>
+                        Desconectado
+                    </div>
+                    <button id="connect-metamask" class="btn btn-outline-primary me-2">
+                        <i class="fab fa-ethereum me-1"></i>Conectar
+                    </button>
+                    <a href="dashboard.html" class="btn btn-primary">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        🚀 Monetize seu site com 
+                        <span class="text-warning">Widgets de Token</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        Plataforma SaaS que permite integrar facilmente um widget de venda de tokens em qualquer site. 
+                        Sistema de créditos pré-pagos e comissão automática de 2%.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <button id="get-started" class="btn btn-warning btn-lg btn-custom">
+                            <i class="fas fa-rocket me-2"></i>
+                            Começar Agora
+                        </button>
+                        <a href="#demo" class="btn btn-outline-light btn-lg btn-custom">
+                            <i class="fas fa-play me-2"></i>
+                            Ver Demo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="widget-demo mt-5 mt-lg-0">
+                        <div id="hero-widget-demo">
+                            <!-- Widget demo será carregado aqui -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 mb-4">
+                    <span class="stats-number" id="total-users">0</span>
+                    <p class="text-muted">Usuários Ativos</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <span class="stats-number" id="total-widgets">0</span>
+                    <p class="text-muted">Widgets Criados</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <span class="stats-number" id="total-transactions">0</span>
+                    <p class="text-muted">Transações</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <span class="stats-number" id="total-volume">$0</span>
+                    <p class="text-muted">Volume Total</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">🎯 Por que escolher nosso Widget?</h2>
+                <p class="lead text-muted">
+                    Solução completa para venda de tokens com máxima simplicidade
+                </p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <h5 class="card-title">🔌 Plug & Play</h5>
+                            <p class="card-text">
+                                Integração em 5 minutos. Copie o código, cole no seu site e pronto! 
+                                Não precisa alterar nada no seu token.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <h5 class="card-title">💰 Sistema de Créditos</h5>
+                            <p class="card-text">
+                                Pague apenas pelo que usar. Compre créditos uma vez e use quando precisar. 
+                                Sem mensalidades ou taxas fixas.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h5 class="card-title">🛡️ Seguro & Auditado</h5>
+                            <p class="card-text">
+                                Smart contracts auditados, transações seguras e comissão automática. 
+                                Você recebe 98%, plataforma fica com 2%.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h5 class="card-title">📱 Responsivo</h5>
+                            <p class="card-text">
+                                Widget otimizado para desktop, tablet e mobile. 
+                                Funciona perfeitamente em qualquer dispositivo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-network-wired"></i>
+                            </div>
+                            <h5 class="card-title">🌐 Multi-Rede</h5>
+                            <p class="card-text">
+                                Suporte para Ethereum, BSC, Polygon e mais redes. 
+                                Expanda seu alcance para diferentes blockchains.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card feature-card">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5 class="card-title">📊 Analytics</h5>
+                            <p class="card-text">
+                                Dashboard completo com estatísticas de vendas, 
+                                volume transacionado e performance do widget.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">🔄 Como Funciona</h2>
+                <p class="lead text-muted">
+                    Processo simples em 4 passos para monetizar seu token
+                </p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div class="mt-4">
+                            <i class="fas fa-user-plus text-primary" style="font-size: 2.5rem;"></i>
+                            <h5 class="mt-3">Conecte MetaMask</h5>
+                            <p class="text-muted">
+                                Conecte sua carteira MetaMask para criar sua conta. 
+                                Sem formulários, sem complicação.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div class="mt-4">
+                            <i class="fas fa-credit-card text-primary" style="font-size: 2.5rem;"></i>
+                            <h5 class="mt-3">Compre Créditos</h5>
+                            <p class="text-muted">
+                                Adquira créditos usando USDT, BUSD ou outras 
+                                criptomoedas aceitas. Pague apenas o que vai usar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <div class="mt-4">
+                            <i class="fas fa-code text-primary" style="font-size: 2.5rem;"></i>
+                            <h5 class="mt-3">Gere o Widget</h5>
+                            <p class="text-muted">
+                                Configure seu token, preço e limites. 
+                                Sistema gera código pronto para colar no seu site.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <div class="mt-4">
+                            <i class="fas fa-rocket text-primary" style="font-size: 2.5rem;"></i>
+                            <h5 class="mt-3">Venda e Lucre</h5>
+                            <p class="text-muted">
+                                Usuários compram seus tokens diretamente do widget. 
+                                Você recebe 98%, plataforma fica com 2%.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">💎 Pacotes de Créditos</h2>
+                <p class="lead text-muted">
+                    Escolha o pacote ideal para suas necessidades
+                </p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card pricing-card h-100">
+                        <div class="card-header text-center bg-light">
+                            <h5 class="card-title">🌱 Starter</h5>
+                            <h2 class="text-primary">$10</h2>
+                            <p class="text-muted">100 créditos</p>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>100 transações</li>
+                                <li><i class="fas fa-check text-success me-2"></i>1 widget ativo</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Suporte básico</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Analytics básicas</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-outline-primary w-100">Escolher Plano</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card pricing-card popular h-100">
+                        <div class="card-header text-center bg-primary text-white">
+                            <h5 class="card-title">🚀 Professional</h5>
+                            <h2>$40</h2>
+                            <p>500 créditos</p>
+                            <span class="badge bg-warning">Popular</span>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>500 transações</li>
+                                <li><i class="fas fa-check text-success me-2"></i>5 widgets ativos</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Suporte prioritário</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Analytics avançadas</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Customização de tema</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary w-100">Escolher Plano</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card pricing-card h-100">
+                        <div class="card-header text-center bg-light">
+                            <h5 class="card-title">💼 Business</h5>
+                            <h2 class="text-primary">$75</h2>
+                            <p class="text-muted">1000 créditos</p>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>1000 transações</li>
+                                <li><i class="fas fa-check text-success me-2"></i>10 widgets ativos</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Suporte VIP 24/7</li>
+                                <li><i class="fas fa-check text-success me-2"></i>API dedicada</li>
+                                <li><i class="fas fa-check text-success me-2"></i>White label</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Relatórios personalizados</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-outline-primary w-100">Escolher Plano</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card pricing-card h-100">
+                        <div class="card-header text-center bg-warning">
+                            <h5 class="card-title">🏢 Enterprise</h5>
+                            <h2 class="text-dark">$300</h2>
+                            <p class="text-dark">5000 créditos</p>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>5000 transações</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Widgets ilimitados</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Gerente dedicado</li>
+                                <li><i class="fas fa-check text-success me-2"></i>SLA garantido</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Integração customizada</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Consultoria inclusa</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-warning w-100">Falar com Vendas</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">🎮 Experimente o Widget</h2>
+                <p class="lead text-muted">
+                    Veja como funciona na prática
+                </p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-desktop me-2"></i>Preview do Widget em Ação</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="widget-demo-container" data-token-widget 
+                                         data-api-key="demo-key" 
+                                         data-sale-id="demo-sale" 
+                                         data-theme="light">
+                                        <!-- Widget será carregado aqui -->
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Código de Integração:</h6>
+                                    <pre class="bg-light p-3 rounded"><code>&lt;script src="widget-sale.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+new TokenSaleWidget({
+  apiKey: 'sua-api-key',
+  containerId: 'widget-container',
+  theme: 'light'
+});
+&lt;/script&gt;</code></pre>
+                                    
+                                    <div class="mt-4">
+                                        <h6>Recursos do Widget:</h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success me-2"></i>Conexão MetaMask automática</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Validação de créditos em tempo real</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Cálculo automático de preços</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Interface responsiva</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Suporte a múltiplas redes</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-white mb-3">
+                        <i class="fas fa-cube me-2"></i>Widget SaaS
+                    </h5>
+                    <p class="text-light">
+                        Plataforma líder para integração de widgets de venda de tokens. 
+                        Simples, seguro e escalável.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-light"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-telegram fa-lg"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-discord fa-lg"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-github fa-lg"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="text-white">Produto</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#features" class="text-light text-decoration-none">Recursos</a></li>
+                        <li><a href="#pricing" class="text-light text-decoration-none">Preços</a></li>
+                        <li><a href="#demo" class="text-light text-decoration-none">Demo</a></li>
+                        <li><a href="dashboard.html" class="text-light text-decoration-none">Dashboard</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="text-white">Recursos</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">Documentação</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">API Reference</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Tutoriais</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Suporte</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="text-white">Empresa</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">Sobre</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Blog</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Carreiras</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Contato</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="text-white">Legal</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">Privacidade</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Termos</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Segurança</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Status</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-light mb-0">
+                        © 2025 Widget SaaS. Todos os direitos reservados.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-light mb-0">
+                        Feito com ❤️ para a comunidade blockchain
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Ethers.js -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    
+    <!-- Módulos do Sistema -->
+    <script src="js/modules/data-manager.js"></script>
+    <script src="js/modules/auth-manager.js"></script>
+    <script src="js/shared/web3.js"></script>
+    <script src="js/shared/api.js"></script>
+    
+    <!-- Widget Sale -->
+    <script src="js/modules/widget-sale.js"></script>
+    
+    <!-- Landing Page Controller -->
+    <script src="js/pages/landing.js"></script>
+    
+    <script>
+        // Inicializar Landing Page quando DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            new LandingPage();
+        });
+
+        // Smooth scroll para links internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

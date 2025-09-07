@@ -423,7 +423,7 @@ def main():
         return
     
     HOST = '0.0.0.0'
-    PORT = 8000
+    PORT = 3000
     
     server = HTTPServer((HOST, PORT), WidgetSaaSHandler)
     
