@@ -1,0 +1,362 @@
+/*
+================================================================================
+INDEX.HTML - CSS STYLES
+================================================================================
+Estilos específicos para a página principal do XCafe Widget SaaS
+================================================================================
+*/
+
+:root {
+    /* Cores principais */
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
+    --dark-gray: #495057;
+    
+    /* Cores neon para efeitos */
+    --neon-blue: #4facfe;
+    --neon-blue-bright: #00f2fe;
+    --neon-glow: 0 0 20px rgba(79, 172, 254, 0.6);
+    --neon-glow-strong: 0 0 30px rgba(79, 172, 254, 0.8);
+    
+    /* Fonte */
+    --font-family: 'Inter', sans-serif;
+}
+
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 100px 0 80px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Widget Demo */
+.widget-demo {
+    perspective: 1000px;
+}
+
+.floating {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.widget-preview {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    color: #333;
+    transform: rotateY(-5deg) rotateX(5deg);
+    transition: all 0.3s ease;
+}
+
+.widget-preview:hover {
+    transform: rotateY(0deg) rotateX(0deg) scale(1.02);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+}
+
+.token-display {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.token-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-color), var(--neon-blue));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 24px;
+}
+
+.quantity-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    justify-content: center;
+}
+
+.quantity-btn {
+    background: var(--light-gray);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.quantity-btn:hover {
+    background: var(--medium-gray);
+    transform: translateY(-2px);
+}
+
+.quantity-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    box-shadow: var(--neon-glow);
+}
+
+/* Stats Section */
+.stats-section {
+    background: var(--light-gray);
+    padding: 60px 0;
+}
+
+.stats-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Features Cards */
+.feature-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+    background: white;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--neon-blue));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+    color: white;
+}
+
+/* How It Works */
+.how-it-works {
+    background: var(--light-gray);
+    padding: 80px 0;
+}
+
+.step-card {
+    text-align: center;
+    padding: 30px 20px;
+    position: relative;
+}
+
+.step-number {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+/* Demo Section */
+.demo-section {
+    padding: 80px 0;
+    background: white;
+}
+
+.demo-section .card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.demo-section .card-header {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 20px 30px;
+}
+
+.demo-section pre {
+    background: #f8f9fa !important;
+    border-radius: 10px;
+    font-size: 14px;
+    overflow-x: auto;
+}
+
+/* Pricing Cards */
+.pricing-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.pricing-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+.pricing-card.popular {
+    transform: scale(1.05);
+    border: 3px solid var(--primary-color);
+}
+
+.pricing-card .price {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 10px 0;
+}
+
+/* Buttons */
+.btn-custom {
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.btn-warning.btn-custom:hover {
+    background: #e0a800;
+    box-shadow: 0 8px 25px rgba(255,193,7,0.4);
+}
+
+.btn-primary.btn-custom:hover {
+    background: #0056b3;
+    box-shadow: var(--neon-glow);
+}
+
+.btn-outline-primary.btn-custom:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 60px 0 40px;
+        min-height: auto;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .widget-preview {
+        transform: none;
+        padding: 20px;
+    }
+    
+    .pricing-card.popular {
+        transform: none;
+        margin-bottom: 20px;
+    }
+}
+
+/* Animações de entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
