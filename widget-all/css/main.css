@@ -23,8 +23,19 @@ Data: Setembro 2025
     /* Cores neon para efeitos */
     --neon-blue: #4facfe;
     --neon-blue-bright: #00f2fe;
+    --neon-blue-light: rgba(79, 172, 254, 0.2);
+    --neon-blue-faint: rgba(79, 172, 254, 0.1);
     --neon-glow: 0 0 20px rgba(79, 172, 254, 0.6);
     --neon-glow-strong: 0 0 30px rgba(79, 172, 254, 0.8);
+    
+    /* Cores do sistema */
+    --surface-color: #ffffff;
+    --border-color: #e5e7eb;
+    
+    /* Dark mode support */
+    --surface-color-dark: #1f2937;
+    --border-color-dark: #374151;
+    --text-color-dark: #f9fafb;
     
     /* Tipografia */
     --font-family: 'Inter', sans-serif;
@@ -98,6 +109,11 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
@@ -266,6 +282,85 @@ body {
     overflow: hidden;
 }
 
+/* BOTÕES PEQUENOS DO HEADER - Novos estilos */
+.btn-sm.btn-custom {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    min-width: 44px;
+    height: 40px;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* Estilo especial para bandeiras */
+.btn-sm.btn-custom .flag-icon {
+    font-size: 18px;
+    line-height: 1;
+    display: block;
+    filter: brightness(1.1) contrast(1.1);
+    transition: transform 0.2s ease;
+}
+
+.btn-sm.btn-custom:hover .flag-icon {
+    transform: scale(1.1);
+}
+
+/* ESTADOS DOS BOTÕES DO HEADER */
+
+/* Estado Desconectado/Desabilitado - Cinza */
+.btn-sm.btn-outline-secondary.btn-custom {
+    background: transparent;
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.btn-sm.btn-outline-secondary.btn-custom:hover:not(:disabled) {
+    background: rgba(79, 172, 254, 0.1);
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+}
+
+/* Estado Conectado - Azul */
+.btn-sm.btn-primary.btn-custom {
+    background: var(--neon-blue);
+    border-color: var(--neon-blue);
+    color: white;
+}
+
+.btn-sm.btn-primary.btn-custom:hover {
+    background: var(--neon-blue-bright);
+    border-color: var(--neon-blue-bright);
+    box-shadow: 0 0 15px rgba(79, 172, 254, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Estado Habilitado/Dashboard - Verde */
+.btn-sm.btn-success.btn-custom {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-sm.btn-success.btn-custom:hover {
+    background: #34ce57;
+    border-color: #34ce57;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Botões desabilitados */
+.btn-sm.btn-custom:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 .btn-custom:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-xl);
@@ -315,6 +410,17 @@ body {
     border-radius: 50%;
     animation: spin 1s linear infinite;
     transform: translate(-50%, -50%);
+}
+
+/* ESTADOS ESPECIAIS DOS BOTÕES DO HEADER */
+.btn-custom:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-custom:disabled:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 /* STATS SECTION */
@@ -424,7 +530,240 @@ body {
     transform: translateX(-50%) scale(1.1);
 }
 
-/* WIDGET DEMO */
+/* ================================================================================
+   WIDGET SALE STYLES - Estilos do Widget de Venda
+   ================================================================================ */
+
+/* Container principal do widget com borda destacada */
+.token-sale-widget {
+    background: #ffffff;
+    border: 3px solid #007bff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 
+        0 10px 30px rgba(0, 123, 255, 0.15),
+        0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Efeito de borda animada */
+.token-sale-widget::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        #007bff, #4facfe, #00f2fe, #007bff
+    );
+    background-size: 400% 400%;
+    border-radius: 18px;
+    z-index: -1;
+    animation: gradient-border 3s ease infinite;
+    opacity: 0.8;
+}
+
+@keyframes gradient-border {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Hover effect */
+.token-sale-widget:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 15px 40px rgba(0, 123, 255, 0.25),
+        0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.token-sale-widget:hover::before {
+    opacity: 1;
+    animation-duration: 2s;
+}
+
+/* Widget Header */
+.widget-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(0, 123, 255, 0.1);
+}
+
+.widget-header h5 {
+    color: #007bff;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.widget-header .badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+}
+
+/* Widget Body */
+.widget-body {
+    margin-bottom: 20px;
+}
+
+.token-info {
+    background: rgba(0, 123, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid rgba(0, 123, 255, 0.1);
+}
+
+.token-info .fw-bold {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Form Elements */
+.purchase-form .form-label {
+    color: #495057;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.purchase-form .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+}
+
+.purchase-form .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.purchase-form .input-group-text {
+    background: #007bff;
+    color: white;
+    border: 2px solid #007bff;
+    font-weight: 500;
+}
+
+/* Total Price Display */
+#total-price {
+    color: #007bff;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Widget Buttons */
+.token-sale-widget .btn {
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.token-sale-widget .btn-primary {
+    background: linear-gradient(135deg, #007bff, #4facfe);
+    border-color: #007bff;
+}
+
+.token-sale-widget .btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3, #007bff);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+}
+
+.token-sale-widget .btn-success {
+    background: linear-gradient(135deg, #28a745, #34ce57);
+    border-color: #28a745;
+}
+
+.token-sale-widget .btn-success:hover {
+    background: linear-gradient(135deg, #1e7e34, #28a745);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+}
+
+/* Connection Status */
+.connection-status .alert {
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 0;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.connection-status .alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+}
+
+.connection-status .alert-success {
+    background: rgba(40, 167, 69, 0.1);
+    color: #155724;
+    border-color: rgba(40, 167, 69, 0.3);
+}
+
+/* Widget Footer */
+.widget-footer {
+    padding-top: 15px;
+    border-top: 1px solid rgba(0, 123, 255, 0.1);
+    text-align: center;
+}
+
+.widget-footer small {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+/* Tema Dark */
+.token-sale-widget.dark {
+    background: #2d3748;
+    border-color: #4facfe;
+    color: #f7fafc;
+}
+
+.token-sale-widget.dark .widget-header h5 {
+    color: #4facfe;
+}
+
+.token-sale-widget.dark .token-info {
+    background: rgba(79, 172, 254, 0.1);
+    border-color: rgba(79, 172, 254, 0.2);
+}
+
+.token-sale-widget.dark .form-control {
+    background: #4a5568;
+    border-color: #718096;
+    color: #f7fafc;
+}
+
+.token-sale-widget.dark .form-control:focus {
+    border-color: #4facfe;
+    background: #4a5568;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .token-sale-widget {
+        margin: 10px;
+        padding: 20px;
+        max-width: none;
+    }
+    
+    .token-sale-widget::before {
+        border-radius: 14px;
+    }
+}
+
+/* ================================================================================
+   WIDGET DEMO SECTION
+   ================================================================================ */
 .widget-demo {
     perspective: 1000px;
     max-width: 500px;
@@ -433,9 +772,12 @@ body {
 
 .widget-preview {
     background: white;
-    border-radius: var(--border-radius-xl);
+    border: 3px solid #007bff;
+    border-radius: 16px;
     padding: 30px;
-    box-shadow: var(--shadow-xl);
+    box-shadow: 
+        0 10px 30px rgba(0, 123, 255, 0.15),
+        0 4px 20px rgba(0, 0, 0, 0.1);
     color: #333;
     transform: rotateY(-5deg) rotateX(5deg);
     transition: var(--transition-bounce);
@@ -446,16 +788,30 @@ body {
 .widget-preview::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--neon-blue), var(--neon-blue-bright));
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        #007bff, #4facfe, #00f2fe, #007bff
+    );
+    background-size: 400% 400%;
+    border-radius: 18px;
+    z-index: -1;
+    animation: gradient-border 3s ease infinite;
+    opacity: 0.6;
 }
 
 .widget-preview:hover {
     transform: rotateY(0deg) rotateX(0deg) scale(1.02);
-    box-shadow: var(--shadow-xl), var(--neon-glow);
+    box-shadow: 
+        0 15px 40px rgba(0, 123, 255, 0.25),
+        0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.widget-preview:hover::before {
+    opacity: 1;
+    animation-duration: 2s;
 }
 
 .token-display {
@@ -714,4 +1070,71 @@ body {
 
 .shadow-neon-strong {
     box-shadow: var(--neon-glow-strong) !important;
+}
+
+/* ================================================================================
+   BOTÃO VOLTAR AO TOPO
+   ================================================================================ */
+
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.back-to-top:hover {
+    background: var(--neon-blue);
+    box-shadow: var(--neon-glow);
+    transform: translateY(0) scale(1.1);
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top.show:hover {
+    transform: translateY(-5px) scale(1.1);
+}
+
+/* Responsivo para mobile */
+@media (max-width: 768px) {
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .back-to-top {
+        background: var(--neon-blue);
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+    }
+    
+    .back-to-top:hover {
+        background: var(--neon-blue-bright);
+        box-shadow: var(--neon-glow-strong);
+    }
 }

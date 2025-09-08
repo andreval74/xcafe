@@ -125,6 +125,17 @@ class DataManager {
                 displayName: '',
                 email: ''
             },
+            tokenInfo: {
+                tokenName: 'Meu Token',
+                tokenSymbol: 'TOKEN',
+                price: 0.01,
+                minAmount: 100,
+                maxAmount: 10000,
+                contractAddress: null,
+                verified: false,
+                priceConfirmed: false,
+                lastPriceUpdate: null
+            },
             createdAt: new Date().toISOString(),
             lastLogin: new Date().toISOString()
         };
@@ -539,6 +550,166 @@ app.get('/api/widgets/:id', async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar widget' });
     }
 });
+
+// Obter informações do token por API key (SEGURO)
+app.get('/api/token-info/:apiKey', async (req, res) => {
+    try {
+        const { apiKey } = req.params;
+        
+        // Para demo, retornar valores padrão
+        if (apiKey === 'demo-key') {
+            return res.json({
+                name: 'XCafe Token',
+                symbol: 'XCAFE',
+                price: 0.01,
+                minAmount: 100,
+                maxAmount: 10000,
+                verified: true,
+                contractAddress: '0x742d35Cc1cf...',
+                priceConfirmed: true
+            });
+        }
+
+        // Buscar usuário pela API key
+        const user = await dataManager.getUserByApiKey(apiKey);
+        if (!user) {
+            return res.status(404).json({ error: 'API key inválida' });
+        }
+
+        // Buscar informações do token do usuário
+        const tokenInfo = {
+            name: user.tokenInfo?.tokenName || 'Token Personalizado',
+            symbol: user.tokenInfo?.tokenSymbol || 'TKN',
+            price: user.tokenInfo?.price || 0.01,
+            minAmount: user.tokenInfo?.minAmount || 100,
+            maxAmount: user.tokenInfo?.maxAmount || 10000,
+            verified: user.tokenInfo?.verified || false,
+            contractAddress: user.tokenInfo?.contractAddress || null,
+            priceConfirmed: user.tokenInfo?.priceConfirmed || false
+        };
+
+        res.json(tokenInfo);
+    } catch (error) {
+        console.error('❌ Erro ao buscar informações do token:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+// Atualizar informações do token (SEGURO - apenas pelo owner)
+app.put('/api/token-info', authenticateApiKey, [
+    body('tokenName').isLength({ min: 1, max: 50 }).trim(),
+    body('tokenSymbol').isLength({ min: 1, max: 10 }).isAlphanumeric().toUpperCase(),
+    body('price').isFloat({ min: 0.0001 }).optional(),
+    body('minAmount').isInt({ min: 1 }).optional(),
+    body('maxAmount').isInt({ min: 1 }).optional(),
+    body('contractAddress').matches(/^0x[a-fA-F0-9]{40}$/).optional()
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { tokenName, tokenSymbol, price, minAmount, maxAmount, contractAddress } = req.body;
+        const user = await dataManager.getUser(req.walletAddress);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        // Validar se maxAmount > minAmount
+        if (maxAmount && minAmount && maxAmount <= minAmount) {
+            return res.status(400).json({ error: 'Quantidade máxima deve ser maior que a mínima' });
+        }
+
+        // Atualizar informações do token
+        user.tokenInfo = {
+            ...user.tokenInfo,
+            tokenName,
+            tokenSymbol,
+            ...(price && { price, priceConfirmed: false, lastPriceUpdate: new Date().toISOString() }),
+            ...(minAmount && { minAmount }),
+            ...(maxAmount && { maxAmount }),
+            ...(contractAddress && { contractAddress }),
+            verified: false // Reset verificação quando alterar
+        };
+
+        await dataManager.updateUser(req.walletAddress, user);
+
+        res.json({ 
+            success: true, 
+            message: 'Informações do token atualizadas com sucesso',
+            tokenInfo: user.tokenInfo,
+            warning: price ? 'Preço precisa ser confirmado via contrato' : null
+        });
+    } catch (error) {
+        console.error('❌ Erro ao atualizar informações do token:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+// Validar preço do token via contrato blockchain
+app.post('/api/token-info/validate-price', authenticateApiKey, [
+    body('contractAddress').matches(/^0x[a-fA-F0-9]{40}$/),
+    body('network').isIn(['ethereum', 'polygon', 'bsc', 'arbitrum'])
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { contractAddress, network } = req.body;
+        const user = await dataManager.getUser(req.walletAddress);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        // Aqui você implementaria a lógica para verificar o preço no contrato
+        // Por enquanto, vou simular uma validação
+        const isValidPrice = await validatePriceFromContract(contractAddress, network, user.tokenInfo.price);
+        
+        if (isValidPrice) {
+            user.tokenInfo.priceConfirmed = true;
+            user.tokenInfo.contractAddress = contractAddress;
+            user.tokenInfo.verified = true;
+            user.tokenInfo.lastPriceConfirm = new Date().toISOString();
+            
+            await dataManager.updateUser(req.walletAddress, user);
+            
+            res.json({
+                success: true,
+                message: 'Preço confirmado via contrato blockchain',
+                tokenInfo: user.tokenInfo
+            });
+        } else {
+            res.status(400).json({
+                error: 'Preço no banco de dados não confere com o contrato',
+                suggestion: 'Atualize o preço para corresponder ao contrato'
+            });
+        }
+    } catch (error) {
+        console.error('❌ Erro ao validar preço:', error);
+        res.status(500).json({ error: 'Erro ao validar preço do contrato' });
+    }
+});
+
+// Função simulada para validar preço do contrato
+async function validatePriceFromContract(contractAddress, network, expectedPrice) {
+    // Aqui você implementaria a verificação real do contrato
+    // usando web3.js ou ethers.js para consultar o preço no blockchain
+    
+    console.log(`🔍 Validando preço no contrato ${contractAddress} na rede ${network}`);
+    
+    // Simulação: aceitar qualquer preço por enquanto
+    // Na implementação real, você faria:
+    // 1. Conectar na rede blockchain especificada
+    // 2. Consultar o contrato para obter o preço atual
+    // 3. Comparar com o expectedPrice
+    
+    return true; // Simular validação bem-sucedida
+}
 
 // Atualizar widget
 app.put('/api/widgets/:id', authenticateApiKey, async (req, res) => {

@@ -11,7 +11,10 @@ class TokenSaleWidget {
         this.theme = options.theme || 'light';
         this.saleId = options.saleId || 'demo-sale';
         
-        // Configurações básicas (apenas IDs e tema)
+        // Configurações do token
+        this.tokenPrice = options.tokenPrice || 0.01;
+        this.minAmount = options.minAmount || 100; // Quantidade mínima do contrato
+        this.maxAmount = options.maxAmount || 10000;
         this.available = options.available || '1M';
         this.currency = options.currency || 'USDT';
         
@@ -22,67 +25,9 @@ class TokenSaleWidget {
         try {
             console.log('🎮 Inicializando Widget Sale...');
             this.loadWidgetCSS();
-            
-            // Buscar informações do token do servidor
-            await this.loadTokenInfo();
-            
-            // Pequeno delay para garantir carregamento do CSS
-            setTimeout(() => {
-                this.createWidget();
-            }, 100);
+            this.createWidget();
         } catch (error) {
             console.error('❌ Erro ao inicializar Widget Sale:', error);
-        }
-    }
-
-    /**
-     * Busca informações do token do servidor usando a API key
-     */
-    async loadTokenInfo() {
-        try {
-            if (!this.apiKey || this.apiKey === 'demo-key') {
-                // Para demo, usar valores padrão
-                this.tokenName = 'XCafe Token';
-                this.tokenSymbol = 'XCAFE';
-                this.tokenPrice = 0.01;
-                this.minAmount = 100;
-                this.maxAmount = 10000;
-                return;
-            }
-
-            // Fazer requisição para o servidor para buscar TODAS as informações
-            const response = await fetch(`/api/token-info/${this.apiKey}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const tokenData = await response.json();
-            
-            // Todas as informações críticas vêm do servidor
-            this.tokenName = tokenData.name || 'Token';
-            this.tokenSymbol = tokenData.symbol || 'TKN';
-            this.tokenPrice = tokenData.price || 0.01;
-            this.minAmount = tokenData.minAmount || 100;
-            this.maxAmount = tokenData.maxAmount || 10000;
-            this.contractAddress = tokenData.contractAddress;
-            this.verified = tokenData.verified || false;
-            
-            console.log('✅ Informações do token carregadas do servidor:', {
-                name: this.tokenName,
-                symbol: this.tokenSymbol,
-                price: this.tokenPrice,
-                minAmount: this.minAmount,
-                verified: this.verified
-            });
-        } catch (error) {
-            console.warn('⚠️ Erro ao carregar informações do token:', error);
-            // Fallback para valores seguros em caso de erro
-            this.tokenName = 'Token';
-            this.tokenSymbol = 'TKN';
-            this.tokenPrice = 0;
-            this.minAmount = 1;
-            this.maxAmount = 1000;
-            this.verified = false;
         }
     }
 
@@ -103,15 +48,12 @@ class TokenSaleWidget {
     createWidget() {
         const container = document.getElementById(this.containerId);
         if (!container) {
-            console.warn('❌ Container não encontrado:', this.containerId);
-            console.log('Containers disponíveis:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+            console.warn('Container não encontrado:', this.containerId);
             return;
         }
 
-        console.log('✅ Container encontrado:', this.containerId);
         container.innerHTML = this.getWidgetHTML();
         this.setupEventListeners();
-        console.log('✅ Widget renderizado com sucesso!');
     }
 
     getWidgetHTML() {
@@ -125,14 +67,6 @@ class TokenSaleWidget {
                         </span>
                         <span class="badge">Demo</span>
                     </h5>
-                </div>
-                
-                <div class="token-details mb-3">
-                    <div class="text-center p-2 bg-light rounded border">
-                        <i class="fas fa-certificate text-primary me-2"></i>
-                        <strong>${this.tokenName}</strong>
-                        <span class="badge bg-primary ms-2">${this.tokenSymbol}</span>
-                    </div>
                 </div>
                 
                 <div class="widget-body">
@@ -364,31 +298,3 @@ class TokenSaleWidget {
 
 // Exportar para uso global
 window.TokenSaleWidget = TokenSaleWidget;
-
-// Auto-inicializar widgets na página
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎮 Auto-inicializador carregado');
-    const widgetContainers = document.querySelectorAll('[data-token-widget]');
-    
-    console.log(`📊 Encontrados ${widgetContainers.length} containers com data-token-widget`);
-    
-    widgetContainers.forEach((container, index) => {
-        const apiKey = container.dataset.apiKey || 'demo-key';
-        const saleId = container.dataset.saleId || `demo-sale-${index}`;
-        const theme = container.dataset.theme || 'light';
-        
-        console.log(`🎯 Inicializando widget ${index + 1}:`, { 
-            containerId: container.id, 
-            apiKey, 
-            saleId, 
-            theme 
-        });
-        
-        new TokenSaleWidget({
-            apiKey: apiKey,
-            containerId: container.id,
-            saleId: saleId,
-            theme: theme
-        });
-    });
-});

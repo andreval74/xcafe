@@ -12,8 +12,12 @@ class IndexPage {
     constructor() {
         // Inicializar managers se disponíveis
         this.dataManager = window.DataManager ? new window.DataManager() : null;
-        this.authManager = window.AuthManager && this.dataManager ? new window.AuthManager(this.dataManager) : null;
         this.web3Manager = window.Web3Manager ? new window.Web3Manager() : null;
+        this.authManager = window.AuthManager && this.dataManager ? new window.AuthManager(this.dataManager) : null;
+        
+        // Disponibilizar instância globalmente para outros módulos
+        window.web3ManagerInstance = this.web3Manager;
+        window.indexPageInstance = this;
         
         this.init();
     }
@@ -561,3 +565,110 @@ if (!document.getElementById('toast-animations')) {
     `;
     document.head.appendChild(style);
 }
+
+// ================================================================================
+// CONTROLE DE TEMA DO WIDGET
+// ================================================================================
+
+class WidgetThemeController {
+    constructor() {
+        this.currentWidget = null;
+        this.init();
+    }
+
+    init() {
+        document.addEventListener('DOMContentLoaded', () => {
+            this.setupThemeController();
+            // Pequeno delay para garantir que o widget seja carregado primeiro
+            setTimeout(() => {
+                this.findWidget();
+            }, 500);
+        });
+    }
+
+    setupThemeController() {
+        const lightTheme = document.getElementById('theme-light');
+        const darkTheme = document.getElementById('theme-dark');
+
+        if (lightTheme && darkTheme) {
+            lightTheme.addEventListener('change', () => {
+                if (lightTheme.checked) {
+                    this.changeTheme('light');
+                }
+            });
+
+            darkTheme.addEventListener('change', () => {
+                if (darkTheme.checked) {
+                    this.changeTheme('dark');
+                }
+            });
+        }
+    }
+
+    findWidget() {
+        // Tentar encontrar o widget na página
+        const widgetContainer = document.getElementById('widget-demo-container');
+        if (widgetContainer) {
+            const widget = widgetContainer.querySelector('.token-sale-widget');
+            if (widget) {
+                this.currentWidget = widget;
+                console.log('✅ Widget encontrado para controle de tema');
+            } else {
+                console.log('⚠️ Widget ainda não renderizado, tentando novamente...');
+                setTimeout(() => this.findWidget(), 1000);
+            }
+        }
+    }
+
+    changeTheme(theme) {
+        console.log(`🎨 Mudando tema para: ${theme}`);
+        
+        // Atualizar widget se encontrado
+        if (this.currentWidget) {
+            if (theme === 'dark') {
+                this.currentWidget.classList.add('dark');
+            } else {
+                this.currentWidget.classList.remove('dark');
+            }
+        }
+
+        // Atualizar container de fundo
+        const background = document.getElementById('widget-demo-background');
+        if (background) {
+            if (theme === 'dark') {
+                background.style.background = '#2d3748';
+            } else {
+                background.style.background = '#f8f9fa';
+            }
+        }
+
+        // Atualizar exemplos de código
+        const currentThemeSpans = document.querySelectorAll('#current-theme, #current-theme-alt');
+        currentThemeSpans.forEach(span => {
+            span.textContent = theme;
+        });
+
+        // Atualizar container original se disponível
+        const container = document.getElementById('widget-demo-container');
+        if (container) {
+            container.setAttribute('data-theme', theme);
+        }
+
+        // Recriar widget com novo tema usando TokenSaleWidget se disponível
+        if (window.TokenSaleWidget) {
+            setTimeout(() => {
+                new window.TokenSaleWidget({
+                    apiKey: 'demo-key',
+                    containerId: 'widget-demo-container',
+                    theme: theme,
+                    saleId: 'demo-sale',
+                    tokenPrice: 0.01,
+                    minAmount: 100
+                });
+            }, 100);
+        }
+    }
+}
+
+// Inicializar controle de tema
+new WidgetThemeController();
