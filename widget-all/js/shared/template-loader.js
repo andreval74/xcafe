@@ -1,5 +1,21 @@
 /*
-================================================================================
+=============================================            // Executar callback se fornecido
+            if (callback && typeof callback === 'function') {
+                callback(container);
+            }
+
+            // Disparar evento personalizado
+            const event = new CustomEvent('templateLoaded', {
+                detail: {
+                    templatePath: templatePath,
+                    containerId: containerId,
+                    container: container
+                }
+            });
+            document.dispatchEvent(event);
+
+            console.log(`✅ Template carregado: ${templatePath} -> ${containerId}`);
+            return true;============================
 TEMPLATE-LOADER.JS - Sistema de carregamento de templates
 ================================================================================
 Carrega header e footer de forma modular em todas as páginas

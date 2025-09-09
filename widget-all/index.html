@@ -1,7 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang    <!-- CSS Responsivo -->
+    <link href="css/responsive.css" rel="stylesheet">
 
-<head>
+    <!-- CSS para garantir fundo fixo do demo -->
+    <style>
+        #widget-demo-background {
+            background: #f8f9fa !important;
+            background-color: #f8f9fa !important;
+        }
+
+        /* Garantir que nenhum tema afete o container externo */
+        #widget-demo-background.dark,
+        #widget-demo-background.light {
+            background: #f8f9fa !important;
+            background-color: #f8f9fa !important;
+        }
+    </style>
+</head>>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Widget SaaS - Plataforma de Venda de Tokens</title>
@@ -22,26 +37,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
 
-    <!-- CSS personalizado - Sistema Completo -->
-    <link href="css/main.css" rel="stylesheet">
-    <link href="css/theme-system.css" rel="stylesheet">
-    <link href="css/loading-states.css" rel="stylesheet">
-    <link href="css/responsive.css" rel="stylesheet">
-
-    <!-- CSS para garantir fundo fixo do demo -->
-    <style>
-        #widget-demo-background {
-            background: #f8f9fa !important;
-            background-color: #f8f9fa !important;
-        }
-
-        /* Garantir que nenhum tema afete o container externo */
-        #widget-demo-background.dark,
-        #widget-demo-background.light {
-            background: #f8f9fa !important;
-            background-color: #f8f9fa !important;
-        }
-    </style>
+    <!-- CSS Unificado -->
+    <link href="css/unified.css" rel="stylesheet">
+    
+    <!-- CSS específico da página -->
+    <link href="css/widget-sale.css" rel="stylesheet">
 </head>
 
 <body>
@@ -506,97 +506,18 @@
 
     <!-- Sistema de Templates -->
     <script src="js/shared/template-loader.js"></script>
-    <script src="js/shared/back-to-top.js"></script>
 
     <!-- Página Específica -->
     <script src="js/pages/index.js"></script>
 
-    <!-- Script para controle de tema do widget -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Elementos de controle
-            const themeLight = document.getElementById('theme-light');
-            const themeDark = document.getElementById('theme-dark');
-            const widgetContainer = document.getElementById('widget-demo-container');
-            const currentThemeExample = document.getElementById('current-theme-example');
-
-            // Função para atualizar APENAS o tema do widget interno
-            function updateWidgetTheme(theme) {
-                if (widgetContainer) {
-                    console.log('🎨 Alterando tema do widget para:', theme);
-
-                    // Atualizar data-theme
-                    widgetContainer.setAttribute('data-theme', theme);
-
-                    // Encontrar o widget existente
-                    const existingWidget = widgetContainer.querySelector('.token-sale-widget');
-                    if (existingWidget) {
-                        // Apenas alterar a classe do widget, SEM afetar o container externo
-                        if (theme === 'dark') {
-                            existingWidget.classList.add('dark');
-                        } else {
-                            existingWidget.classList.remove('dark');
-                        }
-
-                        console.log('✅ Classe do widget atualizada:', existingWidget.className);
-                    } else {
-                        // Se widget não existe, criar novo
-                        new TokenSaleWidget({
-                            apiKey: 'demo-key',
-                            containerId: 'widget-demo-container',
-                            saleId: 'demo-sale',
-                            theme: theme
-                        });
-                    }
-
-                    // Atualizar exemplo de código
-                    if (currentThemeExample) currentThemeExample.textContent = theme;
-
-                    // IMPORTANTE: Container externo permanece INALTERADO
-                    const backgroundContainer = document.getElementById('widget-demo-background');
-                    if (backgroundContainer) {
-                        // Garantir que o fundo externo nunca mude
-                        backgroundContainer.style.background = '#f8f9fa';
-                        backgroundContainer.style.backgroundColor = '#f8f9fa';
-                    }
-                }
-            }
-
-            // Event listeners para os seletores de tema
-            if (themeLight) {
-                themeLight.addEventListener('change', function () {
-                    if (this.checked) {
-                        updateWidgetTheme('light');
-                    }
-                });
-            }
-
-            if (themeDark) {
-                themeDark.addEventListener('change', function () {
-                    if (this.checked) {
-                        updateWidgetTheme('dark');
-                    }
-                });
-            }
-
-            // Garantir fundo fixo ao carregar
-            setTimeout(() => {
-                const backgroundContainer = document.getElementById('widget-demo-background');
-                if (backgroundContainer) {
-                    backgroundContainer.style.background = '#f8f9fa';
-                    backgroundContainer.style.backgroundColor = '#f8f9fa';
-                }
-            }, 100);
-        });
-    </script>
+    <!-- Controle de Tema do Widget -->
+    <script src="js/index-widget-controller.js"></script>
 
     <!-- Sistema de Temas e UX -->
     <script src="js/theme-controller.js"></script>
-
+    
     <!-- Botão Voltar ao Topo -->
-    <button id="back-to-top" class="back-to-top" title="Voltar ao topo">
-        <i class="fas fa-chevron-up"></i>
-    </button>
+    <script src="js/back-to-top.js"></script>
 </body>
 
 </html>

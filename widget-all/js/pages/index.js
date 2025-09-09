@@ -27,6 +27,13 @@ class IndexPage {
             console.log('🚀 Inicializando Landing Page...');
             
             try {
+                // Carregar templates (header e footer) primeiro
+                if (window.TemplateLoader) {
+                    const templateLoader = new window.TemplateLoader();
+                    await templateLoader.loadDefaultTemplates();
+                    console.log('✅ Templates carregados');
+                }
+                
                 // Funcionalidades básicas sempre disponíveis
                 this.createParticles();
                 this.initWidgetDemo();

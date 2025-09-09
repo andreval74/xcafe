@@ -8,14 +8,14 @@ Sistema JavaScript para controle completo de temas e UX
 
 class ThemeController {
     constructor() {
-        this.currentTheme = localStorage.getItem('xcafe-theme') || 'light';
+        this.currentTheme = localStorage.getItem('xcafe-theme') || 'light'; // Padrão light
         this.observers = [];
         this.init();
     }
 
     init() {
         this.applyTheme(this.currentTheme);
-        this.createThemeSelector();
+        this.setupSimpleThemeToggle(); // Novo método simples
         this.setupEventListeners();
         this.detectSystemTheme();
         
@@ -25,27 +25,68 @@ class ThemeController {
         console.log('🎨 Theme Controller initialized:', this.currentTheme);
     }
 
+    setupSimpleThemeToggle() {
+        // Aguardar o header carregar - usa múltiplas tentativas
+        let attempts = 0;
+        const maxAttempts = 50; // 5 segundos total
+        
+        const checkHeader = () => {
+            attempts++;
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (themeBtn && themeIcon) {
+                // Atualizar ícone baseado no tema atual
+                this.updateThemeIcon();
+                
+                // Adicionar event listener
+                themeBtn.addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+                
+                console.log('🎨 Simple theme toggle setup complete');
+            } else if (attempts < maxAttempts) {
+                // Tentar novamente em 100ms
+                setTimeout(checkHeader, 100);
+            } else {
+                console.warn('⚠️ Header button not found after maximum attempts');
+            }
+        };
+        
+        // Começar verificação imediatamente
+        checkHeader();
+        
+        // Também escutar evento de template carregado se disponível
+        document.addEventListener('templateLoaded', (event) => {
+            if (event.detail && event.detail.containerId === 'header-container') {
+                console.log('🎨 Header template loaded event detected');
+                setTimeout(checkHeader, 100);
+            }
+        });
+    }
+
+    toggleTheme() {
+        // Alternar apenas entre light e dark
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    }
+
+    updateThemeIcon() {
+        const themeIcon = document.getElementById('theme-icon');
+        if (themeIcon) {
+            // Mostrar lua quando está claro (para indicar que pode mudar para escuro)
+            // Mostrar sol quando está escuro (para indicar que pode mudar para claro)
+            if (this.currentTheme === 'light') {
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                themeIcon.className = 'fas fa-sun';
+            }
+        }
+    }
+
     createThemeSelector() {
-        // Verificar se já existe
-        if (document.getElementById('theme-selector')) return;
-
-        const selector = document.createElement('div');
-        selector.id = 'theme-selector';
-        selector.className = 'theme-selector';
-        selector.innerHTML = `
-            <button type="button" class="btn theme-btn" data-theme="light" title="Tema Claro">
-                <i class="fas fa-sun"></i>
-            </button>
-            <button type="button" class="btn theme-btn" data-theme="dark" title="Tema Escuro">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button type="button" class="btn theme-btn" data-theme="auto" title="Automático">
-                <i class="fas fa-magic"></i>
-            </button>
-        `;
-
-        document.body.appendChild(selector);
-        this.updateThemeSelector();
+        // Removido - não criar mais seletor flutuante
+        console.log('🎨 Floating theme selector disabled - using header button instead');
     }
 
     setupEventListeners() {
@@ -57,13 +98,7 @@ class ThemeController {
             }
         });
 
-        // System theme change detection
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        mediaQuery.addEventListener('change', () => {
-            if (this.currentTheme === 'auto') {
-                this.detectSystemTheme();
-            }
-        });
+        // System theme change detection removed - only light/dark modes
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -78,7 +113,7 @@ class ThemeController {
         this.currentTheme = theme;
         localStorage.setItem('xcafe-theme', theme);
         this.applyTheme(theme);
-        this.updateThemeSelector();
+        this.updateThemeIcon(); // Atualizar ícone ao invés do seletor flutuante
         this.notifyObservers(theme);
         
         // Show notification
@@ -116,27 +151,20 @@ class ThemeController {
     }
 
     detectSystemTheme() {
-        if (this.currentTheme === 'auto') {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const systemTheme = prefersDark ? 'dark' : 'light';
-            this.applyTheme(systemTheme);
-            
-            console.log('🔍 System theme detected:', systemTheme);
-        }
+        // Removido - sem modo auto, apenas light/dark
+        console.log('🎨 Auto theme detection disabled - only light/dark modes available');
     }
 
     toggleTheme() {
-        const themes = ['light', 'dark', 'auto'];
-        const currentIndex = themes.indexOf(this.currentTheme);
-        const nextIndex = (currentIndex + 1) % themes.length;
-        this.setTheme(themes[nextIndex]);
+        // Alternar apenas entre light e dark (sem auto)
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
     }
 
     getThemeName(theme) {
         const names = {
             'light': 'Claro',
-            'dark': 'Escuro',
-            'auto': 'Automático'
+            'dark': 'Escuro'
         };
         return names[theme] || theme;
     }
@@ -170,11 +198,7 @@ class ThemeController {
     }
 
     isDarkMode() {
-        if (this.currentTheme === 'dark') return true;
-        if (this.currentTheme === 'auto') {
-            return window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        return false;
+        return this.currentTheme === 'dark';
     }
 
     showNotification(message, type = 'info') {
