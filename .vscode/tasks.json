@@ -8,6 +8,14 @@
 			"isBackground": true,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Executar Servidor XCafe - Corrigido",
+			"type": "shell",
+			"command": "cd widget-all; & \"C:\\Users\\User\\Desktop\\cafe\\xcafe\\.venv\\Scripts\\python.exe\" server.py",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }
