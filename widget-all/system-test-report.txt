@@ -1,0 +1,7 @@
+XCAFE WIDGET SAAS - RELATÓRIO DE TESTE
+==================================================
+Data: 2025-09-09 09:30:16
+Status: FAILED
+Arquivos: OK
+Endpoints: 16.7% funcionando
+Endpoints individuais: [False, False, True, False, False, False]

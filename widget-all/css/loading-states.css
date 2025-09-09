@@ -1,0 +1,327 @@
+/*
+================================================================================
+LOADING STATES - SISTEMA DE FEEDBACK VISUAL
+================================================================================
+Estados de carregamento e feedback para melhor UX
+================================================================================
+*/
+
+/* LOADING SPINNERS */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-primary);
+    border-radius: 50%;
+    border-top-color: var(--text-primary);
+    animation: spin 1s ease-in-out infinite;
+}
+
+.spinner-lg {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+}
+
+.spinner-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* LOADING BUTTON STATES */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.btn-loading .btn-text {
+    opacity: 0;
+}
+
+/* LOADING OVERLAY */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-content {
+    background: var(--bg-primary);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 300px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* PULSE LOADING */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* SKELETON LOADING */
+.skeleton-loader {
+    background: linear-gradient(90deg,
+        var(--bg-secondary) 25%,
+        var(--bg-tertiary) 50%,
+        var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-card {
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.skeleton-line {
+    height: 1rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+}
+
+.skeleton-line.short { width: 60%; }
+.skeleton-line.medium { width: 80%; }
+.skeleton-line.long { width: 100%; }
+
+/* PROGRESS BARS */
+.progress-enhanced {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--bg-tertiary);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-enhanced {
+    height: 100%;
+    background: linear-gradient(45deg, var(--neon-blue), var(--neon-blue-bright));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-enhanced::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(45deg,
+        transparent 33%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 66%);
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ESTADOS DE SUCESSO/ERRO */
+.success-state {
+    color: var(--success);
+    animation: fadeInScale 0.5s ease;
+}
+
+.error-state {
+    color: var(--danger);
+    animation: shake 0.5s ease;
+}
+
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* TYPING ANIMATION */
+.typing {
+    overflow: hidden;
+    border-right: 0.15em solid var(--text-primary);
+    white-space: nowrap;
+    margin: 0 auto;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: var(--text-primary); }
+}
+
+/* FLOATING ACTION BUTTON */
+.fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bg-accent);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.fab.loading {
+    animation: spin 2s linear infinite;
+}
+
+/* NOTIFICATION SYSTEM */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 1rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 1050;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background: linear-gradient(45deg, var(--success), #34d058);
+}
+
+.notification.error {
+    background: linear-gradient(45deg, var(--danger), #f85149);
+}
+
+.notification.warning {
+    background: linear-gradient(45deg, var(--warning), #ffdf5d);
+    color: #212529;
+}
+
+.notification.info {
+    background: linear-gradient(45deg, var(--info), #1f6feb);
+}
+
+/* RIPPLE EFFECT */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform 0.5s, opacity 1s;
+}
+
+.ripple:active::after {
+    transform: scale(0, 0);
+    opacity: 0.3;
+    transition: 0s;
+}
+
+/* RESPONSIVE LOADING STATES */
+@media (max-width: 768px) {
+    .loading-content {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+    }
+    
+    .notification {
+        max-width: calc(100vw - 40px);
+        right: 20px;
+        left: 20px;
+        transform: translateY(-100px);
+    }
+    
+    .notification.show {
+        transform: translateY(0);
+    }
+}

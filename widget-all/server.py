@@ -10,6 +10,10 @@ from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import mimetypes
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 # Imports Web3
 try:
@@ -23,7 +27,26 @@ except ImportError as e:
     print(f"⚠️ Web3 dependencies not found: {e}")
 
 # JWT Secret
-SECRET_KEY = "xcafe_secret_2024_web3_auth"
+SECRET_KEY = os.getenv('SECRET_KEY', 'xcafe_secret_2024_web3_auth')
+JWT_SECRET = os.getenv('JWT_SECRET', SECRET_KEY)
+
+# Server Configuration
+HOST = os.getenv('HOST', '0.0.0.0')
+PORT = int(os.getenv('PORT', 3000))
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+
+# Security Headers
+SECURITY_HEADERS = {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'X-XSS-Protection': '1; mode=block',
+    'Content-Security-Policy': os.getenv('CONTENT_SECURITY_POLICY', 
+        "default-src 'self' 'unsafe-inline' 'unsafe-eval' https:; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; "
+        "style-src 'self' 'unsafe-inline' https:"),
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'Referrer-Policy': 'strict-origin-when-cross-origin'
+}
 
 class WidgetSaaSHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -257,12 +280,16 @@ class WidgetSaaSHandler(BaseHTTPRequestHandler):
             parsed_url = urlparse(self.path)
             path = parsed_url.path[1:] if parsed_url.path.startswith('/') else parsed_url.path
             
+            print(f"🔍 GET request: {path}")  # Debug log melhorado
+            
             if path.startswith('api/'):
+                print(f"🎯 API endpoint detected: {path}")  # Debug log melhorado
                 self.handle_api_get(path)
             else:
+                print(f"📁 Static file request: {path}")  # Debug log melhorado
                 self.serve_static_file(path)
         except Exception as e:
-            print(f"GET error: {e}")
+            print(f"❌ GET error: {e}")
             self.send_error_response(500, f"Internal error: {str(e)}")
 
     def do_POST(self):
@@ -384,14 +411,29 @@ class WidgetSaaSHandler(BaseHTTPRequestHandler):
             print(f"Error serving file {path}: {e}")
             self.send_error_response(500, f"Error reading file: {str(e)}")
 
+    def apply_security_headers(self):
+        """Aplicar headers de segurança padrão"""
+        if os.getenv('ENABLE_SECURITY_HEADERS', 'True').lower() == 'true':
+            for header, value in SECURITY_HEADERS.items():
+                self.send_header(header, value)
+
     def send_json_response(self, data, status=200):
         try:
             json_data = json.dumps(data, ensure_ascii=False, indent=2)
             self.send_response(status)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            
+            # Headers CORS
+            cors_origins = os.getenv('CORS_ORIGINS', '*')
+            self.send_header('Access-Control-Allow-Origin', cors_origins)
+            self.send_header('Access-Control-Allow-Methods', 
+                           os.getenv('CORS_METHODS', 'GET, POST, PUT, DELETE, OPTIONS'))
+            self.send_header('Access-Control-Allow-Headers', 
+                           os.getenv('CORS_HEADERS', 'Content-Type, Authorization, X-Requested-With'))
+            
+            # Headers de segurança
+            self.apply_security_headers()
+            
             self.end_headers()
             self.wfile.write(json_data.encode('utf-8'))
         except Exception as e:
@@ -422,18 +464,21 @@ def main():
         print("⚠️ Run server in widget-all/ directory")
         return
     
-    HOST = '0.0.0.0'
-    PORT = 3000
+    # Usar configurações do .env
+    host = HOST
+    port = PORT
     
-    server = HTTPServer((HOST, PORT), WidgetSaaSHandler)
+    server = HTTPServer((host, port), WidgetSaaSHandler)
     
     print("🚀 Starting Widget SaaS Server Web3...")
-    print(f"📡 Server: http://{HOST}:{PORT}")
-    print(f"🔐 Auth: http://{HOST}:{PORT}/auth.html")
-    print(f"🎛️ Admin: http://{HOST}:{PORT}/admin-panel.html")
-    print(f"❤️ Health: http://{HOST}:{PORT}/api/health")
-    print(f"📈 Stats: http://{HOST}:{PORT}/api/stats")
+    print(f"📡 Server: http://{host}:{port}")
+    print(f"🔐 Auth: http://{host}:{port}/auth.html")
+    print(f"🎛️ Admin: http://{host}:{port}/admin-panel.html")
+    print(f"❤️ Health: http://{host}:{port}/api/health")
+    print(f"📈 Stats: http://{host}:{port}/api/stats")
     print(f"🌐 Web3 Status: {'✅ Active' if WEB3_AVAILABLE else '⚠️ Dev Mode'}")
+    print(f"🛡️ Security Headers: {'✅ Enabled' if os.getenv('ENABLE_SECURITY_HEADERS', 'True').lower() == 'true' else '❌ Disabled'}")
+    print(f"🔧 Environment: {os.getenv('ENVIRONMENT', 'development')}")
     print("🛑 Press Ctrl+C to stop")
     
     try:
