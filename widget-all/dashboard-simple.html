@@ -246,17 +246,49 @@
 
             async checkWalletConnection() {
                 try {
-                    // Verificar MetaMask
-                    if (window.ethereum && window.ethereum.selectedAddress) {
-                        this.currentWallet = window.ethereum.selectedAddress;
-                        const display = this.currentWallet.slice(0, 6) + '...' + this.currentWallet.slice(-4);
-                        document.getElementById('wallet-display').textContent = `Wallet: ${display}`;
-                        return true;
+                    console.log('🔍 Verificando conexão da wallet...');
+                    
+                    // Aguardar um pouco para garantir que MetaMask carregou
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Verificar se MetaMask está instalado
+                    if (typeof window.ethereum === 'undefined') {
+                        console.log('❌ MetaMask não detectado');
+                        document.getElementById('wallet-display').innerHTML = `
+                            <span class="text-danger">MetaMask não detectado</span><br>
+                            <small><a href="https://metamask.io" target="_blank">Instalar</a></small>
+                        `;
+                        return false;
                     }
                     
-                    return false;
+                    // Tentar obter contas conectadas
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_accounts' 
+                    });
+                    
+                    if (accounts && accounts.length > 0) {
+                        this.currentWallet = accounts[0];
+                        const display = this.currentWallet.slice(0, 6) + '...' + this.currentWallet.slice(-4);
+                        document.getElementById('wallet-display').innerHTML = `
+                            <span class="text-success">✅ ${display}</span><br>
+                            <small>Conectado</small>
+                        `;
+                        console.log('✅ Wallet conectada:', this.currentWallet);
+                        return true;
+                    } else {
+                        console.log('⚠️ Nenhuma conta conectada');
+                        document.getElementById('wallet-display').innerHTML = `
+                            <span class="text-warning">Não conectado</span><br>
+                            <small><button class="btn btn-sm btn-primary mt-1" onclick="connectWallet()">Conectar</button></small>
+                        `;
+                        return false;
+                    }
                 } catch (error) {
                     console.error('❌ Erro ao verificar wallet:', error);
+                    document.getElementById('wallet-display').innerHTML = `
+                        <span class="text-danger">Erro na conexão</span><br>
+                        <small>Verifique o MetaMask</small>
+                    `;
                     return false;
                 }
             }
@@ -942,6 +974,44 @@
                         alert.close();
                     }
                 }, 5000);
+            }
+        }
+
+        // Função global para conectar wallet
+        async function connectWallet() {
+            try {
+                console.log('🔌 Tentando conectar wallet...');
+                
+                if (typeof window.ethereum === 'undefined') {
+                    alert('MetaMask não encontrado! Por favor instale o MetaMask.');
+                    window.open('https://metamask.io', '_blank');
+                    return false;
+                }
+                
+                // Solicitar conexão ao usuário
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+                
+                if (accounts && accounts.length > 0) {
+                    console.log('✅ Wallet conectada com sucesso!');
+                    // Recarregar o dashboard para atualizar o estado
+                    setTimeout(() => {
+                        dashboard.checkWalletConnection();
+                    }, 500);
+                    return true;
+                } else {
+                    console.log('❌ Conexão cancelada pelo usuário');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Erro ao conectar wallet:', error);
+                if (error.code === 4001) {
+                    alert('Conexão rejeitada pelo usuário');
+                } else {
+                    alert('Erro ao conectar wallet: ' + error.message);
+                }
+                return false;
             }
         }
 
