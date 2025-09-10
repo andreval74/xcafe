@@ -351,6 +351,23 @@ class WidgetSaaSHandler(BaseHTTPRequestHandler):
             self.send_json_response(admin_list)
             return
         
+        # ==================== ENDPOINTS DASHBOARD ====================
+        
+        if path == 'api/contracts/list':
+            result = self.list_user_contracts()
+            self.send_json_response(result)
+            return
+            
+        if path == 'api/contracts/stats':
+            result = self.get_contracts_stats()
+            self.send_json_response(result)
+            return
+            
+        if path == 'api/dashboard/overview':
+            result = self.get_dashboard_overview()
+            self.send_json_response(result)
+            return
+        
         self.send_error_response(404, "Endpoint not found")
 
     def handle_api_post(self, path, data):
@@ -371,6 +388,23 @@ class WidgetSaaSHandler(BaseHTTPRequestHandler):
 
         if path == 'api/admin/register':
             result = self.create_admin_web3(data)
+            self.send_json_response(result)
+            return
+        
+        # ==================== ENDPOINTS DASHBOARD POST ====================
+        
+        if path == 'api/contracts/register':
+            result = self.register_contract(data)
+            self.send_json_response(result)
+            return
+            
+        if path == 'api/contracts/update':
+            result = self.update_contract(data)
+            self.send_json_response(result)
+            return
+            
+        if path == 'api/contracts/regenerate-key':
+            result = self.regenerate_api_key(data)
             self.send_json_response(result)
             return
         
@@ -454,6 +488,260 @@ class WidgetSaaSHandler(BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'text/plain')
             self.end_headers()
             self.wfile.write(message.encode('utf-8'))
+
+    # ==================== MÉTODOS DASHBOARD ====================
+    
+    def list_user_contracts(self):
+        """Lista contratos do usuário (simulado)"""
+        try:
+            # TODO: Implementar verificação de token/wallet
+            wallet_address = "0x1234567890123456789012345678901234567890"  # Simulado
+            
+            # Dados simulados de contratos
+            contracts = [
+                {
+                    "address": "0xABC123456789012345678901234567890123DEF1",
+                    "name": "MeuToken",
+                    "symbol": "MTK",
+                    "description": "Token de exemplo para demonstração",
+                    "owner": wallet_address,
+                    "apiKey": "xcafe_" + secrets.token_hex(16),
+                    "stats": {
+                        "totalSales": 45,
+                        "totalVolume": 12.5,
+                        "totalFees": 0.25,
+                        "apiCalls": 234
+                    },
+                    "config": {
+                        "platformFee": 2.5,
+                        "enabled": True
+                    },
+                    "createdAt": "2024-10-01T10:00:00Z",
+                    "status": "active"
+                },
+                {
+                    "address": "0xDEF123456789012345678901234567890123ABC2",
+                    "name": "CafeToken",
+                    "symbol": "CAFE",
+                    "description": "Token para negociação de café",
+                    "owner": wallet_address,
+                    "apiKey": "xcafe_" + secrets.token_hex(16),
+                    "stats": {
+                        "totalSales": 128,
+                        "totalVolume": 34.7,
+                        "totalFees": 0.69,
+                        "apiCalls": 567
+                    },
+                    "config": {
+                        "platformFee": 2.5,
+                        "enabled": True
+                    },
+                    "createdAt": "2024-09-15T14:30:00Z",
+                    "status": "active"
+                }
+            ]
+            
+            return {
+                "success": True,
+                "contracts": contracts,
+                "total": len(contracts),
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            print(f"Error listing contracts: {e}")
+            return {
+                "success": False,
+                "error": "Erro ao listar contratos",
+                "timestamp": datetime.now().isoformat()
+            }
+
+    def get_contracts_stats(self):
+        """Obtém estatísticas gerais dos contratos"""
+        try:
+            # Dados simulados
+            stats = {
+                "totalContracts": 2,
+                "activeContracts": 2,
+                "totalSales": 173,
+                "totalVolume": 47.2,
+                "totalFees": 0.94,
+                "totalApiCalls": 801,
+                "averageFeeRate": 2.5
+            }
+            
+            return {
+                "success": True,
+                "stats": stats,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            print(f"Error getting stats: {e}")
+            return {
+                "success": False,
+                "error": "Erro ao obter estatísticas"
+            }
+
+    def get_dashboard_overview(self):
+        """Obtém dados para overview do dashboard"""
+        try:
+            overview = {
+                "summary": {
+                    "totalContracts": 2,
+                    "totalSales": 173,
+                    "totalVolume": 47.2,
+                    "totalFees": 0.94
+                },
+                "recentActivity": [
+                    {
+                        "type": "sale",
+                        "contract": "MeuToken",
+                        "amount": 0.1,
+                        "timestamp": datetime.now().isoformat()
+                    },
+                    {
+                        "type": "fee",
+                        "contract": "CafeToken",
+                        "amount": 0.05,
+                        "timestamp": (datetime.now() - timedelta(hours=2)).isoformat()
+                    }
+                ],
+                "credits": {
+                    "balance": 1250,
+                    "totalPurchased": 2000,
+                    "totalUsed": 750
+                }
+            }
+            
+            return {
+                "success": True,
+                "overview": overview,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            print(f"Error getting overview: {e}")
+            return {
+                "success": False,
+                "error": "Erro ao obter overview"
+            }
+
+    def register_contract(self, data):
+        """Registra um novo contrato"""
+        try:
+            required_fields = ['contractAddress', 'contractName', 'ownerWallet']
+            
+            for field in required_fields:
+                if field not in data:
+                    return {
+                        "success": False,
+                        "error": f"Campo obrigatório: {field}"
+                    }
+            
+            # Validar endereço do contrato (básico)
+            contract_address = data['contractAddress']
+            if not contract_address.startswith('0x') or len(contract_address) != 42:
+                return {
+                    "success": False,
+                    "error": "Endereço de contrato inválido"
+                }
+            
+            # Gerar API Key
+            api_key = "xcafe_" + secrets.token_hex(16)
+            
+            # Simular salvamento (em produção, salvar em arquivo/banco)
+            contract_data = {
+                "address": contract_address,
+                "name": data['contractName'],
+                "symbol": data.get('tokenSymbol', ''),
+                "description": data.get('description', ''),
+                "website": data.get('website', ''),
+                "category": data.get('category', 'token'),
+                "owner": data['ownerWallet'],
+                "apiKey": api_key,
+                "config": {
+                    "platformFee": 2.5,
+                    "enabled": True
+                },
+                "stats": {
+                    "totalSales": 0,
+                    "totalVolume": 0,
+                    "totalFees": 0,
+                    "apiCalls": 0
+                },
+                "createdAt": datetime.now().isoformat(),
+                "status": "active"
+            }
+            
+            print(f"📝 Contrato registrado: {contract_address}")
+            
+            return {
+                "success": True,
+                "contract": contract_data,
+                "message": "Contrato registrado com sucesso"
+            }
+            
+        except Exception as e:
+            print(f"Error registering contract: {e}")
+            return {
+                "success": False,
+                "error": "Erro ao registrar contrato"
+            }
+
+    def update_contract(self, data):
+        """Atualiza configurações de um contrato"""
+        try:
+            if 'contractAddress' not in data:
+                return {
+                    "success": False,
+                    "error": "Endereço do contrato é obrigatório"
+                }
+            
+            # Simular atualização
+            updated_config = {
+                "platformFee": data.get('platformFee', 2.5),
+                "enabled": data.get('enabled', True),
+                "updatedAt": datetime.now().isoformat()
+            }
+            
+            return {
+                "success": True,
+                "config": updated_config,
+                "message": "Contrato atualizado com sucesso"
+            }
+            
+        except Exception as e:
+            print(f"Error updating contract: {e}")
+            return {
+                "success": False,
+                "error": "Erro ao atualizar contrato"
+            }
+
+    def regenerate_api_key(self, data):
+        """Regenera API Key de um contrato"""
+        try:
+            if 'contractAddress' not in data:
+                return {
+                    "success": False,
+                    "error": "Endereço do contrato é obrigatório"
+                }
+            
+            # Gerar nova API Key
+            new_api_key = "xcafe_" + secrets.token_hex(16)
+            
+            return {
+                "success": True,
+                "apiKey": new_api_key,
+                "message": "API Key regenerada com sucesso"
+            }
+            
+        except Exception as e:
+            print(f"Error regenerating API key: {e}")
+            return {
+                "success": False,
+                "error": "Erro ao regenerar API Key"
+            }
 
     def log_message(self, format, *args):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

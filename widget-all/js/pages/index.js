@@ -323,7 +323,12 @@ class IndexPage {
             const account = await this.web3Manager.connectWallet();
             if (account) {
                 this.updateConnectionUI(true, account);
-                this.showSuccess('Carteira conectada com sucesso!');
+                this.showSuccess('Carteira conectada! Redirecionando para dashboard...');
+                
+                // Redirecionamento automático para dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500); // 1.5 segundos para mostrar mensagem
             }
         } catch (error) {
             console.error('Erro ao conectar carteira:', error);

@@ -143,6 +143,12 @@ class HeaderController {
             document.addEventListener('web3:walletConnected', (e) => {
                 console.log('🔌 Header: Carteira conectada', e.detail);
                 this.updateUI();
+                
+                // Redirecionamento automático para dashboard
+                setTimeout(() => {
+                    console.log('🚀 Redirecionando para dashboard...');
+                    window.location.href = 'dashboard.html';
+                }, 1000); // 1 segundo de delay para mostrar o feedback
             });
 
             // Carteira desconectada
@@ -201,7 +207,12 @@ class HeaderController {
             
             if (account) {
                 this.setState(this.states.CONNECTED);
-                this.showSuccess('Carteira conectada com sucesso!');
+                this.showSuccess('Carteira conectada! Redirecionando...');
+                
+                // Redirecionamento imediato para dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500); // 1.5 segundos para mostrar mensagem
             }
         } catch (error) {
             this.setState(this.states.ERROR);
@@ -321,8 +332,6 @@ class HeaderController {
         if (!this.elements.dashboardBtn) return;
 
         const btn = this.elements.dashboardBtn;
-        
-        console.log('🎯 Dashboard Button Update - Estado:', this.currentState, 'Conectado:', this.web3Manager?.isConnected);
 
         if (this.currentState === this.states.CONNECTED) {
             // Habilitado - verde

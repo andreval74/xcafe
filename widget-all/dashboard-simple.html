@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Simple - XCafe Widget SaaS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: white;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .nav-link {
+            color: #495057;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            background: #f8f9fa;
+            color: #007bff;
+            border-left-color: #007bff;
+        }
+        
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 1001;
+        }
+        
+        .connected {
+            background: #28a745;
+            color: white;
+        }
+        
+        .disconnected {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .contract-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .contract-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .border-dashed {
+            border: 2px dashed #dee2e6 !important;
+            background: #f8f9fa !important;
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <!-- Status de Conexão -->
+    <div id="connection-status" class="connection-status disconnected">
+        <i class="fas fa-times-circle me-1"></i>
+        Verificando...
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h4 class="mb-0">
+                <i class="fas fa-cube text-primary me-2"></i>
+                XCafe SaaS
+            </h4>
+            <small class="text-muted" id="wallet-display">Carregando...</small>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-section="overview">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Visão Geral
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-section="contracts">
+                    <i class="fas fa-puzzle-piece"></i>
+                    Meus Contratos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-section="credits">
+                    <i class="fas fa-coins"></i>
+                    Créditos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-section="transactions">
+                    <i class="fas fa-exchange-alt"></i>
+                    Transações
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    Configurações
+                </a>
+            </li>
+            <li class="nav-item">
+                <hr class="my-3">
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-home"></i>
+                    Voltar ao Site
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <div id="main-content">
+            <!-- Conteúdo será carregado aqui -->
+        </div>
+    </main>
+
+    <!-- Container para Toast Messages -->
+    <div class="toast-container"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        class SimpleDashboard {
+            constructor() {
+                this.currentWallet = null;
+                this.currentSection = 'overview';
+                this.contracts = this.loadContracts();
+                this.init();
+            }
+
+            async init() {
+                try {
+                    console.log('🚀 Iniciando Dashboard Simples...');
+                    
+                    // Verificar conexão da wallet
+                    await this.checkWalletConnection();
+                    
+                    if (!this.currentWallet) {
+                        this.showError('Wallet não conectada. Redirecionando...');
+                        setTimeout(() => window.location.href = 'index.html', 2000);
+                        return;
+                    }
+                    
+                    // Configurar navegação
+                    this.setupNavigation();
+                    
+                    // Carregar seção inicial
+                    this.showSection('overview');
+                    
+                    // Atualizar status
+                    this.updateConnectionStatus(true);
+                    
+                    console.log('✅ Dashboard inicializado com sucesso');
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao inicializar dashboard:', error);
+                    this.showError('Erro ao carregar dashboard');
+                }
+            }
+
+            async checkWalletConnection() {
+                try {
+                    // Verificar MetaMask
+                    if (window.ethereum && window.ethereum.selectedAddress) {
+                        this.currentWallet = window.ethereum.selectedAddress;
+                        const display = this.currentWallet.slice(0, 6) + '...' + this.currentWallet.slice(-4);
+                        document.getElementById('wallet-display').textContent = `Wallet: ${display}`;
+                        return true;
+                    }
+                    
+                    return false;
+                } catch (error) {
+                    console.error('❌ Erro ao verificar wallet:', error);
+                    return false;
+                }
+            }
+
+            setupNavigation() {
+                document.querySelectorAll('.nav-link[data-section]').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = e.target.closest('.nav-link').dataset.section;
+                        this.showSection(section);
+                    });
+                });
+            }
+
+            showSection(sectionName) {
+                // Atualizar navegação ativa
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                document.querySelector(`[data-section="${sectionName}"]`)?.classList.add('active');
+                
+                this.currentSection = sectionName;
+                
+                // Renderizar seção
+                const content = this.renderSection(sectionName);
+                document.getElementById('main-content').innerHTML = content;
+            }
+
+            renderSection(section) {
+                switch (section) {
+                    case 'overview':
+                        return this.renderOverview();
+                    case 'contracts':
+                        return this.renderContracts();
+                    case 'credits':
+                        return this.renderCredits();
+                    case 'transactions':
+                        return this.renderTransactions();
+                    case 'settings':
+                        return this.renderSettings();
+                    default:
+                        return '<h2>Seção não encontrada</h2>';
+                }
+            }
+
+            renderOverview() {
+                const stats = this.calculateStats();
+                
+                return `
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>📊 Visão Geral</h2>
+                        <button class="btn btn-primary" onclick="dashboard.showNewContractModal()">
+                            <i class="fas fa-plus me-2"></i>Novo Contrato
+                        </button>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card stats-card text-primary">
+                                <div class="stats-number">${stats.totalContracts}</div>
+                                <div class="stats-label">Contratos</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card text-success">
+                                <div class="stats-number">${stats.totalSales}</div>
+                                <div class="stats-label">Vendas</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card text-info">
+                                <div class="stats-number">${stats.totalVolume.toFixed(2)} ETH</div>
+                                <div class="stats-label">Volume</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card text-warning">
+                                <div class="stats-number">${stats.totalFees.toFixed(4)} ETH</div>
+                                <div class="stats-label">Taxas Ganhas</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Contratos Recentes</h5>
+                                </div>
+                                <div class="card-body">
+                                    ${this.renderRecentContracts()}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Atividade Hoje</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-shopping-cart text-success me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">15 Vendas</div>
+                                            <small class="text-muted">Hoje</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-coins text-warning me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">2.5 ETH</div>
+                                            <small class="text-muted">Volume</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-percentage text-info me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">0.0625 ETH</div>
+                                            <small class="text-muted">Suas Taxas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderContracts() {
+                const contracts = this.getContracts();
+                
+                return `
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>🎯 Meus Contratos</h2>
+                        <button class="btn btn-primary" onclick="dashboard.showNewContractModal()">
+                            <i class="fas fa-plus me-2"></i>Cadastrar Contrato
+                        </button>
+                    </div>
+                    
+                    <div class="row">
+                        ${contracts.map(contract => this.renderContractCard(contract)).join('')}
+                        
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card contract-card h-100 border-dashed">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                                    <i class="fas fa-plus fa-3x text-muted mb-3"></i>
+                                    <h5>Novo Contrato</h5>
+                                    <p class="text-muted">Cadastre um contrato para começar a ganhar com as vendas</p>
+                                    <button class="btn btn-primary" onclick="dashboard.showNewContractModal()">
+                                        <i class="fas fa-plus me-2"></i>Começar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${contracts.length === 0 ? `
+                        <div class="text-center py-5">
+                            <i class="fas fa-puzzle-piece fa-3x text-muted mb-3"></i>
+                            <h4>Nenhum contrato cadastrado</h4>
+                            <p class="text-muted">Cadastre seu primeiro contrato para começar a usar a plataforma descentralizada</p>
+                            <button class="btn btn-primary btn-lg" onclick="dashboard.showNewContractModal()">
+                                <i class="fas fa-plus me-2"></i>Cadastrar Primeiro Contrato
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            renderCredits() {
+                return `
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>💰 Créditos</h2>
+                        <button class="btn btn-success" onclick="dashboard.buyCredits()">
+                            <i class="fas fa-shopping-cart me-2"></i>Comprar Créditos
+                        </button>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card stats-card text-success">
+                                <div class="stats-number">1,250</div>
+                                <div class="stats-label">Saldo Atual</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stats-card text-info">
+                                <div class="stats-number">2,000</div>
+                                <div class="stats-label">Total Comprado</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stats-card text-warning">
+                                <div class="stats-number">750</div>
+                                <div class="stats-label">Total Usado</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Como Funcionam os Créditos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-info-circle text-primary me-2"></i>Sistema Descentralizado</h6>
+                                    <p class="text-muted">
+                                        Os créditos são usados para manter a plataforma funcionando. 
+                                        Cada transação no seu contrato consome alguns créditos para 
+                                        processar as taxas.
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-chart-line text-success me-2"></i>Ganhe com suas Vendas</h6>
+                                    <p class="text-muted">
+                                        Você ganha uma porcentagem (padrão 2.5%) de todas as vendas 
+                                        realizadas através dos seus contratos cadastrados.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderTransactions() {
+                return `
+                    <h2 class="mb-4">📈 Transações</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h5 class="mb-0">Histórico de Transações</h5>
+                                </div>
+                                <div class="col-auto">
+                                    <select class="form-select form-select-sm">
+                                        <option>Todas as transações</option>
+                                        <option>Vendas</option>
+                                        <option>Taxas</option>
+                                        <option>Créditos</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Tipo</th>
+                                            <th>Contrato</th>
+                                            <th>Valor</th>
+                                            <th>Sua Taxa</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Hoje 14:32</td>
+                                            <td><span class="badge bg-primary">Venda</span></td>
+                                            <td>MeuToken</td>
+                                            <td>0.1 ETH</td>
+                                            <td>0.0025 ETH</td>
+                                            <td><span class="badge bg-success">Confirmado</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Hoje 12:15</td>
+                                            <td><span class="badge bg-primary">Venda</span></td>
+                                            <td>CafeToken</td>
+                                            <td>0.05 ETH</td>
+                                            <td>0.00125 ETH</td>
+                                            <td><span class="badge bg-success">Confirmado</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ontem 16:45</td>
+                                            <td><span class="badge bg-warning">Crédito</span></td>
+                                            <td>-</td>
+                                            <td>500 créditos</td>
+                                            <td>-</td>
+                                            <td><span class="badge bg-success">Processado</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderSettings() {
+                return `
+                    <h2 class="mb-4">⚙️ Configurações</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Configurações da Conta</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="settingsForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Nome de Exibição</label>
+                                            <input type="text" class="form-control" name="displayName" 
+                                                   placeholder="Seu nome ou empresa">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Email (opcional)</label>
+                                            <input type="email" class="form-control" name="email" 
+                                                   placeholder="seu@email.com">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Website</label>
+                                            <input type="url" class="form-control" name="website" 
+                                                   placeholder="https://seusite.com">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="notifications" checked>
+                                                <label class="form-check-label">
+                                                    Receber notificações de vendas
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Salvar Configurações
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Informações da Wallet</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Endereço:</strong></p>
+                                    <p class="text-muted small">${this.currentWallet || 'Não conectado'}</p>
+                                    
+                                    <hr>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-info" onclick="dashboard.exportData()">
+                                            <i class="fas fa-download me-2"></i>Exportar Dados
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="dashboard.disconnect()">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Desconectar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ==================== RENDERIZAÇÃO DE COMPONENTES ====================
+
+            renderContractCard(contract) {
+                return `
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card contract-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="card-title">${contract.name}</h5>
+                                    <span class="badge bg-success">Ativo</span>
+                                </div>
+                                
+                                <p class="text-muted small mb-2">${contract.symbol}</p>
+                                <p class="card-text">${contract.description}</p>
+                                
+                                <div class="row text-center mb-3">
+                                    <div class="col-4">
+                                        <small class="text-muted">Vendas</small>
+                                        <div class="fw-bold">${contract.stats.sales}</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">Volume</small>
+                                        <div class="fw-bold">${contract.stats.volume} ETH</div>
+                                    </div>
+                                    <div class="col-4">
+                                        <small class="text-muted">Suas Taxas</small>
+                                        <div class="fw-bold">${contract.stats.fees} ETH</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-sm" 
+                                            onclick="dashboard.showContractDetails('${contract.address}')">
+                                        <i class="fas fa-eye me-1"></i>Ver Detalhes
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" 
+                                            onclick="dashboard.copyApiKey('${contract.apiKey}')">
+                                        <i class="fas fa-key me-1"></i>Copiar API Key
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderRecentContracts() {
+                const contracts = this.getContracts();
+                if (contracts.length === 0) {
+                    return '<p class="text-muted">Nenhum contrato cadastrado ainda.</p>';
+                }
+                
+                return contracts.slice(0, 3).map(contract => `
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div>
+                            <strong>${contract.name}</strong>
+                            <span class="badge bg-primary ms-2">${contract.symbol}</span>
+                            <br>
+                            <small class="text-muted">${this.truncateAddress(contract.address)}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">${contract.stats.sales} vendas</div>
+                            <small class="text-muted">${contract.stats.volume} ETH volume</small>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // ==================== MODAIS E INTERAÇÕES ====================
+
+            showNewContractModal() {
+                const modalHtml = `
+                    <div class="modal fade" id="newContractModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">🎯 Cadastrar Novo Contrato</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="newContractForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Endereço do Contrato *</label>
+                                            <input type="text" class="form-control" name="contractAddress" required
+                                                   placeholder="0x..." pattern="^0x[a-fA-F0-9]{40}$">
+                                            <div class="form-text">Endereço do seu contrato de venda de tokens</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Nome do Token/Projeto *</label>
+                                            <input type="text" class="form-control" name="contractName" required
+                                                   placeholder="Meu Token Incrível">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Símbolo</label>
+                                            <input type="text" class="form-control" name="tokenSymbol" 
+                                                   placeholder="MTK" maxlength="10">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Descrição</label>
+                                            <textarea class="form-control" name="description" rows="3"
+                                                      placeholder="Descreva seu projeto e token..."></textarea>
+                                        </div>
+                                        
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Sistema Descentralizado:</strong> Você mantém total controle do seu contrato. 
+                                            A plataforma apenas processa as vendas e repassa as taxas automaticamente.
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cancelar
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="dashboard.submitNewContract()">
+                                        <i class="fas fa-save me-2"></i>Cadastrar Contrato
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Remover modal existente se houver
+                const existingModal = document.getElementById('newContractModal');
+                if (existingModal) existingModal.remove();
+                
+                // Adicionar modal ao DOM
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Mostrar modal
+                const modal = new bootstrap.Modal(document.getElementById('newContractModal'));
+                modal.show();
+                
+                // Limpar modal após fechar
+                document.getElementById('newContractModal').addEventListener('hidden.bs.modal', function () {
+                    this.remove();
+                });
+            }
+
+            submitNewContract() {
+                try {
+                    const form = document.getElementById('newContractForm');
+                    const formData = new FormData(form);
+                    
+                    const contractData = {
+                        address: formData.get('contractAddress'),
+                        name: formData.get('contractName'),
+                        symbol: formData.get('tokenSymbol') || 'TOKEN',
+                        description: formData.get('description') || 'Sem descrição',
+                        owner: this.currentWallet,
+                        apiKey: this.generateApiKey(),
+                        stats: {
+                            sales: 0,
+                            volume: 0,
+                            fees: 0
+                        },
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Validar endereço
+                    if (!contractData.address.match(/^0x[a-fA-F0-9]{40}$/)) {
+                        this.showError('Endereço de contrato inválido');
+                        return;
+                    }
+                    
+                    // Salvar contrato
+                    this.contracts.push(contractData);
+                    this.saveContracts();
+                    
+                    // Fechar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('newContractModal'));
+                    modal.hide();
+                    
+                    // Mostrar sucesso
+                    this.showSuccess('Contrato cadastrado com sucesso! API Key gerada.');
+                    
+                    // Recarregar seção atual se for contracts
+                    if (this.currentSection === 'contracts') {
+                        this.showSection('contracts');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao cadastrar contrato:', error);
+                    this.showError('Erro ao cadastrar contrato');
+                }
+            }
+
+            // ==================== AÇÕES ====================
+
+            copyApiKey(apiKey) {
+                navigator.clipboard.writeText(apiKey).then(() => {
+                    this.showSuccess('API Key copiada para área de transferência!');
+                }).catch(() => {
+                    this.showError('Erro ao copiar API Key');
+                });
+            }
+
+            showContractDetails(address) {
+                const contract = this.contracts.find(c => c.address === address);
+                if (contract) {
+                    alert(`Contrato: ${contract.name}\\nEndereço: ${contract.address}\\nAPI Key: ${contract.apiKey}`);
+                }
+            }
+
+            buyCredits() {
+                this.showInfo('Sistema de compra de créditos em desenvolvimento!');
+            }
+
+            exportData() {
+                const data = {
+                    wallet: this.currentWallet,
+                    contracts: this.contracts,
+                    exportDate: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `xcafe-dashboard-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showSuccess('Dados exportados com sucesso!');
+            }
+
+            disconnect() {
+                if (confirm('Deseja realmente desconectar a wallet?')) {
+                    localStorage.removeItem('xcafe_contracts');
+                    window.location.href = 'index.html';
+                }
+            }
+
+            // ==================== UTILITÁRIOS ====================
+
+            loadContracts() {
+                try {
+                    const stored = localStorage.getItem('xcafe_contracts');
+                    return stored ? JSON.parse(stored) : [];
+                } catch {
+                    return [];
+                }
+            }
+
+            saveContracts() {
+                localStorage.setItem('xcafe_contracts', JSON.stringify(this.contracts));
+            }
+
+            getContracts() {
+                return this.contracts.filter(c => c.owner === this.currentWallet);
+            }
+
+            calculateStats() {
+                const userContracts = this.getContracts();
+                return userContracts.reduce((stats, contract) => {
+                    stats.totalContracts = userContracts.length;
+                    stats.totalSales += contract.stats.sales || 0;
+                    stats.totalVolume += parseFloat(contract.stats.volume) || 0;
+                    stats.totalFees += parseFloat(contract.stats.fees) || 0;
+                    return stats;
+                }, { totalContracts: 0, totalSales: 0, totalVolume: 0, totalFees: 0 });
+            }
+
+            generateApiKey() {
+                return 'xcafe_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            truncateAddress(address) {
+                return address.slice(0, 6) + '...' + address.slice(-4);
+            }
+
+            updateConnectionStatus(connected) {
+                const statusEl = document.getElementById('connection-status');
+                if (statusEl) {
+                    statusEl.className = `connection-status ${connected ? 'connected' : 'disconnected'}`;
+                    statusEl.innerHTML = connected 
+                        ? '<i class="fas fa-check-circle me-1"></i>Conectado'
+                        : '<i class="fas fa-times-circle me-1"></i>Desconectado';
+                }
+            }
+
+            // ==================== MENSAGENS ====================
+
+            showSuccess(message) {
+                this.showToast(message, 'success');
+            }
+
+            showError(message) {
+                this.showToast(message, 'error');
+            }
+
+            showInfo(message) {
+                this.showToast(message, 'info');
+            }
+
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible`;
+                toast.style.cssText = 'margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+                
+                const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle';
+                
+                toast.innerHTML = `
+                    <i class="fas fa-${icon} me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.querySelector('.toast-container').appendChild(toast);
+                
+                // Auto-remover após 5 segundos
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        const alert = new bootstrap.Alert(toast);
+                        alert.close();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Instância global
+        let dashboard;
+
+        // Inicializar quando página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            dashboard = new SimpleDashboard();
+        });
+
+        // Monitorar mudanças na wallet
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    console.log('❌ Wallet desconectada');
+                    window.location.href = 'index.html';
+                } else {
+                    console.log('🔄 Conta alterada, recarregando...');
+                    window.location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
