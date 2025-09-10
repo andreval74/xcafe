@@ -1,22 +1,7 @@
 <!DOCTYPE html>
-<html lang    <!-- CSS Responsivo -->
-    <link href="css/responsive.css" rel="stylesheet">
+<html lang="pt-BR">
 
-    <!-- CSS para garantir fundo fixo do demo -->
-    <style>
-        #widget-demo-background {
-            background: #f8f9fa !important;
-            background-color: #f8f9fa !important;
-        }
-
-        /* Garantir que nenhum tema afete o container externo */
-        #widget-demo-background.dark,
-        #widget-demo-background.light {
-            background: #f8f9fa !important;
-            background-color: #f8f9fa !important;
-        }
-    </style>
-</head>>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Widget SaaS - Plataforma de Venda de Tokens</title>
@@ -37,10 +22,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
 
-    <!-- CSS Unificado -->
-    <link href="css/unified.css" rel="stylesheet">
+    <!-- CSS personalizado - Sistema Completo -->
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/theme-system.css" rel="stylesheet">
+    <link href="css/loading-states.css" rel="stylesheet">
+    <link href="css/responsive.css" rel="stylesheet">
     
     <!-- CSS específico da página -->
+    <link href="css/index.css" rel="stylesheet">
     <link href="css/widget-sale.css" rel="stylesheet">
 </head>
 
@@ -117,7 +106,7 @@
 
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <div class="card feature-card">
+                    <div class="card feature-card neon-hover">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
                                 <i class="fas fa-plug"></i>
@@ -132,7 +121,7 @@
                 </div>
 
                 <div class="col-lg-4 mb-4">
-                    <div class="card feature-card">
+                    <div class="card feature-card neon-hover">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
                                 <i class="fas fa-coins"></i>
@@ -147,7 +136,7 @@
                 </div>
 
                 <div class="col-lg-4 mb-4">
-                    <div class="card feature-card">
+                    <div class="card feature-card neon-hover">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
                                 <i class="fas fa-shield-alt"></i>
@@ -162,7 +151,7 @@
                 </div>
 
                 <div class="col-lg-4 mb-4">
-                    <div class="card feature-card">
+                    <div class="card feature-card neon-hover">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
                                 <i class="fas fa-mobile-alt"></i>
@@ -177,7 +166,7 @@
                 </div>
 
                 <div class="col-lg-4 mb-4">
-                    <div class="card feature-card">
+                    <div class="card feature-card neon-hover">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
                                 <i class="fas fa-network-wired"></i>
@@ -192,7 +181,7 @@
                 </div>
 
                 <div class="col-lg-4 mb-4">
-                    <div class="card feature-card">
+                    <div class="card feature-card neon-hover">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
                                 <i class="fas fa-chart-line"></i>
@@ -221,7 +210,7 @@
 
             <div class="row">
                 <div class="col-lg-3 mb-4">
-                    <div class="step-card">
+                    <div class="step-card neon-hover">
                         <div class="step-number">1</div>
                         <div class="feature-icon text mb-3">
                             <i class="fas fa-user-plus"></i>
@@ -234,7 +223,7 @@
                 </div>
 
                 <div class="col-lg-3 mb-4">
-                    <div class="step-card">
+                    <div class="step-card neon-hover">
                         <div class="step-number">2</div>
                         <div class="feature-icon text mb-3">
                             <i class="fas fa-coins"></i>
@@ -247,7 +236,7 @@
                 </div>
 
                 <div class="col-lg-3 mb-4">
-                    <div class="step-card">
+                    <div class="step-card neon-hover">
                         <div class="step-number">3</div>
                         <div class="feature-icon text mb-3">
                             <i class="fas fa-code"></i>
@@ -260,7 +249,7 @@
                 </div>
 
                 <div class="col-lg-3 mb-4">
-                    <div class="step-card">
+                    <div class="step-card neon-hover">
                         <div class="step-number">4</div>
                         <div class="feature-icon text mb-3">
                             <i class="fas fa-rocket"></i>
@@ -313,8 +302,10 @@
                                     </div>
 
                                     <!-- Container do Widget com fundo fixo -->
-                                    <div id="widget-demo-container" data-token-widget data-api-key="demo-key"
-                                        data-sale-id="demo-sale" data-theme="light">
+                                    <div>
+                                        <div id="widget-demo-container" data-token-widget data-api-key="demo-key"
+                                            data-sale-id="demo-sale" data-theme="light">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -389,103 +380,77 @@
     </section>
 
     <!-- Pricing Section -->
-    <section id="pricing" class="py-5 bg-light">
+    <section id="pricing" class="pricing-section">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold">💰 Planos e Preços</h2>
-                <p class="lead text-muted">
-                    Escolha o pacote ideal para suas necessidades
-                </p>
+                <h2 class="pricing-title">PLANOS E PREÇOS</h2>
             </div>
 
-            <div class="row justify-content-center">
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card pricing-card h-100">
-                        <div class="card-header text-center bg-light">
-                            <h5 class="card-title">🌱 Starter</h5>
-                            <div class="price">$10</div>
-                            <p class="text-muted">100 créditos</p>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li class="mb-2">✅ 1000 transações</li>
-                                <li class="mb-2">✅ 1 widget ativo</li>
-                                <li class="mb-2">✅ Suporte básico</li>
-                                <li class="mb-2">✅ Analytics básicas</li>
-                            </ul>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-outline-primary btn-custom w-100">Escolher Plano</button>
-                        </div>
+            <div class="pricing-container">
+                <!-- Starter Plan -->
+                <div class="pricing-card starter">
+                    <div class="pricing-icon">
+                        <i class="fas fa-seedling"></i>
                     </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>10<span class="period"></span>
+                    </div>
+                    <div class="pricing-period">Starter</div>
+                    <div class="pricing-description">
+                        100 créditos para começar seu negócio digital. Ideal para testes e projetos pequenos.
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 1000 transações</li>
+                        <li><i class="fas fa-check"></i> 1 widget ativo</li>
+                        <li><i class="fas fa-check"></i> Suporte básico</li>
+                        <li><i class="fas fa-check"></i> Analytics básicas</li>
+                    </ul>
+                    <button class="pricing-btn btn-starter">ESCOLHER PLANO</button>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card pricing-card popular h-100">
-                        <div class="card-header text-center bg-primary text-white">
-                            <h5 class="card-title">🚀 Professional</h5>
-                            <div class="price text-white">$40</div>
-                            <p>500 créditos</p>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li class="mb-2">✅ 5000 transações</li>
-                                <li class="mb-2">✅ 5 widgets ativos</li>
-                                <li class="mb-2">✅ Suporte prioritário</li>
-                                <li class="mb-2">✅ Analytics avançadas</li>
-                                <li class="mb-2">✅ Customização de tema</li>
-                            </ul>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-primary btn-custom w-100">Escolher Plano</button>
-                        </div>
+                <!-- Professional Plan (Popular) -->
+                <div class="pricing-card professional popular">
+                    <div class="pricing-icon">
+                        <i class="fas fa-rocket"></i>
                     </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>40<span class="period"></span>
+                    </div>
+                    <div class="pricing-period">Professional</div>
+                    <div class="pricing-description">
+                        500 créditos para profissionais. Recursos avançados para maximizar seus resultados.
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 5000 transações</li>
+                        <li><i class="fas fa-check"></i> 5 widgets ativos</li>
+                        <li><i class="fas fa-check"></i> Suporte prioritário</li>
+                        <li><i class="fas fa-check"></i> Analytics avançadas</li>
+                        <li><i class="fas fa-check"></i> Customização de tema</li>
+                    </ul>
+                    <button class="pricing-btn btn-professional">ESCOLHER PLANO</button>
                 </div>
 
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card pricing-card h-100">
-                        <div class="card-header text-center bg-light">
-                            <h5 class="card-title">💼 Business</h5>
-                            <div class="price">$75</div>
-                            <p class="text-muted">1000 créditos</p>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li class="mb-2">✅ 10000 transações</li>
-                                <li class="mb-2">✅ 10 widgets ativos</li>
-                                <li class="mb-2">✅ Suporte VIP 24/7</li>
-                                <li class="mb-2">✅ API dedicada</li>
-                                <li class="mb-2">✅ White label</li>
-                                <li class="mb-2">✅ Relatórios personalizados</li>
-                            </ul>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-outline-primary btn-custom w-100">Escolher Plano</button>
-                        </div>
+                <!-- Business Plan -->
+                <div class="pricing-card business">
+                    <div class="pricing-icon">
+                        <i class="fas fa-briefcase"></i>
                     </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card pricing-card h-100">
-                        <div class="card-header text-center bg-warning">
-                            <h5 class="card-title">🏢 Enterprise</h5>
-                            <div class="price text-dark">$300</div>
-                            <p class="text-dark">5000 créditos</p>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li class="mb-2">✅ 50000 transações</li>
-                                <li class="mb-2">✅ Widgets ilimitados</li>
-                                <li class="mb-2">✅ Gerente dedicado</li>
-                                <li class="mb-2">✅ SLA garantido</li>
-                                <li class="mb-2">✅ Integração customizada</li>
-                                <li class="mb-2">✅ Consultoria inclusa</li>
-                            </ul>
-                        </div>
-                        <div class="card-footer">
-                            <button class="btn btn-warning btn-custom w-100">Falar com Vendas</button>
-                        </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>75<span class="period"></span>
                     </div>
+                    <div class="pricing-period">Business</div>
+                    <div class="pricing-description">
+                        1000 créditos para empresas. Solução completa para negócios em crescimento.
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 10000 transações</li>
+                        <li><i class="fas fa-check"></i> 10 widgets ativos</li>
+                        <li><i class="fas fa-check"></i> Suporte VIP 24/7</li>
+                        <li><i class="fas fa-check"></i> API dedicada</li>
+                        <li><i class="fas fa-check"></i> White label</li>
+                        <li><i class="fas fa-check"></i> Relatórios personalizados</li>
+                    </ul>
+                    <button class="pricing-btn btn-business">ESCOLHER PLANO</button>
                 </div>
             </div>
         </div>

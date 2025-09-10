@@ -335,6 +335,23 @@ class HeaderController {
         }
     }
 
+    /**
+     * Atualiza botão/flag de idioma
+     */
+    updateLanguageFlag() {
+        if (!this.elements.languageBtn) return;
+
+        const btn = this.elements.languageBtn;
+        
+        // Por enquanto, sistema básico de PT-BR
+        btn.innerHTML = '<i class="fas fa-globe me-1"></i>PT';
+        btn.title = 'Sistema de tradução em desenvolvimento';
+        btn.className = 'btn btn-sm btn-outline-secondary btn-custom';
+        
+        // Desabilitado temporariamente até implementar tradução completa
+        btn.disabled = true;
+    }
+
     // ==================== NOTIFICAÇÕES ====================
     
     /**

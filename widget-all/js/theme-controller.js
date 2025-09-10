@@ -530,11 +530,11 @@ if (!document.getElementById('ux-enhancements-css')) {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.themeController = new ThemeController();
-        window.loadingManager = new LoadingManager();
+        // window.loadingManager = new LoadingManager(); // Temporariamente desabilitado
         window.uxEnhancements = new UXEnhancements();
     });
 } else {
     window.themeController = new ThemeController();
-    window.loadingManager = new LoadingManager();
+    // window.loadingManager = new LoadingManager(); // Temporariamente desabilitado
     window.uxEnhancements = new UXEnhancements();
 }
