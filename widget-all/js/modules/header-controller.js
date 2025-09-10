@@ -321,6 +321,8 @@ class HeaderController {
         if (!this.elements.dashboardBtn) return;
 
         const btn = this.elements.dashboardBtn;
+        
+        console.log('🎯 Dashboard Button Update - Estado:', this.currentState, 'Conectado:', this.web3Manager?.isConnected);
 
         if (this.currentState === this.states.CONNECTED) {
             // Habilitado - verde
